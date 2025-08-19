@@ -64,20 +64,20 @@ Para validar o fluxo principal do sistema utilizando **PHP, HTML e CSS (sem fram
 
 ## 📖 User Stories  
 
-### 👨‍🍳 Garçom  
+###Garçom  
 - **US01**: Como garçom, quero logar no sistema para registrar e gerenciar os pedidos dos clientes.  
 - **US02**: Como garçom, quero cadastrar o pedido do cliente de forma digital para que seja enviado instantaneamente à cozinha.  
 - **US03**: Como garçom, quero visualizar o status do pedido (em preparo, pronto) para poder informar o cliente.  
 
-### 🍳 Cozinha  
+###Cozinha  
 - **US04**: Como cozinheiro, quero receber os pedidos em tempo real em uma tela para iniciar o preparo sem demora.  
 - **US05**: Como cozinheiro, quero atualizar o status do pedido para que o garçom e o caixa saibam quando está pronto para ser entregue ou cobrado.  
 
-### 💰 Caixa  
+###Caixa  
 - **US06**: Como caixa, quero visualizar todos os pedidos finalizados de uma mesa para gerar a conta do cliente com precisão.  
 - **US07**: Como caixa, quero registrar o pagamento (parcial ou total) para concluir o atendimento e fechar a conta.  
 
-### 🛠️ Administrador  
+###Administrador  
 - **US08**: Como administrador, quero gerenciar o cardápio (adicionar, editar, remover itens e preços) para manter as opções sempre atualizadas.  
 - **US09**: Como administrador, quero gerenciar os usuários (criar, editar e desativar perfis) para controlar os acessos ao sistema.  
 - **US10**: Como administrador, quero gerar relatórios de vendas para acompanhar o desempenho financeiro do restaurante.  
