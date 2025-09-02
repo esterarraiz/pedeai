@@ -80,6 +80,34 @@ Para validar o fluxo principal do sistema utilizando **PHP, HTML e CSS (sem fram
 - **US09**: Como administrador, quero gerenciar os usuários (criar, editar e desativar perfis) para controlar os acessos ao sistema.  
 - **US10**: Como administrador, quero gerar relatórios de vendas para acompanhar o desempenho financeiro do restaurante.  
 
+
+# Iterações
+
+## Iteração 1: O Pedido Nasce
+### Objetivo
+Criar o fluxo mais essencial do sistema: o garçom faz um pedido e ele aparece na cozinha.
+
+| Responsável | Missão da Iteração | Dependências |
+|-------------|----------------------------------|--------------|
+| - | **Setup e Estrutura (Enabler):** Criar Git, estrutura de pastas MVC, conexão com DB e tabelas iniciais. | Nenhuma. Esta é a tarefa inicial que bloqueia todas as outras. |
+| - | **Feature: Gestão de Produtos (Base):** ProdutoModel (método getTodos) para listar produtos. | Setup e Estrutura: Precisa da tabela produtos e da conexão com o DB. |
+| - | **Feature: Listagem de Mesas:** MesaModel, MesaController e a View que exibe as mesas. | Setup e Estrutura: Precisa da tabela mesas e da conexão com o DB. |
+| - | **Feature: Lançar Pedido:** PedidoController e Model para criar um pedido, mais a View do formulário. | Setup e Estrutura, Gestão de Produtos, Listagem de Mesas: Precisa selecionar uma mesa e listar produtos para adicionar ao pedido. |
+| - | **Feature: Tela da Cozinha:** CozinhaController e View que exibe os pedidos recém-criados. | Lançar Pedido: Precisa que a funcionalidade de criar pedidos exista para poder exibi-los. |
+
+## Iteração 2: Controle de Acesso e Feedback 
+
+### Objetivo
+Implementar o Módulo de Login (requisito APG-2) e o fluxo de atualização de status do pedido.
+
+| Responsável | Missão da Iteração | Dependências |
+|-------------|----------------------------------|--------------|
+| - | **Feature: Autenticação de Usuário:** Implementar todo o sistema de login (Model, View, Controller, Session). | Setup e Estrutura (It. 1): Precisa criar a tabela usuários. |
+| - | **Feature: Controle de Acesso por Papel:** Lógica para proteger as rotas e redirecionar usuários com base em seu papel. | Autenticação de Usuário: Precisa que o usuário esteja logado e que sua $_SESSION contenha seu papel. |
+| - | **Feature: Cozinha Atualiza Status:** Lógica e botão para a cozinha marcar o pedido como "Pronto". | Autenticação de Usuário: Apenas um usuário “Cozinha” logado pode fazer isso. Fluxo de Pedido (It. 1): Precisa de um pedido existente para atualizar. |
+| - | **Feature: Garçom Visualiza Status:** Exibir o status atualizado na tela do garçom. | Cozinha Atualiza Status: Depende da funcionalidade de atualização para ter um status para exibir. Controle de Acesso: Apenas o garçom logado pode ver. |
+| - | **CSS Básico e Layout:** Criar um arquivo CSS base para padronizar a aparência do sistema. | Nenhuma dependência direta, pode ser feito em paralelo, aplicando-se às features existentes. |
+
 ## 📱Protótipo
 ### Administrador  
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
