@@ -80,4 +80,16 @@ Para validar o fluxo principal do sistema utilizando **PHP, HTML e CSS (sem fram
 - **US09**: Como administrador, quero gerenciar os usuários (criar, editar e desativar perfis) para controlar os acessos ao sistema.  
 - **US10**: Como administrador, quero gerar relatórios de vendas para acompanhar o desempenho financeiro do restaurante.  
 
-
+## 📱Protótipo
+### Administrador  
+<div style="display: flex; gap: 10px; margin-bottom: 10px;">
+  <img src="prototipo/Home.png" alt="Home" width="300px">
+  <img src="prototipo/Relatorios_Vendas.png" alt="Login" width="300px">
+</div>
+<div style="display: flex; gap: 10px; margin-bottom: 10px;">
+  <img src="prototipo/Gerenciamento_Cardapio.png" alt="Home" width="300px">
+  <img src="prototipo/Gerenciamento_Usuarios.png" alt="Login" width="300px">
+</div>
+<div style="display: flex; gap: 10px;">
+  <img src="prototipo/Suporte.png" alt="Home" width="300px">
+</div>
