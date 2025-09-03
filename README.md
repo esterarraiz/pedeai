@@ -121,3 +121,14 @@ Implementar o Módulo de Login (requisito APG-2) e o fluxo de atualização de s
 <div style="display: flex; gap: 10px;">
   <img src="prototipo/Suporte.png" alt="Home" width="300px">
 </div>
+
+### TELA DE CADASTRO E LOGIN
+
+<div style="display: flex; gap: 10px; margin-bottom: 10px;">
+  <img src="prototipo/tela_de_login.png" alt="Home" width="300px">
+  <img src="prototipo/tela_de_cadastro.png" alt="Login" width="300px">
+</div>
+<div style="display: flex; gap: 10px;">
+  <img src="prototipo/tela_de_LOGIN_FUNCIONARIO.png" alt="Home" width="300px">
+</div>
+
