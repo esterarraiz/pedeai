@@ -1,4 +1,8 @@
-# 🍽️ PedeAI  
+# 🍽️ PedeAI   
+O **PedeAI** é um sistema de gerenciamento de pedidos em restaurantes, desenvolvido para **digitalizar o fluxo do garçom à cozinha**, agilizando o atendimento e permitindo o pagamento das mesas.  
+**Problema que resolve:** atualmente, pedidos são anotados manualmente, o que gera **erros de escrita, atrasos na cozinha e comunicação ineficiente** entre equipe de atendimento e cozinha. O PedeAI reduz esses problemas, tornando o serviço mais rápido, preciso e organizado.
+
+---
 
 ## Universidade  
 Universidade Federal do Tocantins  
@@ -25,7 +29,7 @@ Edeílson Milhomem
 ---
 
 ## 🎯 Escopo do Projeto  
-O sistema de gerenciamento de pedidos **PedeAI** tem como objetivo **digitalizar e otimizar o processo de atendimento em restaurantes**, garantindo mais agilidade e eficiência na comunicação entre a equipe.  
+O sistema de gerenciamento de pedidos PedeAI tem como objetivo digitalizar e otimizar o processo de atendimento em restaurantes, garantindo mais agilidade e eficiência na comunicação entre a equipe.
 
 O cliente **não interage diretamente com o sistema**, sendo atendido normalmente pelo garçom.  
 
@@ -38,28 +42,25 @@ O sistema é acessado apenas por perfis de usuários internos:
 
 ---
 
-## 🚀 Produto Mínimo Viável (MVP)  
-Para validar o fluxo principal do sistema utilizando **PHP, HTML e CSS (sem frameworks)**, o MVP se concentrará nas funcionalidades essenciais para operar o ciclo de um pedido, desde a anotação até o pagamento.  
+## 🚀 Produto Mínimo Viável (MVP)
 
-### Funcionalidades Essenciais  
-- **Autenticação por Perfil**: Tela de login que redireciona o usuário (Garçom, Cozinha, Caixa, Admin) para sua respectiva interface.  
-- **Gerenciamento de Cardápio**: Interface simples para o Administrador adicionar, editar ou remover itens do cardápio.  
+**Foco:** Entregar um sistema funcional que digitalize todo o fluxo de pedidos do garçom até a cozinha, com pagamento básico, e permita administração mínima do restaurante.
 
-### Fluxo do Garçom  
-- Visualizar e selecionar mesas (livres/ocupadas).  
-- Lançar pedidos para uma mesa a partir do cardápio digital.  
-- Enviar o pedido para a cozinha.  
+### Funcionalidades (MVP final após todas as iterações)
+- **Autenticação geral com redirecionamento por perfil** (US01, US04, US06, US08)  
+- **Gerenciamento de Cardápio pelo Administrador** (US08)  
+- **Cadastro e lançamento de pedidos pelo Garçom** (US02)  
+- **Recebimento de pedidos pela Cozinha** (US04)  
+- **Visualização de pedidos e pagamento pelo Caixa** (US06, US07)  
+- **Cadastro de novos funcionários pelo Administrador** (US09)  
+- **Geração de Relatórios de Vendas pelo Administrador** (US10)  
 
-### Tela da Cozinha  
-- Visualizar os pedidos recebidos em tempo real.  
-- Marcar pedidos como "Prontos" para notificar o garçom.  
-
-### Tela do Caixa  
-- Visualizar os itens consumidos e o valor total por mesa.  
-- Registrar o pagamento e liberar a mesa.   
+### Fora do escopo do MVP
+- **Funcionalidades administrativas complexas**  
+- **Status detalhado dos pedidos** (US03, US05)
+- **Geração de PDF do cardápio com link público para o cliente**
 
 ---
-
 ## 📖 User Stories  
 
 ### Garçom  
@@ -80,36 +81,15 @@ Para validar o fluxo principal do sistema utilizando **PHP, HTML e CSS (sem fram
 - **US09**: Como administrador, quero gerenciar os usuários (criar, editar e desativar perfis) para controlar os acessos ao sistema.  
 - **US10**: Como administrador, quero gerar relatórios de vendas para acompanhar o desempenho financeiro do restaurante.  
 
+---
 
-# Iterações
+## 📌 Planejamento das Iterações
+Veja o detalhamento das iterações [aqui](docs/planejamento.md).
 
-## Iteração 1: O Pedido Nasce
-### Objetivo
-Criar o fluxo mais essencial do sistema: o garçom faz um pedido e ele aparece na cozinha.
-
-| Responsável | Missão da Iteração | Dependências |
-|-------------|----------------------------------|--------------|
-| - | **Setup e Estrutura (Enabler):** Criar Git, estrutura de pastas MVC, conexão com DB e tabelas iniciais. | Nenhuma. Esta é a tarefa inicial que bloqueia todas as outras. |
-| - | **Feature: Gestão de Produtos (Base):** ProdutoModel (método getTodos) para listar produtos. | Setup e Estrutura: Precisa da tabela produtos e da conexão com o DB. |
-| - | **Feature: Listagem de Mesas:** MesaModel, MesaController e a View que exibe as mesas. | Setup e Estrutura: Precisa da tabela mesas e da conexão com o DB. |
-| - | **Feature: Lançar Pedido:** PedidoController e Model para criar um pedido, mais a View do formulário. | Setup e Estrutura, Gestão de Produtos, Listagem de Mesas: Precisa selecionar uma mesa e listar produtos para adicionar ao pedido. |
-| - | **Feature: Tela da Cozinha:** CozinhaController e View que exibe os pedidos recém-criados. | Lançar Pedido: Precisa que a funcionalidade de criar pedidos exista para poder exibi-los. |
-
-## Iteração 2: Controle de Acesso e Feedback 
-
-### Objetivo
-Implementar o Módulo de Login (requisito APG-2) e o fluxo de atualização de status do pedido.
-
-| Responsável | Missão da Iteração | Dependências |
-|-------------|----------------------------------|--------------|
-| - | **Feature: Autenticação de Usuário:** Implementar todo o sistema de login (Model, View, Controller, Session). | Setup e Estrutura (It. 1): Precisa criar a tabela usuários. |
-| - | **Feature: Controle de Acesso por Papel:** Lógica para proteger as rotas e redirecionar usuários com base em seu papel. | Autenticação de Usuário: Precisa que o usuário esteja logado e que sua $_SESSION contenha seu papel. |
-| - | **Feature: Cozinha Atualiza Status:** Lógica e botão para a cozinha marcar o pedido como "Pronto". | Autenticação de Usuário: Apenas um usuário “Cozinha” logado pode fazer isso. Fluxo de Pedido (It. 1): Precisa de um pedido existente para atualizar. |
-| - | **Feature: Garçom Visualiza Status:** Exibir o status atualizado na tela do garçom. | Cozinha Atualiza Status: Depende da funcionalidade de atualização para ter um status para exibir. Controle de Acesso: Apenas o garçom logado pode ver. |
-| - | **CSS Básico e Layout:** Criar um arquivo CSS base para padronizar a aparência do sistema. | Nenhuma dependência direta, pode ser feito em paralelo, aplicando-se às features existentes. |
+---
 
 ## 📱Protótipo
-### Administrador  
+### Administrador  (US08, US09, US10)
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
   <img src="prototipo/Home.png" alt="Home" width="300px">
   <img src="prototipo/Relatorios_Vendas.png" alt="Login" width="300px">
@@ -122,7 +102,7 @@ Implementar o Módulo de Login (requisito APG-2) e o fluxo de atualização de s
   <img src="prototipo/Suporte.png" alt="Home" width="300px">
 </div>
 
-### TELA DE CADASTRO E LOGIN
+### Cadastro e Login
 
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
   <img src="prototipo/tela_de_login.png" alt="Home" width="300px">
