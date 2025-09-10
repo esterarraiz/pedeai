@@ -1,0 +1,5 @@
+# Arquivo de variáveis de ambiente (contém segredos)
+.env
+
+# Dependências do Composer
+/vendor/
