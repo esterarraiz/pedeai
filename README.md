@@ -92,11 +92,11 @@ Veja o detalhamento das iterações [aqui](docs/planejamento.md).
 
 ### Garçom  (US01, US02, US03)
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-  <img src="prototipo/tela 1.png" alt="Home" width="300px">
-  <img src="prototipo/tela 2.png" alt="Login" width="300px">
+  <img src="prototipo/tela 1.PNG" alt="Home" width="300px">
+  <img src="prototipo/tela 2.PNG" alt="Login" width="300px">
 </div>
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-  <img src="prototipo/tela 3.png" alt="Home" width="300px">
+  <img src="prototipo/tela 3.PNG" alt="Home" width="300px">
 </div>
 
 ### Administrador  (US08, US09, US10)
