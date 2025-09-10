@@ -124,7 +124,7 @@ Veja o detalhamento das iterações [aqui](docs/planejamento.md).
 
 ### Cozinha (US04, US05)
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-  <img src="prototipo/Tela_Status.png" alt="Tela de Status" width="300px">
+  <img src="prototipo/Tela_de_Status.png" alt="Tela de Status" width="300px">
   <img src="prototipo/Tela_de_Pedidos.png" alt="Tela de Pedidos" width="300px">
 </div>
 
