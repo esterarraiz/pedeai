@@ -99,6 +99,15 @@ Veja o detalhamento das iterações [aqui](docs/planejamento.md).
   <img src="prototipo/tela 3.PNG" alt="Home" width="300px">
 </div>
 
+### Caixa (US06, US07)
+<div style="display: flex; gap: 10px; margin-bottom: 10px;">
+  <img src="prototipo/Selecionar_Mesa.png" alt="Home" width="300px">
+  <img src="prototipo/Resumo_Pedidos_Mesa.png" alt="Login" width="300px">
+</div>
+<div style="display: flex; gap: 10px; margin-bottom: 10px;">
+  <img src="prototipo/Pagamento.png" alt="Home" width="300px">
+</div>
+
 ### Administrador  (US08, US09, US10)
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
   <img src="prototipo/Home.png" alt="Home" width="300px">
