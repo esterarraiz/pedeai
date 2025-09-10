@@ -64,7 +64,7 @@ O sistema é acessado apenas por perfis de usuários internos:
 ## 📖 User Stories  
 
 ### Garçom  
-- **US01**: Como garçom, quero logar no sistema para registrar e gerenciar os pedidos dos clientes.  
+- **US01**: Como garçom, quero ver as mesas ocupadas para registrar e gerenciar os pedidos dos clientes.  
 - **US02**: Como garçom, quero cadastrar o pedido do cliente de forma digital para que seja enviado instantaneamente à cozinha.  
 - **US03**: Como garçom, quero visualizar o status do pedido (em preparo, pronto) para poder informar o cliente.  
 
@@ -89,6 +89,16 @@ Veja o detalhamento das iterações [aqui](docs/planejamento.md).
 ---
 
 ## 📱Protótipo
+
+### Garçom  (US01, US02, US03)
+<div style="display: flex; gap: 10px; margin-bottom: 10px;">
+  <img src="prototipo/tela 1.png" alt="Home" width="300px">
+  <img src="prototipo/tela 2.png" alt="Login" width="300px">
+</div>
+<div style="display: flex; gap: 10px; margin-bottom: 10px;">
+  <img src="prototipo/tela 3.png" alt="Home" width="300px">
+</div>
+
 ### Administrador  (US08, US09, US10)
 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
   <img src="prototipo/Home.png" alt="Home" width="300px">
@@ -111,4 +121,6 @@ Veja o detalhamento das iterações [aqui](docs/planejamento.md).
 <div style="display: flex; gap: 10px;">
   <img src="prototipo/tela_de_LOGIN_FUNCIONARIO.png" alt="Home" width="300px">
 </div>
+
+
 
