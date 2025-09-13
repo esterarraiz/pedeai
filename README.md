@@ -84,7 +84,14 @@ O sistema é acessado apenas por perfis de usuários internos:
 ---
 
 ## 📌 Planejamento das Iterações
-Veja o detalhamento das iterações [aqui](docs/planejamento.md).
+Este arquivo detalha todas as iterações planejadas do projeto, descrevendo o valor agregado ao cliente e as funcionalidades previstas.  
+[Abrir planejamento das iterações](docs/planejamento.md)
+
+---
+
+## 💻 Histórico de Implementações
+Este arquivo contém todas as features implementadas em cada iteração, junto com os responsáveis e revisores (PR).  
+[Abrir registro de features](docs/features.md)
 
 ---
 

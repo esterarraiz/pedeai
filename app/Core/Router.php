@@ -9,7 +9,16 @@ class Router
 
     public function __construct()
     {
-        #As rotas serão definidas aqui
+        $this->add('login', ['controller' => 'AuthController', 'action' => 'showLogin']);
+        $this->add('login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
+        $this->add('logout', ['controller' => 'AuthController', 'action' => 'logout']);
+
+        # Rotas dos Dashboards (Protegida)
+        $this->add('dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index']);
+        $this->add('dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index']);
+        $this->add('dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index']);
+        $this->add('dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index']);
+        $this->add('dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
     }
 
     public function add($route, $params = [])
@@ -40,24 +49,26 @@ class Router
     public function dispatch()
     {
         $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $url = trim($url, '/'); // Importante: remover barras no início/fim
         $url = $this->removeQueryStringVariables($url);
 
         if ($this->match($url)) {
+            // Namespace completo do Controller
             $controller = "App\\Controllers\\" . $this->params['controller'];
 
             if (class_exists($controller)) {
-                $controller_object = new $controller();
+                // Passa os parâmetros da rota (ex: 'id') para o construtor do Controller Base
+                $controller_object = new $controller($this->params); 
+                
                 $action = $this->params['action'];
 
-                if (method_exists($controller_object, $action)) {
-                    
-                    if (isset($this->params['id'])) {
-                        $controller_object->$action($this->params['id']);
-                    } else {
-                        $controller_object->$action();
-                    }
+                if (is_callable([$controller_object, $action])) {
+                    // Substituí a lógica anterior pela chamada __call do Controller Base
+                    // Isso nos permite rodar os filtros 'before' e 'after'
+                    $controller_object->$action($this->params);
+
                 } else {
-                    echo "Action '$action' não encontrada no controller '$controller'";
+                    echo "Action '$action' não encontrada ou não é 'callable' no controller '$controller'";
                 }
             } else {
                 echo "Controller '$controller' não encontrado.";
