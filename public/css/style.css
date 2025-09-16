@@ -1,0 +1,491 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --green-light: #A7F3D0;
+    --green-medium: #34D399;
+    --green-dark: #059669;
+    --blue-action: #38BDF8;
+    --red-status-bg: #FEE2E2;
+    --red-status-text: #EF4444;
+    --yellow-status-bg: #FEF3C7;
+    --yellow-status-text: #F59E0B;
+    --bg-main: #F9FAFB;
+    --bg-sidebar-cards: #FFFFFF;
+    --border-color: #E5E7EB;
+    --text-dark: #1F2937;
+    --text-light: #6B7280;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+.dashboard-container {
+    display: flex;
+}
+
+
+
+.sidebar {
+    width: 280px;
+    background-color: var(--bg-sidebar-cards);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    height: 100vh;
+    position: fixed;
+    z-index: 1000;
+}
+
+.main-content {
+    flex-grow: 1;
+    margin-left: 280px;
+    padding: 32px;
+}
+
+/* ========================================= */
+/* ADIÇÕES PARA O PAINEL DA COZINHA          */
+/* ========================================= */
+
+/* 1. Estilos para o Cabeçalho e Botão de Logout */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-header h1 {
+    margin-bottom: 0; /* Ajuste para o alinhamento com flex */
+}
+
+/* Garante que a classe .btn exista. Se já tiver, não precisa adicionar. */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.btn-logout {
+    background-color: var(--red-status-text);
+    color: white;
+}
+.btn-logout:hover {
+    background-color: #b91c1c; /* Vermelho mais escuro */
+}
+
+
+/* 2. Estilos para o Grid e Cards de Pedido da Cozinha */
+.kitchen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    justify-content: center; /* Centraliza os cards */
+}
+
+.order-card {
+    background: var(--bg-sidebar-cards);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+}
+
+.order-card-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-card-header h3 { 
+    font-size: 1.2rem; 
+}
+
+.order-card-body { 
+    padding: 15px; 
+    flex-grow: 1; 
+}
+
+.order-card-body ul { 
+    list-style: none; 
+}
+
+.order-card-body li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.order-card-body li:last-child { 
+    border-bottom: none; 
+}
+
+.order-card-body .quantity {
+    font-weight: 700;
+    background-color: var(--green-light);
+    color: var(--green-dark);
+    padding: 2px 8px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.order-card-footer {
+    padding: 15px;
+    background-color: var(--bg-main);
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-ready {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--green-dark);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 32px;
+}
+.sidebar-logo img {
+    height: 200px;
+}
+
+.sidebar-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-nav li a i {
+    font-size: 1.25rem;
+}
+
+.sidebar-nav li a:hover {
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+}
+
+.sidebar-nav li a.active {
+    background-color: var(--green-light);
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.sidebar-nav li a.active i {
+    color: var(--green-dark);
+}
+
+.sidebar-user, .sidebar-support {
+    margin-top: auto;
+    list-style: none;
+}
+
+.main-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.tables-grid {
+    display: grid;
+    /* Cria colunas responsivas que tentam ter 200px, mas se ajustam */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+}
+
+.table-card-link {
+    text-decoration: none; /* Remove o sublinhado do link */
+    color: inherit; /* Herda a cor do texto do elemento pai */
+}
+
+.table-card {
+    padding: 24px;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 180px;
+}
+
+.table-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.table-card .table-number {
+    font-size: 3.5rem; /* Número bem grande */
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-dark);
+}
+
+.table-card .table-label {
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-top: -5px; /* Ajusta a proximidade com o número */
+    margin-bottom: 16px;
+}
+
+.table-card .status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    align-self: center; /* Centraliza o status horizontalmente */
+}
+
+/* Status das Mesas (com as cores do novo design) */
+.table-card.status-livre {
+    background-color: #F0FDF4; /* Verde muito claro */
+    border-color: #A7F3D0;
+}
+.table-card.status-livre .status {
+    background-color: var(--green-light);
+    color: var(--green-dark);
+}
+.table-card.status-livre .table-number,
+.table-card.status-livre .table-label {
+    color: var(--green-dark);
+}
+
+
+.table-card.status-ocupada {
+    background-color: var(--red-status-bg);
+    border-color: #FECACA;
+}
+.table-card.status-ocupada .status {
+    background-color: var(--red-status-text);
+    color: var(--bg-sidebar-cards);
+}
+.table-card.status-ocupada .table-number,
+.table-card.status-ocupada .table-label {
+    color: var(--red-status-text);
+}
+
+.table-card.status-pagamento {
+    background-color: var(--yellow-status-bg);
+    border-color: #FDE047; /* Um amarelo um pouco mais forte para a borda */
+}
+.table-card.status-pagamento .status {
+    background-color: var(--yellow-status-text);
+    color: var(--text-dark); /* Texto escuro fica melhor em fundo amarelo */
+}
+.table-card.status-pagamento .table-number,
+.table-card.status-pagamento .table-label {
+    color: var(--yellow-status-text);
+}
+
+.order-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+    align-items: flex-start;
+}
+.menu-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+.menu-item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg-sidebar-cards);
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+.menu-item .item-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.menu-item .item-details {
+    flex-grow: 1;
+}
+.menu-item .item-details h4 {
+    font-weight: 600;
+}
+.menu-item .item-details .price {
+    color: var(--text-light);
+    font-weight: 500;
+}
+.menu-item .btn-add {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--green-light);
+    color: var(--green-dark);
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.menu-item .btn-add:hover { background-color: #6EE7B7; }
+
+.order-summary {
+    background: var(--bg-sidebar-cards);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+.order-summary h3 {
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+}
+.order-summary .total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+.btn-submit-order {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--green-dark);
+    color: var(--bg-sidebar-cards);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+}
+
+.order-tracking-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--bg-sidebar-cards);
+    padding: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+.order-tracking-card .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    background: var(--yellow-status-bg);
+    color: var(--yellow-status-text);
+    margin: 16px 0;
+}
+.order-tracking-card .items-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.order-tracking-card .actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+}
+.btn-blue {
+    flex-grow: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--blue-action);
+    color: var(--bg-sidebar-cards);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-green {
+     flex-grow: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--green-dark);
+    color: var(--bg-sidebar-cards);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+    .order-layout {
+        grid-template-columns: 1fr 300px;
+    }
+}
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .main-content {
+        margin-left: 0;
+    }
+    .order-layout {
+        grid-template-columns: 1fr;
+    }
+}

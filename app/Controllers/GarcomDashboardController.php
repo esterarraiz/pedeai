@@ -3,29 +3,39 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Models\Mesa;
+use Config\Database;
 
 class GarcomDashboardController extends Controller
 {
     /**
-     * Exibe a tela principal do garçom.
+     * Ação principal (index) do dashboard do garçom.
+     * Esta função irá exibir a página de gerenciamento de mesas.
      */
     public function index()
     {
-        // 1. Protege a rota: exige que o usuário esteja logado.
-        $this->requireLogin();
+        // Futuramente, você pode adicionar uma verificação de segurança aqui
+        // para garantir que apenas garçons acessem esta página.
+        // Ex: $this->requireRole('Garcom');
 
-        // 2. (Opcional, mas recomendado) Garante que apenas um Garçom acesse esta página.
-        if ($_SESSION['user_cargo_id'] != 2) {
-            // Se não for garçom, redireciona para o logout ou uma página de "acesso negado".
-            header('Location: /logout');
+        // 1. Pega a conexão com o banco de dados
+        $pdo = Database::getConnection();
+
+        // 2. Cria uma instância do Model de Mesas
+        $mesaModel = new Mesa($pdo);
+
+        // 3. Busca a lista de todas as mesas da empresa do usuário logado
+        $empresa_id = $_SESSION['empresa_id'] ?? null;
+        if (!$empresa_id) {
+            // Lida com o caso de não encontrar a empresa na sessão (ex: redireciona para o login)
+            header('Location: ' . BASE_PATH . '/login');
             exit;
         }
-        
-        // 3. Carrega a view ou exibe o conteúdo do dashboard do garçom
-        // Por enquanto, vamos apenas exibir uma mensagem de boas-vindas.
-        echo "<h1>Bem-vindo ao Dashboard do Garçom, " . htmlspecialchars($_SESSION['user_nome']) . "!</h1>";
-        echo "<p>Aqui será implementado o painel principal do Garçom (Dashboard) e navegação.</p>";
-        echo '<a href="/logout">Sair</a>';
+        $mesas = $mesaModel->buscarTodasPorEmpresa($empresa_id);
 
+        // 4. Carrega o arquivo da View ('mesaview.php') e passa os dados das mesas para ele
+        $this->loadView('mesaview', [
+            'mesas' => $mesas
+        ]);
     }
 }
