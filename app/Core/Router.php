@@ -14,7 +14,6 @@ class Router
         $this->add('logout', ['controller' => 'AuthController', 'action' => 'logout']);
         
 
-        # Rotas dos Dashboards (Protegida)
         $this->add('dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index']);
         $this->add('dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index']);
         $this->add('dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index']);
@@ -50,22 +49,21 @@ class Router
     public function dispatch()
     {
         $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $url = trim($url, '/'); // Importante: remover barras no início/fim
+        $url = trim($url, '/'); 
         $url = $this->removeQueryStringVariables($url);
 
         if ($this->match($url)) {
-            // Namespace completo do Controller
+
             $controller = "App\\Controllers\\" . $this->params['controller'];
 
             if (class_exists($controller)) {
-                // Passa os parâmetros da rota (ex: 'id') para o construtor do Controller Base
+
                 $controller_object = new $controller($this->params); 
                 
                 $action = $this->params['action'];
 
                 if (is_callable([$controller_object, $action])) {
-                    // Substituí a lógica anterior pela chamada __call do Controller Base
-                    // Isso nos permite rodar os filtros 'before' e 'after'
+
                     $controller_object->$action($this->params);
 
                 } else {

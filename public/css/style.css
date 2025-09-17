@@ -55,11 +55,7 @@ body {
     padding: 32px;
 }
 
-/* ========================================= */
-/* ADIÇÕES PARA O PAINEL DA COZINHA          */
-/* ========================================= */
 
-/* 1. Estilos para o Cabeçalho e Botão de Logout */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -67,10 +63,10 @@ body {
 }
 
 .main-header h1 {
-    margin-bottom: 0; /* Ajuste para o alinhamento com flex */
+    margin-bottom: 0; 
 }
 
-/* Garante que a classe .btn exista. Se já tiver, não precisa adicionar. */
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -92,16 +88,15 @@ body {
     color: white;
 }
 .btn-logout:hover {
-    background-color: #b91c1c; /* Vermelho mais escuro */
+    background-color: #b91c1c; 
 }
 
 
-/* 2. Estilos para o Grid e Cards de Pedido da Cozinha */
 .kitchen-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
-    justify-content: center; /* Centraliza os cards */
+    justify-content: center; 
 }
 
 .order-card {
@@ -237,14 +232,14 @@ body {
 
 .tables-grid {
     display: grid;
-    /* Cria colunas responsivas que tentam ter 200px, mas se ajustam */
+
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 24px;
 }
 
 .table-card-link {
-    text-decoration: none; /* Remove o sublinhado do link */
-    color: inherit; /* Herda a cor do texto do elemento pai */
+    text-decoration: none; 
+    color: inherit; 
 }
 
 .table-card {
@@ -266,7 +261,7 @@ body {
 }
 
 .table-card .table-number {
-    font-size: 3.5rem; /* Número bem grande */
+    font-size: 3.5rem; 
     font-weight: 700;
     line-height: 1;
     color: var(--text-dark);
@@ -275,7 +270,7 @@ body {
 .table-card .table-label {
     color: var(--text-light);
     font-size: 1rem;
-    margin-top: -5px; /* Ajusta a proximidade com o número */
+    margin-top: -5px; 
     margin-bottom: 16px;
 }
 
@@ -285,12 +280,12 @@ body {
     padding: 6px 14px;
     border-radius: 20px;
     text-transform: uppercase;
-    align-self: center; /* Centraliza o status horizontalmente */
+    align-self: center; 
 }
 
-/* Status das Mesas (com as cores do novo design) */
+
 .table-card.status-livre {
-    background-color: #F0FDF4; /* Verde muito claro */
+    background-color: #F0FDF4; 
     border-color: #A7F3D0;
 }
 .table-card.status-livre .status {
@@ -318,11 +313,11 @@ body {
 
 .table-card.status-pagamento {
     background-color: var(--yellow-status-bg);
-    border-color: #FDE047; /* Um amarelo um pouco mais forte para a borda */
+    border-color: #FDE047; 
 }
 .table-card.status-pagamento .status {
     background-color: var(--yellow-status-text);
-    color: var(--text-dark); /* Texto escuro fica melhor em fundo amarelo */
+    color: var(--text-dark); 
 }
 .table-card.status-pagamento .table-number,
 .table-card.status-pagamento .table-label {
