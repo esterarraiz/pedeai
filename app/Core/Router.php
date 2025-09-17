@@ -12,6 +12,7 @@ class Router
         $this->add('login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('logout', ['controller' => 'AuthController', 'action' => 'logout']);
+        
 
         # Rotas dos Dashboards (Protegida)
         $this->add('dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index']);
