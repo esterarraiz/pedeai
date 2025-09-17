@@ -35,6 +35,7 @@ body {
     display: flex;
 }
 
+
 .sidebar {
     width: 280px;
     background-color: var(--bg-sidebar-cards);
@@ -52,6 +53,119 @@ body {
     margin-left: 280px;
     padding: 32px;
 }
+
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-header h1 {
+    margin-bottom: 0; 
+}
+
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.btn-logout {
+    background-color: var(--red-status-text);
+    color: white;
+}
+.btn-logout:hover {
+    background-color: #b91c1c; 
+}
+
+
+.kitchen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    justify-content: center; 
+}
+
+.order-card {
+    background: var(--bg-sidebar-cards);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+}
+
+.order-card-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-card-header h3 { 
+    font-size: 1.2rem; 
+}
+
+.order-card-body { 
+    padding: 15px; 
+    flex-grow: 1; 
+}
+
+.order-card-body ul { 
+    list-style: none; 
+}
+
+.order-card-body li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.order-card-body li:last-child { 
+    border-bottom: none; 
+}
+
+.order-card-body .quantity {
+    font-weight: 700;
+    background-color: var(--green-light);
+    color: var(--green-dark);
+    padding: 2px 8px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.order-card-footer {
+    padding: 15px;
+    background-color: var(--bg-main);
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-ready {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--green-dark);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
 
 .sidebar-logo {
     display: flex;
@@ -118,14 +232,16 @@ body {
 
 .tables-grid {
     display: grid;
-    /* Cria colunas responsivas que tentam ter 200px, mas se ajustam */
+
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 24px;
 }
 
 .table-card-link {
-    text-decoration: none; /* Remove o sublinhado do link */
-    color: inherit; /* Herda a cor do texto do elemento pai */
+
+    text-decoration: none; 
+    color: inherit; 
+
 }
 
 .table-card {
@@ -147,7 +263,9 @@ body {
 }
 
 .table-card .table-number {
-    font-size: 3.5rem; /* Número bem grande */
+
+    font-size: 3.5rem; 
+
     font-weight: 700;
     line-height: 1;
     color: var(--text-dark);
@@ -156,7 +274,9 @@ body {
 .table-card .table-label {
     color: var(--text-light);
     font-size: 1rem;
-    margin-top: -5px; /* Ajusta a proximidade com o número */
+
+    margin-top: -5px; 
+
     margin-bottom: 16px;
 }
 
@@ -166,12 +286,14 @@ body {
     padding: 6px 14px;
     border-radius: 20px;
     text-transform: uppercase;
-    align-self: center; /* Centraliza o status horizontalmente */
+
+    align-self: center; 
 }
 
-/* Status das Mesas (com as cores do novo design) */
+
 .table-card.status-livre {
-    background-color: #F0FDF4; /* Verde muito claro */
+    background-color: #F0FDF4; 
+
     border-color: #A7F3D0;
 }
 .table-card.status-livre .status {
@@ -199,11 +321,13 @@ body {
 
 .table-card.status-pagamento {
     background-color: var(--yellow-status-bg);
-    border-color: #FDE047; /* Um amarelo um pouco mais forte para a borda */
+
+    border-color: #FDE047; 
 }
 .table-card.status-pagamento .status {
     background-color: var(--yellow-status-text);
-    color: var(--text-dark); /* Texto escuro fica melhor em fundo amarelo */
+    color: var(--text-dark); 
+
 }
 .table-card.status-pagamento .table-number,
 .table-card.status-pagamento .table-label {

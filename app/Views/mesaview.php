@@ -19,7 +19,9 @@
 </div>
             <ul class="sidebar-nav">
                 <li><a href="/dashboard/garcom" class="active"><i class="fa-solid fa-chair"></i><span>Mesas</span></a></li>
-                <li><a href="#"><i class="fa-solid fa-receipt"></i><span>Pedidos Atuais</span></a></li>
+
+                <li><a href="/dashboard/pedidos"><i class="fa-solid fa-receipt"></i><span>Pedidos Atuais</span></a></li>
+
                 <li><a href="/logout"><i class="fa-solid fa-sign-out-alt"></i><span>Sair</span></a></li>
             </ul>
             <div class="sidebar-user">
@@ -35,13 +37,14 @@
 
             <section class="tables-grid">
 
-    <?php if (empty($mesas)): // ALTERADO AQUI ?>
+
+    <?php if (empty($mesas)):  ?>
         <p>Nenhuma mesa cadastrada para esta empresa.</p>
     <?php else: ?>
 
-        <?php foreach ($mesas as $mesa): // ALTERADO AQUI ?>
+        <?php foreach ($mesas as $mesa):  ?>
             <?php
-                // Lógica simplificada para o novo design
+
                 $statusClass = 'status-livre';
                 $statusText = 'Livre';
 
