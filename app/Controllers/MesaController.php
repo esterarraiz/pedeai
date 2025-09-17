@@ -9,6 +9,7 @@ use Config\Database;
 class MesaController extends Controller
 {
 
+
     public function index()
     {
 
@@ -20,6 +21,7 @@ class MesaController extends Controller
 
         $empresa_id = $_SESSION['empresa_id'] ?? null;
         $mesas = $mesaModel->buscarTodasPorEmpresa($empresa_id);
+
 
 
          $this->loadView('mesaview', [

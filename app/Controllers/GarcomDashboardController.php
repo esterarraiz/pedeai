@@ -21,10 +21,12 @@ class GarcomDashboardController extends Controller
         $empresa_id = $_SESSION['empresa_id'] ?? null;
         if (!$empresa_id) {
 
+
             header('Location: ' . BASE_PATH . '/login');
             exit;
         }
         $mesas = $mesaModel->buscarTodasPorEmpresa($empresa_id);
+
 
         $this->loadView('mesaview', [
             'mesas' => $mesas

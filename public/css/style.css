@@ -36,7 +36,6 @@ body {
 }
 
 
-
 .sidebar {
     width: 280px;
     background-color: var(--bg-sidebar-cards);
@@ -167,6 +166,7 @@ body {
     font-weight: 600;
 }
 
+
 .sidebar-logo {
     display: flex;
     align-items: center;
@@ -238,8 +238,10 @@ body {
 }
 
 .table-card-link {
+
     text-decoration: none; 
     color: inherit; 
+
 }
 
 .table-card {
@@ -261,7 +263,9 @@ body {
 }
 
 .table-card .table-number {
+
     font-size: 3.5rem; 
+
     font-weight: 700;
     line-height: 1;
     color: var(--text-dark);
@@ -270,7 +274,9 @@ body {
 .table-card .table-label {
     color: var(--text-light);
     font-size: 1rem;
+
     margin-top: -5px; 
+
     margin-bottom: 16px;
 }
 
@@ -280,12 +286,14 @@ body {
     padding: 6px 14px;
     border-radius: 20px;
     text-transform: uppercase;
+
     align-self: center; 
 }
 
 
 .table-card.status-livre {
     background-color: #F0FDF4; 
+
     border-color: #A7F3D0;
 }
 .table-card.status-livre .status {
@@ -313,11 +321,13 @@ body {
 
 .table-card.status-pagamento {
     background-color: var(--yellow-status-bg);
+
     border-color: #FDE047; 
 }
 .table-card.status-pagamento .status {
     background-color: var(--yellow-status-text);
     color: var(--text-dark); 
+
 }
 .table-card.status-pagamento .table-number,
 .table-card.status-pagamento .table-label {
