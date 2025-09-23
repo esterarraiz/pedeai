@@ -2,6 +2,8 @@
 
 ## Iteração 1: Conexão Garçom–Cozinha (Pedido do Salão para a Cozinha)
 
+[➡️ Ver registro de implementação desta iteração](features.md)
+
 **Valor da Iteração:**  
 Validar o fluxo mais crítico do negócio, digitalizando a comunicação entre o garçom e a cozinha. O objetivo é garantir que um pedido possa ser criado digitalmente e recebido instantaneamente para preparo, eliminando erros de ordem e tempo de deslocamento.
 
@@ -13,12 +15,20 @@ Validar o fluxo mais crítico do negócio, digitalizando a comunicação entre o
 
 ---
 
-## Iteração 2: Administração e Controle (Gestão de Cardápio e Usuários)
 
-**Valor da Iteração:**  
-Dar autonomia ao administrador do restaurante, permitindo que ele gerencie os pilares do sistema: o cardápio e os acessos da equipe. Isso torna o PedeAI adaptável à realidade do negócio sem depender de suporte técnico para alterações simples.
+## Iteração 2: Consolidação Operacional
+
+[➡️ Ver registro de implementação desta iteração](features.md)
+
+**Valor da Iteração:**
+Consolidar o sistema com as funcionalidades essenciais de **administração** (cardápio e usuários), fechar o **loop de comunicação** (notificação de pedido pronto) e implementar o **fluxo de caixa** completo (visualização da conta e registro do pagamento).
 
 ### Funcionalidades
-- **Autenticação por Perfil (Refinamento):** Expandir a tela de login para redirecionar corretamente os perfis de Administrador, Caixa e Cozinha.  
-- **Gerenciamento de Cardápio (US08):** Criar a interface do Administrador para adicionar, editar e remover produtos e categorias, incluindo seus preços.  
-- **Gerenciamento de Usuários (US09):** Implementar a funcionalidade para o Administrador criar, editar e desativar os logins dos funcionários (Garçom, Cozinha, Caixa).  
+- **Gerenciamento de Cardápio (US08):** Criar a interface para o Administrador gerenciar o cardápio, permitindo adicionar, editar e remover produtos, categorias e seus respectivos preços.
+- **Gerenciamento de Usuários (US09):** Implementar a funcionalidade para o Administrador criar, editar e desativar os logins e perfis dos funcionários (Garçom, Cozinha, Caixa).
+- **Ciclo de Notificação de Pedido Pronto (US05 + US03):** Implementar o fluxo de comunicação de duas vias: adicionar um botão no Painel da Cozinha para marcar pedidos como "Prontos" (US05) e exibir um alerta ou indicador visual na tela do Garçom quando um de seus pedidos estiver pronto para entrega (US03).
+- **Visualização de Conta por Mesa (US06):** Desenvolver a tela para o perfil de Caixa, que permite selecionar uma mesa ocupada e visualizar todos os itens consumidos, com suas quantidades, preços e o valor total da conta.
+- **Registro de Pagamento (US07):** Na tela do Caixa, implementar a funcionalidade para registrar o pagamento de uma conta. Após o registro, o sistema deve marcar a conta como "Paga" e liberar a mesa, alterando seu status para "Livre".
+
+
+---
