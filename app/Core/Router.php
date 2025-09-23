@@ -19,6 +19,9 @@ class Router
         $this->add('dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index']);
         $this->add('dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index']);
         $this->add('dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
+        $this->add('pedidos/novo/{id}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
+        $this->add('pedidos/processar', ['controller' => 'PedidoController', 'action' => 'processarNovoPedido']);
+        $this->add('mesas', ['controller' => 'MesaController', 'action' => 'index']);
     }
 
     public function add($route, $params = [])
@@ -51,7 +54,7 @@ class Router
         $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $url = trim($url, '/'); 
         $url = $this->removeQueryStringVariables($url);
-
+        
         if ($this->match($url)) {
 
             $controller = "App\\Controllers\\" . $this->params['controller'];

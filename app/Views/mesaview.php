@@ -56,7 +56,7 @@
                     $statusText = 'Pagamento';
                 }
                 
-                $linkMesa = (BASE_PATH ?? '') . "/pedidos/mesa/" . $mesa['id'];
+                $linkMesa = "/pedidos/novo/" . $mesa['id'];
             ?>
 
             <a href="<?= $linkMesa ?>" class="table-card-link">
