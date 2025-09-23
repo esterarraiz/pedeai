@@ -74,4 +74,27 @@ abstract class Controller
             throw new \Exception("View '$file' não encontrada.");
         }
     }
+    public function renderView(string $view, array $data = [])
+    {
+        // Constrói o caminho para o arquivo da view
+        // Ex: ../app/Views/pedidos/novo.php
+        $viewPath = __DIR__ . '/../Views/' . $view . '.php';
+
+        // Verifica se o arquivo da view realmente existe
+        if (file_exists($viewPath)) {
+            // A função extract() é muito útil aqui.
+            // Ela transforma as chaves de um array em variáveis.
+            // Ex: $data['mesa_id'] se torna a variável $mesa_id dentro da view.
+            extract($data);
+
+            // Inclui o arquivo da view, que agora tem acesso às variáveis extraídas
+            require_once $viewPath;
+        } else {
+            // Se o arquivo da view não for encontrado, exibe um erro claro.
+            http_response_code(500);
+            echo "Erro: Arquivo de View não encontrado em: " . htmlspecialchars($viewPath);
+            exit;
+        }
+    }
+
 }
