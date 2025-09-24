@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/633ce93e-fa26-46c1-b700-e21d51bc09aa" alt="PedeAI Logo" width="200"/>
+</p>
+
 # 🍽️ PedeAI   
 O **PedeAI** é um sistema de gerenciamento de pedidos em restaurantes, desenvolvido para **digitalizar o fluxo do garçom à cozinha**, agilizando o atendimento e permitindo o pagamento das mesas.  
 **Problema que resolve:** atualmente, pedidos são anotados manualmente, o que gera **erros de escrita, atrasos na cozinha e comunicação ineficiente** entre equipe de atendimento e cozinha. O PedeAI reduz esses problemas, tornando o serviço mais rápido, preciso e organizado.
