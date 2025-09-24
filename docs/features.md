@@ -35,8 +35,8 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 
 | Feature | Responsável | Revisor (PR) | Status |
 |---------|-------------|--------------|--------|
-| Gerenciamento de Cardápio (US08) | -- | -- | A produzir |
-| Gerenciamento de Usuários (US09) | -- | -- | A produzir |
-| Ciclo de Notificação de Pedido Pronto (US05 + US03) | -- | -- | A produzir |
+| Gerenciamento de Cardápio (US08) | Jorge | Ester | A produzir |
+| Gerenciamento de Usuários (US09) | Ester | Arthur | A produzir |
+| Ciclo de Notificação de Pedido Pronto (US05 + US03) | Arthur | Vitória | A produzir |
 | Visualização de Conta por Mesa (US06) | Vitória | Matheus | A produzir |
 | Tela do Caixa - Registro de Pagamento (US07) | Matheus | Jorge | A produzir |
