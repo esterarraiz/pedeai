@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use PDO;
+use PDOException;
+use Exception;
+
 class PedidoModel
 {
-    private \PDO $pdo;
+    private PDO $pdo;
 
-    public function __construct(\PDO $pdo)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
     }
@@ -27,7 +31,7 @@ class PedidoModel
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$empresa_id]);
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $pedidos = [];
         foreach ($results as $row) {
@@ -47,11 +51,13 @@ class PedidoModel
         }
         return array_values($pedidos);
     }
-        public function criarNovoPedido(int $empresa_id, int $mesa_id, int $funcionario_id, array $itens): bool
+
+    public function criarNovoPedido(int $empresa_id, int $mesa_id, int $funcionario_id, array $itens): bool
     {
         try {
-            // Inicia uma transação
-            $this->pdo->beginTransaction();
+            if (empty($itens)) {
+                throw new Exception("Lista de itens do pedido está vazia.");
+            }
 
             // 1. Insere o registro principal na tabela 'pedidos'
             $sql_pedido = "
@@ -59,9 +65,10 @@ class PedidoModel
                 VALUES (?, ?, ?, 'em_preparo', NOW());
             ";
             $stmt_pedido = $this->pdo->prepare($sql_pedido);
-            $stmt_pedido->execute([$empresa_id, $mesa_id, $funcionario_id]);
+            if (!$stmt_pedido->execute([$empresa_id, $mesa_id, $funcionario_id])) {
+                throw new Exception("Falha ao inserir o pedido principal: " . implode(" | ", $stmt_pedido->errorInfo()));
+            }
 
-            // Pega o ID do pedido que acabamos de criar
             $pedido_id = $this->pdo->lastInsertId();
 
             // 2. Prepara a query para inserir os itens do pedido
@@ -71,42 +78,33 @@ class PedidoModel
             ";
             $stmt_itens = $this->pdo->prepare($sql_itens);
 
-            // 3. Itera sobre os itens e os insere na tabela 'pedido_itens'
             $sql_preco = "SELECT preco FROM cardapio_itens WHERE id = ?";
             $stmt_preco = $this->pdo->prepare($sql_preco);
 
-            // 4. Itera sobre os itens, busca o preço e os insere na tabela 'pedido_itens'
             foreach ($itens as $item_id => $quantidade) {
-            // Busca o preço atual do item no cardápio
-            $stmt_preco->execute([$item_id]);
-            $item_info = $stmt_preco->fetch(\PDO::FETCH_ASSOC);
-            $preco_do_item = $item_info ? $item_info['preco'] : 0; // Pega o preço ou usa 0 se não encontrar
+                $stmt_preco->execute([$item_id]);
+                $item_info = $stmt_preco->fetch(PDO::FETCH_ASSOC);
 
-            // Executa a inserção com o preço
-            $stmt_itens->execute([
-                ':pedido_id' => $pedido_id,
-                ':item_id' => $item_id,
-                ':quantidade' => $quantidade,
-                ':preco' => $preco_do_item // <-- Adiciona o preço aqui
-            ]);
-}
+                if (!$item_info) {
+                    throw new Exception("Item de ID {$item_id} não encontrado no cardápio.");
+                }
 
-            // Se tudo deu certo, confirma a transação
-            $this->pdo->commit();
+                $preco_do_item = $item_info['preco'];
+
+                if (!$stmt_itens->execute([
+                    ':pedido_id' => $pedido_id,
+                    ':item_id' => $item_id,
+                    ':quantidade' => $quantidade,
+                    ':preco' => $preco_do_item
+                ])) {
+                    throw new Exception("Falha ao inserir item {$item_id}: " . implode(" | ", $stmt_itens->errorInfo()));
+                }
+            }
+
             return true;
 
-        } catch (\PDOException $e) {
-    // Se algo deu errado, desfaz a transação
-    $this->pdo->rollBack();
-
-    // --- MODIFICAÇÃO TEMPORÁRIA PARA DEBUG ---
-    // A linha abaixo vai parar o script e mostrar o erro exato.
-    // Lembre-se de removê-la depois de resolver o problema!
-    die("Erro no Banco de Dados: " . $e->getMessage());
-    // --- FIM DA MODIFICAÇÃO ---
-
-    // O ideal aqui é logar o erro: error_log($e->getMessage());
-    return false;
+        } catch (PDOException $e) {
+            throw new Exception("Erro PDO no PedidoModel: " . $e->getMessage());
         }
     }
 }

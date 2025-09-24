@@ -28,4 +28,36 @@ class MesaController extends Controller
          'mesas' => $mesas
             ]);
     }
+    /**
+ * Recebe uma requisição POST para liberar uma mesa (mudar status para 'Livre').
+ */
+  public function liberarMesa()
+    {
+        // Garante que a requisição seja POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('HTTP/1.0 405 Method Not Allowed');
+            echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
+            exit;
+        }
+
+        header('Content-Type: application/json');
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $mesaId = $data['mesa_id'] ?? null;
+
+        if (!$mesaId || !is_numeric($mesaId)) {
+            echo json_encode(['success' => false, 'message' => 'ID da mesa inválido.']);
+            return;
+        }
+
+        $mesaModel = new Mesa();
+        $sucesso = $mesaModel->atualizarStatus((int)$mesaId, 'Livre');
+
+        if ($sucesso) {
+            echo json_encode(['success' => true, 'message' => 'Mesa liberada com sucesso!']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Falha ao atualizar o status da mesa.']);
+        }
+    }
+
 }
