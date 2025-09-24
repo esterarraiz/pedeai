@@ -60,4 +60,21 @@ class Mesa
             throw new Exception("Erro PDO ao atualizar status da mesa: " . $e->getMessage());
         }
     }
+    public function buscarPorId(int $id)
+    {
+        $sql = "SELECT * FROM mesas WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Libera uma mesa, alterando seu status para 'disponivel'.
+     */
+    public function liberarMesa(int $mesa_id): bool
+    {
+        $sql = "UPDATE mesas SET status_mesa = 'disponivel' WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$mesa_id]);
+    }
 }

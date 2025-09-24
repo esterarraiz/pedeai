@@ -25,8 +25,8 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 | Criar o painel principal do Garçom (Dashboard) e navegação | Vitória | Matheus | Concluída |
 | Implementar o fluxo de login e logout do Garçom (US01) | Ester | Arthur | Concluída |
 | Implementar o painel da Cozinha em tempo real (US04) | Jorge | Ester | Concluída |
-| Implementar a visualização e seleção de Mesas (dentro do Dashboard) | Arthur | Vitória | Em produção |
-| Implementar o lançamento de Pedidos para uma mesa (US02) | Matheus | Jorge | Em produção |
+| Implementar a visualização e seleção de Mesas (dentro do Dashboard) | Arthur | Vitória | Concluída |
+| Implementar o lançamento de Pedidos para uma mesa (US02) | Matheus | Jorge | Concluída |
 
 ---
 
@@ -38,5 +38,5 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 | Gerenciamento de Cardápio (US08) | -- | -- | A produzir |
 | Gerenciamento de Usuários (US09) | -- | -- | A produzir |
 | Ciclo de Notificação de Pedido Pronto (US05 + US03) | -- | -- | A produzir |
-| Visualização de Conta por Mesa (US06) | -- | -- | A produzir |
-| Tela do Caixa - Registro de Pagamento (US07) | -- | -- | A produzir |
+| Visualização de Conta por Mesa (US06) | Vitória | Matheus | A produzir |
+| Tela do Caixa - Registro de Pagamento (US07) | Matheus | Jorge | A produzir |
