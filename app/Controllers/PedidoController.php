@@ -12,25 +12,28 @@ class PedidoController extends Controller
 {
     public function showFormNovoPedido($params)
     {
-        $mesaId = $params[0] ?? null;
+        // CORREÇÃO: Acessando o ID pela chave associativa 'id' em vez de [0]
+        $mesaId = $params['id'] ?? null;
 
+        // Esta verificação agora funcionará corretamente
         if (!$mesaId || !is_numeric($mesaId)) {
             header('Location: /dashboard/garcom?status=mesa_invalida');
             exit;
         }
 
         try {
-            $pdo = Database::getConnection();
+            $pdo = \Config\Database::getConnection();
             $empresa_id = $_SESSION['empresa_id'] ?? null;
 
             if (!$empresa_id) {
                 throw new \Exception("ID da empresa não encontrado na sessão.");
             }
             
-            $cardapioModel = new CardapioModel($pdo); 
+            $cardapioModel = new \App\Models\CardapioModel($pdo); 
             $itensCardapio = $cardapioModel->buscarItensAgrupados($empresa_id); 
             
-            $this->renderView('pedidos/novo', [
+            // Supondo que seu método para renderizar a view se chame 'loadView' ou 'renderView'
+            $this->loadView('pedidos/novo', [
                 'pageTitle' => 'Lançar Pedido para a Mesa ' . htmlspecialchars($mesaId),
                 'mesa_id'   => (int)$mesaId,
                 'cardapio'  => $itensCardapio
@@ -38,74 +41,77 @@ class PedidoController extends Controller
 
         } catch (\Exception $e) {
             error_log("Erro em showFormNovoPedido: " . $e->getMessage());
-            $this->renderView('error', ['message' => 'Não foi possível carregar a página de pedidos.']);
+            $this->loadView('error', ['message' => 'Não foi possível carregar a página de pedidos.']);
         }
     }
-
-    public function criarPedido()
+    public function processarPedidoAjax()
     {
+        header('Content-Type: application/json');
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /dashboard/garcom');
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
             exit;
         }
 
-        $mesa_id = filter_input(INPUT_POST, 'mesa_id', FILTER_SANITIZE_NUMBER_INT);
-        $itens_pedido = $_POST['itens'] ?? [];
+        $jsonPayload = file_get_contents('php://input');
+        $requestData = json_decode($jsonPayload, true);
+        
+        $mesa_id = filter_var($requestData['mesa_id'] ?? null, FILTER_SANITIZE_NUMBER_INT);
+        $itens_pedido = $requestData['itens'] ?? [];
         $itens_validos = array_filter($itens_pedido, fn($qtd) => is_numeric($qtd) && $qtd > 0);
 
         if (empty($itens_validos) || !$mesa_id) {
-            $_SESSION['error_message'] = "Pedido inválido ou sem itens.";
-            header('Location: /dashboard/garcom');
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Pedido inválido ou sem itens.']);
             exit;
         }
 
         $pdo = null;
         try {
             $pdo = Database::getConnection();
-
-            if (!$pdo->inTransaction()) {
-                $pdo->beginTransaction();
-            }
+            $pdo->beginTransaction();
 
             $pedidoModel = new PedidoModel($pdo);
             $mesaModel = new Mesa($pdo);
 
             $empresa_id = $_SESSION['empresa_id'] ?? null;
             $funcionario_id = $_SESSION['user_id'] ?? null;
-
-            $pedidoSucesso = $pedidoModel->criarNovoPedido($empresa_id, $mesa_id, $funcionario_id, $itens_validos);
-            if (!$pedidoSucesso) {
-                throw new \Exception("Falha ao registrar os itens do pedido.");
+            
+            if (!$empresa_id || !$funcionario_id) {
+                throw new \Exception("Sessão do usuário inválida ou expirada. Verifique se está logado.");
             }
 
+            // A função agora retorna o ID do novo pedido.
+            $pedido_id = $pedidoModel->criarNovoPedido($empresa_id, (int)$mesa_id, (int)$funcionario_id, $itens_validos);
+
+            // A atualização da mesa continua sendo uma operação crítica na transação.
             $mesaSucesso = $mesaModel->atualizarStatus($mesa_id, 'Ocupada');
             if (!$mesaSucesso) {
-                throw new \Exception("Falha ao atualizar o status da mesa.");
+                throw new \Exception("Falha ao atualizar o status da mesa. Verifique o MesaModel.");
             }
 
             $pdo->commit();
 
-            $_SESSION['success_message'] = "Pedido lançado e mesa ocupada com sucesso!";
-            header('Location: /dashboard/garcom');
+            echo json_encode(['success' => true, 'message' => "Pedido #{$pedido_id} lançado com sucesso!"]);
             exit;
 
         } catch (\Exception $e) {
             if ($pdo && $pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+            
+            // Log do erro detalhado para o desenvolvedor
+            error_log("Erro ao processar pedido AJAX: " . $e->getMessage() . " no arquivo " . $e->getFile() . " na linha " . $e->getLine());
 
-            // 🔹 Debug detalhado
-            $erro = $e->getMessage();
-            $dados = json_encode([
-                'empresa_id' => $empresa_id,
-                'mesa_id' => $mesa_id,
-                'itens' => $itens_validos
+            http_response_code(500);
+            
+            // Retorna a mensagem de erro específica para o frontend (facilita a depuração)
+            echo json_encode([
+                'success' => false, 
+                'message' => $e->getMessage() // <-- MUDANÇA PRINCIPAL
             ]);
-
-            error_log("Erro ao criar pedido: $erro | Dados: $dados");
-
-            // Mostra o erro na página para teste (remover em produção)
-            die("Erro ao criar pedido: $erro <br> Dados enviados: $dados");
+            exit;
         }
     }
 }

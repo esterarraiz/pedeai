@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Mesa;
+use App\Models\PedidoModel;
 use Config\Database;
 
 class MesaController extends Controller
@@ -59,5 +60,25 @@ class MesaController extends Controller
             echo json_encode(['success' => false, 'message' => 'Falha ao atualizar o status da mesa.']);
         }
     }
+    public function showDetalhesMesa($params)
+    {
+        // ...
+        $mesa_id = $params['id'];
+        $empresa_id = $_SESSION['empresa_id'];
 
+        $pdo = \Config\Database::getConnection();
+        
+        $mesaModel = new \App\Models\Mesa($pdo);
+        $mesa = $mesaModel->buscarPorId($mesa_id);
+
+        $pedidoModel = new \App\Models\PedidoModel($pdo);
+        // CHAMANDO O NOVO MÉTODO
+        $ultimo_pedido = $pedidoModel->buscarItensDoUltimoPedidoDaMesa($mesa_id, $empresa_id);
+
+        // ENVIANDO PARA A VIEW com a chave 'pedido' (singular)
+        $this->loadView('mesas/detalhes', [
+            'mesa' => $mesa,
+            'pedido' => $ultimo_pedido
+        ]);
+    }
 }

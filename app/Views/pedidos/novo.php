@@ -2,55 +2,186 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Lançar Pedido - Mesa <?= htmlspecialchars($mesa_id) ?></title>
-    <link rel="stylesheet" href="/css/style.css"> <style>
-        /* Estilos básicos para o formulário (pode mover para style.css) */
-        .categoria { margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px; }
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .item:last-child { border-bottom: none; }
-        .item input { width: 60px; text-align: center; }
-        .item .info { flex-grow: 1; margin-right: 15px; }
-        .item .info p { margin: 5px 0 0; font-size: 0.9em; color: #666; }
-        .btn-submit { background-color: #28a745; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css"> 
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <title>Lançar Pedido - Mesa <?php echo htmlspecialchars($data['mesa_id']); ?></title>
 </head>
 <body>
 
-    <h1>Lançar Pedido para a Mesa <?= htmlspecialchars($mesa_id) ?></h1>
+<div class="dashboard-container">
+        
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="/images/pedeai-logo.png" alt="Logo PedeAi">
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="/dashboard/garcom" class="active"><i class="fa-solid fa-chair"></i><span>Mesas</span></a></li>
 
-    <?php if (isset($_SESSION['error_message'])): ?>
-        <p style="color: red;"><?= $_SESSION['error_message']; unset($_SESSION['error_message']); ?></p>
-    <?php endif; ?>
+                <li><a href="/dashboard/pedidos"><i class="fa-solid fa-receipt"></i><span>Pedidos Atuais</span></a></li>
 
-    <form action="/pedidos/criar" method="POST">
-        <input type="hidden" name="mesa_id" value="<?= htmlspecialchars($mesa_id) ?>">
+                <li><a href="/logout"><i class="fa-solid fa-sign-out-alt"></i><span>Sair</span></a></li>
+            </ul>
+            <div class="sidebar-user">
+                <h4><?= htmlspecialchars($_SESSION['user_nome'] ?? 'Usuário') ?></h4>
+                <span>Garçom</span>
+            </div>
+        </aside>
 
-        <?php if (empty($cardapio)): ?>
-            <p>Não foi possível carregar o cardápio.</p>
-        <?php else: ?>
-            <?php foreach ($cardapio as $categoria => $itens): ?>
-                <div class="categoria">
-                    <h2><?= htmlspecialchars($categoria) ?></h2>
-                    <?php foreach ($itens as $item): ?>
-                        <div class="item">
-                            <div class="info">
-                                <strong><?= htmlspecialchars($item['nome']) ?></strong>
-                                <small>(R$ <?= number_format($item['preco'], 2, ',', '.') ?>)</small>
-                                <p><?= htmlspecialchars($item['descricao']) ?></p>
-                            </div>
-                            <div class="quantidade">
-                                <label for="item-<?= $item['id'] ?>">Qtd:</label>
-                                <input type="number" id="item-<?= $item['id'] ?>" name="itens[<?= $item['id'] ?>]" min="0" value="0">
-                            </div>
+
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Lançar Pedido - Mesa <?php echo htmlspecialchars($data['mesa_id']); ?></h1>
+        </header>
+
+        <div class="order-layout">
+            
+            <section class="menu-section">
+                <?php foreach ($data['cardapio'] as $categoria => $itens): ?>
+                    <div class="category-group" style="margin-bottom: 24px;">
+                        <h2><?php echo htmlspecialchars($categoria); ?></h2>
+                        <div class="menu-item-list">
+                            <?php foreach ($itens as $item): ?>
+                                <div class="menu-item">
+                                    <div class="item-icon" style="background-color: 
+                                        <?php 
+                                            // Lógica simples para cores baseada na categoria
+                                            if (stripos($categoria, 'pizza') !== false) echo '#ff9800';
+                                            elseif (stripos($categoria, 'porç') !== false) echo '#ffc107';
+                                            else echo '#fbc02d'; // Cor padrão
+                                        ?>;">
+                                        <span>
+                                            <?php 
+                                                // Pega a primeira palavra da categoria para o ícone
+                                                echo htmlspecialchars(explode(' ', $categoria)[0]); 
+                                            ?>
+                                        </span>
+                                    </div>
+                                    <div class="item-details">
+                                        <h4><?php echo htmlspecialchars($item['nome']); ?></h4>
+                                        <span class="price">R$ <?php echo number_format($item['preco'], 2, ',', '.'); ?></span>
+                                    </div>
+                                    <button 
+                                        class="btn-add" 
+                                        data-id="<?php echo $item['id']; ?>"
+                                        data-nome="<?php echo htmlspecialchars($item['nome']); ?>" 
+                                        data-preco="<?php echo $item['preco']; ?>">
+                                        +
+                                    </button>
+
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </section>
 
-        <br>
-        <button type="submit" class="btn-submit">Lançar Pedido</button>
-    </form>
+            <aside class="order-summary">
+                <h3>Resumo do Pedido</h3>
+
+                <p class="empty-message">Nenhum item adicionado.</p>
+
+                <div class="summary-content"></div>
+
+                <div class="total">
+                    <span>Total:</span>
+                    <span>R$ 0,00</span>
+                </div>
+                <button class="btn-submit-order" type="submit">Fazer Pedido</button>
+            </aside>
+
+        </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const addButtons = document.querySelectorAll('.btn-add');
+    const summaryContent = document.querySelector('.summary-content');
+    const emptyMessage = document.querySelector('.empty-message');
+    const totalElement = document.querySelector('.order-summary .total span:last-child');
+    const submitButton = document.querySelector('.btn-submit-order');
+
+    let orderItems = {};
+    let totalPrice = 0.0;
+
+    // --- LÓGICA PARA ADICIONAR ITENS (JÁ ESTÁ OK) ---
+    addButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.getAttribute('data-id'); // <-- Captura o ID
+            const name = this.getAttribute('data-nome');
+            const price = parseFloat(this.getAttribute('data-preco'));
+
+            if (emptyMessage && !emptyMessage.hidden) {
+                emptyMessage.hidden = true;
+            }
+
+            if (orderItems[id]) { // Usando ID como chave para evitar nomes duplicados
+                orderItems[id].quantity++;
+                orderItems[id].element.querySelector('.item-quantity').textContent = `${orderItems[id].quantity}x`;
+            } else {
+                const summaryItem = document.createElement('div');
+                summaryItem.classList.add('summary-item');
+                summaryItem.innerHTML = `<span class="item-name">${name}</span><span class="item-quantity">1x</span>`;
+                summaryContent.appendChild(summaryItem);
+
+                orderItems[id] = {
+                    quantity: 1,
+                    price: price,
+                    element: summaryItem
+                };
+            }
+
+            totalPrice += price;
+            totalElement.textContent = totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        });
+    });
+
+    // --- NOVA LÓGICA PARA ENVIAR O PEDIDO ---
+    submitButton.addEventListener('click', function() {
+        if (Object.keys(orderItems).length === 0) {
+            alert('Nenhum item foi adicionado ao pedido.');
+            return;
+        }
+
+        // Formata o objeto de itens para o formato esperado pelo PHP: [item_id => quantidade]
+        const itensParaEnviar = {};
+        for (const itemId in orderItems) {
+            itensParaEnviar[itemId] = orderItems[itemId].quantity;
+        }
+
+        const dadosDoPedido = {
+            mesa_id: <?php echo htmlspecialchars($data['mesa_id']); ?>,
+            itens: itensParaEnviar
+        };
+        
+        // Envia os dados para o novo método no controller
+        fetch('/pedidos/processar-ajax', { // <<< ROTA NOVA/AJAX
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(dadosDoPedido)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message); // Ex: "Pedido lançado com sucesso!"
+                window.location.href = '/dashboard/garcom'; // Redireciona
+            } else {
+                alert('Erro: ' + data.message); // Ex: "Nenhum item foi adicionado."
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            alert('Ocorreu um erro de comunicação com o servidor.');
+        });
+    });
+});
+</script>
 
 </body>
 </html>
