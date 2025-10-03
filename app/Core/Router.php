@@ -5,44 +5,50 @@ namespace App\Core;
 class Router
 {
     protected $routes = [];
-    protected $params = []; // Armazenará TODOS os parâmetros (rota + URL)
+    protected $params = [];
 
     public function __construct()
     {
-        // === ROTAS DE AUTENTICAÇÃO ===
+        // === ROTAS PÚBLICAS (sem roles) ===
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
         
-        // === ROTAS DE DASHBOARDS ===
-        $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index']);
-        $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index']);
-        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index']);
-        $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index']);
-        $this->add('GET', 'dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
+        // === ROTAS DE ADMIN (só o admin pode aceder) ===
+        $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
+        $this->add('GET', 'funcionarios', ['controller' => 'FuncionarioController', 'action' => 'index'], ['administrador']);
+        $this->add('GET', 'funcionarios/novo', ['controller' => 'FuncionarioController', 'action' => 'showCreateForm'], ['administrador']);
+        $this->add('POST', 'funcionarios/criar', ['controller' => 'FuncionarioController', 'action' => 'create'], ['administrador']);
+        $this->add('GET', 'funcionarios/editar/{id:\d+}', ['controller' => 'FuncionarioController', 'action' => 'showEditForm'], ['administrador']);
+        $this->add('POST', 'funcionarios/atualizar', ['controller' => 'FuncionarioController', 'action' => 'update'], ['administrador']);
+        $this->add('POST', 'funcionarios/status', ['controller' => 'FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
+        $this->add('POST', 'funcionarios/redefinir-senha', ['controller' => 'FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
 
-        // === ROTAS DE PEDIDOS ===
-        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
-        $this->add('POST', 'pedidos/criar', ['controller' => 'PedidoController', 'action' => 'criarPedido']);
-        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax']);
-
-        // === ROTAS DE MESAS ===
-        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index']);
-        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa']);
-        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
+        // === ROTAS DE GARÇOM (garçom e admin) ===
+        $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
+        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index'], ['garçom']);
+        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa'], ['garçom']);
+        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa'], ['garçom']);
+        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido'], ['garçom']);
+        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax'], ['garçom']);
+        
+        // === ROTAS DE COZINHA (cozinheiro e admin) ===
+        $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index'], ['cozinheiro']);
+        
+        // === ROTAS DE CAIXA (caixa e admin) ===
+        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
     }
 
-    public function add($method, $route, $params = [])
+    public function add($method, $route, $params = [], $roles = [])
     {
-        // Converte placeholders como {id:\d+} em grupos de captura nomeados (?P<id>\d+)
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
-        
         $route = '/^' . str_replace('/', '\/', $route) . '$/i';
         
         $this->routes[] = [
             'method' => strtoupper($method),
             'route'  => $route,
-            'params' => $params
+            'params' => $params,
+            'roles'  => array_map('strtolower', $roles)
         ];
     }
 
@@ -52,11 +58,11 @@ class Router
 
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
-                // Combina os parâmetros da rota (controller/action) com os da URL (id)
                 $this->params = $routeInfo['params'];
+                $this->params['roles'] = $routeInfo['roles'];
                 
                 foreach ($matches as $key => $value) {
-                    if (is_string($key)) { // Pega apenas os grupos nomeados
+                    if (is_string($key)) {
                         $this->params[$key] = $value;
                     }
                 }
@@ -71,23 +77,63 @@ class Router
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         
         if ($this->match($url)) {
-            $controller = "App\\Controllers\\" . $this->params['controller'];
+            $requiredRoles = $this->params['roles'] ?? [];
 
-            if (class_exists($controller)) {
-                $controller_object = new $controller(); 
-                $action = $this->params['action'];
+            if (empty($requiredRoles)) {
+                $this->executeAction();
+                return;
+            }
 
-                if (method_exists($controller_object, $action)) {
-                    // Agora $this->params contém ['controller' => ..., 'action' => ..., 'id' => '1']
-                    $controller_object->$action($this->params);
-                } else {
-                    echo "Método '$action' não encontrado no controller '$controller'";
-                }
+            if (!isset($_SESSION['user_id'])) {
+                header('Location: /login');
+                exit;
+            }
+
+            $userRole = strtolower($_SESSION['user_cargo'] ?? '');
+
+            if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
+                $this->executeAction();
             } else {
-                echo "Controller '$controller' não encontrado.";
+                // CORREÇÃO: Chama o novo método de erro
+                $this->showErrorPage('error/403', 403);
             }
         } else {
-            echo "Página não encontrada (Erro 404) para a URL: " . htmlspecialchars($url) . " com o método " . $_SERVER['REQUEST_METHOD'];
+            // MELHORIA: Usa o mesmo método para o erro 404
+            $this->showErrorPage('error/404', 404);
         }
     }
+
+    protected function executeAction()
+    {
+        $controller = "App\\Controllers\\" . $this->params['controller'];
+
+        if (class_exists($controller)) {
+            $controller_object = new $controller(); 
+            $action = $this->params['action'];
+
+            if (method_exists($controller_object, $action)) {
+                $controller_object->$action($this->params);
+            } else {
+                echo "Método '$action' não encontrado no controller '$controller'";
+            }
+        } else {
+            echo "Controller '$controller' não encontrado.";
+        }
+    }
+
+    /**
+     * NOVO MÉTODO: Carrega uma view de erro de forma segura.
+     */
+    protected function showErrorPage($viewName, $statusCode)
+    {
+        http_response_code($statusCode);
+        $viewPath = dirname(__DIR__) . '/views/' . $viewName . '.php';
+        if (file_exists($viewPath)) {
+            require $viewPath;
+        } else {
+            echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
+        }
+        exit;
+    }
 }
+

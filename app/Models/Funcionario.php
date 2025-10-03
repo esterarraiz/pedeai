@@ -57,5 +57,66 @@ class Funcionario
             return false;
         }
     }
+    public function buscarTodosPorEmpresa(int $empresa_id): array
+    {
+        $sql = "
+            SELECT f.id, f.nome, f.email, f.ativo, c.nome_cargo
+            FROM funcionarios f
+            JOIN cargos c ON f.cargo_id = c.id
+            WHERE f.empresa_id = ?
+            ORDER BY f.nome ASC
+        ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$empresa_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function buscarPorId(int $id)
+    {
+        $sql = "SELECT id, nome, email, cargo_id FROM funcionarios WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public function criar(int $empresa_id, int $cargo_id, string $nome, string $email, string $senha): bool
+    {
+        $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+        $sql = "INSERT INTO funcionarios (empresa_id, cargo_id, nome, email, senha, ativo) VALUES (?, ?, ?, ?, ?, TRUE)";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$empresa_id, $cargo_id, $nome, $email, $senha_hash]);
+    }
+
+    public function atualizar(int $id, int $cargo_id, string $nome, string $email, ?string $senha = null): bool
+    {
+        if (!empty($senha)) {
+            $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+            $sql = "UPDATE funcionarios SET cargo_id = ?, nome = ?, email = ?, senha = ? WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$cargo_id, $nome, $email, $senha_hash, $id]);
+        } else {
+            $sql = "UPDATE funcionarios SET cargo_id = ?, nome = ?, email = ? WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$cargo_id, $nome, $email, $id]);
+        }
+    }
+
+    public function atualizarStatus(int $id, bool $novo_status): bool
+    {
+        $sql = "UPDATE funcionarios SET ativo = :status WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        
+        // Vincula os parâmetros especificando seus tipos
+        $stmt->bindParam(':status', $novo_status, PDO::PARAM_BOOL);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        
+        return $stmt->execute();
+    }
+    
+    public function redefinirSenha(int $id, string $nova_senha): bool
+    {
+        $senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
+        $sql = "UPDATE funcionarios SET senha = ? WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$senha_hash, $id]);
+    }
 }
 
