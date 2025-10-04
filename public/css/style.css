@@ -41,24 +41,27 @@ body {
     background-color: var(--bg-sidebar-cards);
     border-right: 1px solid var(--border-color);
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     padding: 24px;
-    height: 100vh;
-    position: fixed;
+    height: 100vh; 
+    position: sticky; 
+    top: 0;
     z-index: 1000;
 }
 
 .main-content {
     flex-grow: 1;
-    margin-left: 280px;
     padding: 32px;
+    /* CORREÇÃO APLICADA AQUI */
+    display: flex;
+    flex-direction: column;
 }
-
 
 .main-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0; /* Impede que o header encolha */
 }
 
 .main-header h1 {
@@ -175,9 +178,11 @@ body {
     font-weight: 700;
     color: var(--text-dark);
     margin-bottom: 32px;
+    flex-shrink: 0;
 }
+
 .sidebar-logo img {
-    height: 200px;
+    height: 180px; /* Ajustado para um tamanho mais razoável */
 }
 
 .sidebar-nav {
@@ -185,6 +190,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 5px; /* Espaço para a barra de rolagem */
 }
 
 .sidebar-nav li a {
@@ -202,6 +210,8 @@ body {
 
 .sidebar-nav li a i {
     font-size: 1.25rem;
+    width: 20px;
+    text-align: center;
 }
 
 .sidebar-nav li a:hover {
@@ -219,10 +229,13 @@ body {
     color: var(--green-dark);
 }
 
-.sidebar-user, .sidebar-support {
+.sidebar-user {
     margin-top: auto;
-    list-style: none;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
+
 
 .main-header h1 {
     font-size: 2rem;
@@ -477,6 +490,65 @@ body {
     font-weight: 600;
     cursor: pointer;
 }
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.data-table thead th {
+    text-align: left;
+    padding: 15px;
+    color: var(--text-light);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.data-table tbody tr {
+    border-top: 1px solid var(--border-color);
+}
+
+.data-table td {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+.badge {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.badge-pago {
+    background-color: var(--green-pago-bg);
+    color: var(--green-pago-text);
+}
+
+.badge-servido {
+    background-color: var(--blue-servido-bg);
+    color: var(--blue-servido-text);
+}
+
+.badge-cozinha {
+    background-color: var(--orange-cozinha-bg);
+    color: var(--orange-cozinha-text);
+}
+
+.action-link {
+    color: #4A90E2;
+    text-decoration: none;
+    font-weight: 600;
+}
+.action-link:hover {
+    text-decoration: underline;
+}
+
 
 @media (max-width: 1024px) {
     .order-layout {
