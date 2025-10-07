@@ -5,7 +5,7 @@ namespace App\Core;
 class Router
 {
     protected $routes = [];
-    protected $params = [];
+    protected $params = []; // Armazenará TODOS os parâmetros (rota + URL)
 
     public function __construct()
     {
@@ -15,15 +15,12 @@ class Router
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
         
         // === ROTAS DE DASHBOARDS ===
-        // ROTA ADICIONADA: Redireciona /dashboard para /login
-        $this->add('GET', 'dashboard', ['controller' => 'AuthController', 'action' => 'redirectToLogin']);
-        
         $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index']);
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index']);
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index']);
         $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index']);
         
-        // === ROTA PARA A AÇÃO DA COZINHA ===
+        // === NOVA ROTA PARA A AÇÃO DA COZINHA ===
         $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto']);
         
         $this->add('GET', 'dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
@@ -32,6 +29,8 @@ class Router
         $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
         $this->add('POST', 'pedidos/criar', ['controller' => 'PedidoController', 'action' => 'criarPedido']);
         $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax']);
+        
+        // === NOVA ROTA PARA BUSCAR PEDIDOS PRONTOS (PARA O GARÇOM) ===
         $this->add('GET', 'pedidos/prontos', ['controller' => 'PedidoController', 'action' => 'buscarPedidosProntos']);
 
         // === ROTAS DE MESAS ===
@@ -40,20 +39,37 @@ class Router
         $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
     }
 
-    // O resto do arquivo continua igual...
+    // O resto do seu arquivo continua igual...
     
-    public function add($method, $route, $params = []) {
+    public function add($method, $route, $params = [])
+    {
+        // ... (código existente) ...
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
         $route = '/^' . str_replace('/', '\/', $route) . '$/i';
-        $this->routes[] = [ 'method' => strtoupper($method), 'route'  => $route, 'params' => $params ];
+        $this->routes[] = [
+            'method' => strtoupper($method),
+            'route'  => $route,
+            'params' => $params,
+            'roles'  => array_map('strtolower', $roles)
+        ];
+>>>>>>> ff7e809267584702955f97481404ddbdfe68abb5
     }
     public function match($url) {
         $current_method = $_SERVER['REQUEST_METHOD'];
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
                 $this->params = $routeInfo['params'];
+<<<<<<< HEAD
                 foreach ($matches as $key => $value) {
                     if (is_string($key)) { $this->params[$key] = $value; }
+=======
+                $this->params['roles'] = $routeInfo['roles'];
+                
+                foreach ($matches as $key => $value) {
+                    if (is_string($key)) {
+                        $this->params[$key] = $value;
+                    }
+>>>>>>> ff7e809267584702955f97481404ddbdfe68abb5
                 }
                 return true;
             }

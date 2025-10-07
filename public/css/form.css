@@ -1,0 +1,98 @@
+/* ================================== */
+/* CSS para Formulários Padronizados  */
+/* ================================== */
+
+.main-header {
+    display: flex;
+    align-items: center;
+    /* CORREÇÃO: "justify-content" agora centra o conteúdo */
+    justify-content: center; 
+}
+
+.main-header h1 {
+    text-align: center;
+    /* CORREÇÃO: Removidas as propriedades que causavam o desalinhamento */
+}
+
+.form-container {
+    flex-grow: 1; /* Faz o container ocupar todo o espaço vertical disponível */
+    display: flex;
+    align-items: center; /* Alinha o formulário verticalmente ao centro */
+    justify-content: center; /* Alinha o formulário horizontalmente ao centro */
+    padding: 20px 0; /* Adiciona um espaçamento vertical para telas menores */
+}
+
+.form-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: var(--shadow-sm);
+    width: 100%; /* Ocupa a largura do container pai */
+    max-width: 700px; /* Mas não passa de 700px */
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--green-dark);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
+}
+
+.form-group small {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+}
+
+.form-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end; /* Alinha os botões à direita */
+    gap: 15px;
+}
+
+/* Estilos para os botões */
+.btn-success {
+    background-color: var(--green-dark);
+    color: white;
+}
+.btn-success:hover {
+    background-color: #047857; /* Tom de verde mais escuro */
+}
+
+.btn-secondary {
+    background-color: #f3f4f6;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+    background-color: #e5e7eb;
+}
+
