@@ -23,6 +23,11 @@ class Router
         $this->add('POST', 'funcionarios/atualizar', ['controller' => 'FuncionarioController', 'action' => 'update'], ['administrador']);
         $this->add('POST', 'funcionarios/status', ['controller' => 'FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'funcionarios/redefinir-senha', ['controller' => 'FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
+        
+        // === ROTAS DE CAIXA (caixa e admin) ===
+        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
+        $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'CaixaController', 'action' => 'verConta'], ['caixa']);
+        $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'CaixaController', 'action' => 'processarPagamento'], ['caixa']);
 
         // === ROTAS DE GARÇOM (garçom e admin) ===
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
