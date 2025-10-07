@@ -7,25 +7,25 @@ use App\Models\Mesa;
 use App\Models\PedidoModel;
 use Config\Database;
 
-class MesaController extends Controller
+class CaixaDashboardController extends Controller
 {
     public function index()
     {
         $pdo = Database::getConnection();
         $mesaModel = new Mesa($pdo);
-
         $empresa_id = $_SESSION['empresa_id'] ?? null;
+
         $mesas = $mesaModel->buscarTodasPorEmpresa($empresa_id);
 
-        $this->loadView('mesaview', [
+        $this->loadView('caixa/mesas', [
             'mesas' => $mesas
         ]);
     }
 
-    public function showDetalhesMesa($params)
+    public function verConta($params)
     {
         $mesa_id = $params['id'];
-        $empresa_id = $_SESSION['empresa_id'];
+        $empresa_id = $_SESSION['empresa_id'] ?? null;
 
         $pdo = Database::getConnection();
         $mesaModel = new Mesa($pdo);
@@ -40,7 +40,7 @@ class MesaController extends Controller
         ]);
     }
 
-    public function liberarMesa()
+    public function fecharConta()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('HTTP/1.0 405 Method Not Allowed');
@@ -50,20 +50,18 @@ class MesaController extends Controller
 
         header('Content-Type: application/json');
         $data = json_decode(file_get_contents('php://input'), true);
-        $mesaId = $data['mesa_id'] ?? null;
+        $mesa_id = $data['mesa_id'] ?? null;
 
-        if (!$mesaId || !is_numeric($mesaId)) {
-            echo json_encode(['success' => false, 'message' => 'ID da mesa inválido.']);
+        if (!$mesa_id) {
+            echo json_encode(['success' => false, 'message' => 'Mesa inválida.']);
             return;
         }
 
-        $mesaModel = new Mesa();
-        $sucesso = $mesaModel->atualizarStatus((int)$mesaId, 'Livre');
+        $pdo = Database::getConnection();
+        $mesaModel = new Mesa($pdo);
 
-        if ($sucesso) {
-            echo json_encode(['success' => true, 'message' => 'Mesa liberada com sucesso!']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Falha ao atualizar o status da mesa.']);
-        }
+        $mesaModel->atualizarStatus($mesa_id, 'Livre');
+
+        echo json_encode(['success' => true, 'message' => 'Conta fechada e mesa liberada!']);
     }
 }

@@ -9,12 +9,12 @@ class Router
 
     public function __construct()
     {
-        // === ROTAS PÚBLICAS (sem roles) ===
+        // === ROTAS PÚBLICAS ===
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
-        
-        // === ROTAS DE ADMIN (só o admin pode aceder) ===
+
+        // === ADMIN ===
         $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios', ['controller' => 'FuncionarioController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios/novo', ['controller' => 'FuncionarioController', 'action' => 'showCreateForm'], ['administrador']);
@@ -24,19 +24,21 @@ class Router
         $this->add('POST', 'funcionarios/status', ['controller' => 'FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'funcionarios/redefinir-senha', ['controller' => 'FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
 
-        // === ROTAS DE GARÇOM (garçom e admin) ===
+        // === GARÇOM ===
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
         $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index'], ['garçom']);
         $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa'], ['garçom']);
         $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa'], ['garçom']);
         $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido'], ['garçom']);
         $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax'], ['garçom']);
-        
-        // === ROTAS DE COZINHA (cozinheiro e admin) ===
+
+        // === COZINHEIRO ===
         $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index'], ['cozinheiro']);
-        
-        // === ROTAS DE CAIXA (caixa e admin) ===
+
+        // === CAIXA ===
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
+        $this->add('GET', 'caixa/mesa/{id:\d+}', ['controller' => 'CaixaDashboardController', 'action' => 'verConta'], ['caixa']);
+        $this->add('POST', 'caixa/mesa/fechar', ['controller' => 'CaixaDashboardController', 'action' => 'fecharConta'], ['caixa']);
     }
 
     public function add($method, $route, $params = [], $roles = [])
@@ -55,16 +57,13 @@ class Router
     public function match($url)
     {
         $current_method = $_SERVER['REQUEST_METHOD'];
-
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
                 $this->params = $routeInfo['params'];
                 $this->params['roles'] = $routeInfo['roles'];
-                
+
                 foreach ($matches as $key => $value) {
-                    if (is_string($key)) {
-                        $this->params[$key] = $value;
-                    }
+                    if (is_string($key)) $this->params[$key] = $value;
                 }
                 return true;
             }
@@ -75,30 +74,17 @@ class Router
     public function dispatch()
     {
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-        
+
         if ($this->match($url)) {
             $requiredRoles = $this->params['roles'] ?? [];
 
-            if (empty($requiredRoles)) {
-                $this->executeAction();
+            if (!empty($requiredRoles) && (!isset($_SESSION['user_id']) || !in_array(strtolower($_SESSION['user_cargo'] ?? ''), $requiredRoles) && strtolower($_SESSION['user_cargo'] ?? '') !== 'administrador')) {
+                $this->showErrorPage('error/403', 403);
                 return;
             }
 
-            if (!isset($_SESSION['user_id'])) {
-                header('Location: /login');
-                exit;
-            }
-
-            $userRole = strtolower($_SESSION['user_cargo'] ?? '');
-
-            if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
-                $this->executeAction();
-            } else {
-                // CORREÇÃO: Chama o novo método de erro
-                $this->showErrorPage('error/403', 403);
-            }
+            $this->executeAction();
         } else {
-            // MELHORIA: Usa o mesmo método para o erro 404
             $this->showErrorPage('error/404', 404);
         }
     }
@@ -108,9 +94,8 @@ class Router
         $controller = "App\\Controllers\\" . $this->params['controller'];
 
         if (class_exists($controller)) {
-            $controller_object = new $controller(); 
+            $controller_object = new $controller();
             $action = $this->params['action'];
-
             if (method_exists($controller_object, $action)) {
                 $controller_object->$action($this->params);
             } else {
@@ -121,19 +106,12 @@ class Router
         }
     }
 
-    /**
-     * NOVO MÉTODO: Carrega uma view de erro de forma segura.
-     */
     protected function showErrorPage($viewName, $statusCode)
     {
         http_response_code($statusCode);
         $viewPath = dirname(__DIR__) . '/views/' . $viewName . '.php';
-        if (file_exists($viewPath)) {
-            require $viewPath;
-        } else {
-            echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
-        }
+        if (file_exists($viewPath)) require $viewPath;
+        else echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
         exit;
     }
 }
-
