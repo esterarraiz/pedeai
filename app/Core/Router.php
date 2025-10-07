@@ -52,24 +52,16 @@ class Router
             'params' => $params,
             'roles'  => array_map('strtolower', $roles)
         ];
->>>>>>> ff7e809267584702955f97481404ddbdfe68abb5
     }
     public function match($url) {
         $current_method = $_SERVER['REQUEST_METHOD'];
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
                 $this->params = $routeInfo['params'];
-<<<<<<< HEAD
+
                 foreach ($matches as $key => $value) {
                     if (is_string($key)) { $this->params[$key] = $value; }
-=======
-                $this->params['roles'] = $routeInfo['roles'];
-                
-                foreach ($matches as $key => $value) {
-                    if (is_string($key)) {
-                        $this->params[$key] = $value;
-                    }
->>>>>>> ff7e809267584702955f97481404ddbdfe68abb5
+
                 }
                 return true;
             }
