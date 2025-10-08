@@ -26,8 +26,8 @@ class Router
         
         // === ROTAS DE CAIXA (caixa e admin) ===
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
-        $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'CaixaController', 'action' => 'verConta'], ['caixa']);
-        $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'CaixaController', 'action' => 'processarPagamento'], ['caixa']);
+        $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'Caixacontroller', 'action' => 'verConta'], ['caixa']);
+        $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'Caixacontroller', 'action' => 'processarPagamento'], ['caixa']);
 
         // === ROTAS DE GARÇOM (garçom e admin) ===
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
