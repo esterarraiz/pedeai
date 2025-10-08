@@ -11,9 +11,7 @@ class Router
     {
 
 
-
         // === ROTAS DE AUTENTICAÇÃO ===
-
 
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
@@ -50,8 +48,7 @@ class Router
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
         $this->add('GET', 'caixa/mesa/{id:\d+}', ['controller' => 'CaixaDashboardController', 'action' => 'verConta'], ['caixa']);
         $this->add('POST', 'caixa/mesa/fechar', ['controller' => 'CaixaDashboardController', 'action' => 'fecharConta'], ['caixa']);
-        $this->add('GET', 'dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
-        $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto'])
+    
 
 
         // === ROTAS DE PEDIDOS ===
@@ -77,7 +74,7 @@ class Router
     }
     
 
-        public function add($method, $route, $params = [], $roles = [])
+    public function add($method, $route, $params = [], $roles = [])
     {
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
         $route = '/^' . str_replace('/', '\/', $route) . '$/i';
@@ -151,7 +148,5 @@ class Router
         exit;
     }
 
-
 }
-
 
