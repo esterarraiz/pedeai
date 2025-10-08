@@ -8,7 +8,7 @@ use App\Models\PedidoModel;
 use App\Models\PagamentoModel;
 use Config\Database;
 
-class CaixaController extends Controller
+class Caixacontroller extends Controller
 {
     /**
      * Mostra o resumo da conta de uma mesa específica.
