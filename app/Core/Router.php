@@ -37,12 +37,17 @@ class Router
         $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index']);
         $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa']);
         $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
+
+        // rotas cardapio
+
+        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio']);
+        $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem']);
+        $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem']);
+        $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem']);
+        
     }
     
-    /**
-     * AQUI ESTÁ A CORREÇÃO!
-     * Adicionamos $roles = [] como um parâmetro opcional.
-     */
+
     public function add($method, $route, $params = [], $roles = [])
     {
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
