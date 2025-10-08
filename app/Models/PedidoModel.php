@@ -153,6 +153,7 @@ class PedidoModel
             return (int)$pedido_id;
 
 
+
         } catch (PDOException $e) { error_log("Erro no Model (PDO) ao criar pedido: " . $e->getMessage()); throw $e;
         } catch (Exception $e) { error_log("Erro no Model (Geral) ao criar pedido: " . $e->getMessage()); throw $e; }
     }
@@ -171,6 +172,7 @@ class PedidoModel
         ";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
+
 
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -192,6 +194,7 @@ class PedidoModel
                 'preco_unitario' => $row['preco_unitario_momento']
             ];
             $ultimo_pedido['total'] += $subtotal;
+
 
         }
         return $ultimo_pedido;
