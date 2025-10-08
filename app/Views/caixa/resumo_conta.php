@@ -8,22 +8,7 @@
 </head>
 <body>
 <div class="dashboard-container">
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <img src="/images/pedeai-logo.png" alt="Logo PedeAi">
-        </div>
-        <ul class="sidebar-nav">
-            <li><a href="#"><i class="fa-solid fa-home"></i><span>Home</span></a></li>
-            <li><a href="/dashboard/caixa" class="active"><i class="fa-solid fa-chair"></i><span>Mesas e Pedidos</span></a></li>
-            <li><a href="#"><i class="fa-solid fa-dollar-sign"></i><span>Pagamento</span></a></li>
-            <li><a href="#"><i class="fa-solid fa-question-circle"></i><span>Suporte</span></a></li>
-            <li><a href="/logout"><i class="fa-solid fa-sign-out-alt"></i><span>Sair</span></a></li>
-        </ul>
-        <div class="sidebar-user">
-            <h4><?= htmlspecialchars($_SESSION['user_nome'] ?? 'Usuário') ?></h4>
-            <span>Caixa</span>
-        </div>
-    </aside>
+    <?php include_once __DIR__ . '/../partials/sidebar_caixa.php'; ?>
     <main class="main-content">
         <div class="caixa-card">
             <h1>Pedidos Finalizados por Mesa</h1>
