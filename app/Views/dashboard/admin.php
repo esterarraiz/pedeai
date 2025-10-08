@@ -16,9 +16,6 @@
         <main class="main-content">
             <header class="main-header">
                 <h1>Dashboard</h1>
-                <a href="/dashboard/admin/cardapio" class="btn btn-success">
-                    <i class="fas fa-book-open"></i> Editar Cardápio
-                </a>
             </header>
 
             <section class="metrics-grid">

@@ -19,7 +19,7 @@ $activePage = $data['activePage'] ?? '';
             </a>
         </li>
         <li>
-            <a href="/cardapio" class="<?= ($activePage === 'cardapio') ? 'active' : '' ?>">
+            <a href="/dashboard/admin/cardapio" class="<?= ($activePage === 'cardapio') ? 'active' : '' ?>">
                 <i class="fa-solid fa-book-open"></i><span>Gerenciamento de Cardápio</span>
             </a>
         </li>
