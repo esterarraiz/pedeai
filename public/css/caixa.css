@@ -1,63 +1,148 @@
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: #f5f5f5;
+/* Estilo geral para os cards do caixa */
+.caixa-card {
+    max-width: 600px;
+    margin: 2rem auto;
+    background: #FFFFFF;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.caixa-card h1 {
+    text-align: left;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
     color: #333;
 }
 
-.dashboard-container {
-    display: flex;
-}
-
-.sidebar {
-    width: 220px;
-    background: #2c3e50;
-    color: #ecf0f1;
-    min-height: 100vh;
+/* Estilo para a lista de mesas (Selecionar_Mesa.jpg) */
+.mesa-list {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
 
-.sidebar-logo img {
-    width: 150px;
-    margin: 20px auto;
-    display: block;
+.mesa-item {
+    padding: 1rem;
+    border-bottom: 1px solid #EEE;
+    text-decoration: none;
+    color: #444;
+    font-size: 1.1rem;
+    transition: background-color 0.2s;
 }
 
-.sidebar-nav {
+.mesa-item:hover {
+    background-color: #f7f7f7;
+}
+
+/* Estilo para o resumo da conta (Resumo_Pedidos_Mesa.jpg) */
+.resumo-mesa {
+    margin-bottom: 2rem;
+}
+
+.resumo-mesa h2 {
+    font-size: 1.3rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.resumo-itens {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.sidebar-nav li {
-    margin: 10px 0;
-}
-
-.sidebar-nav li a {
-    color: #ecf0f1;
-    text-decoration: none;
+.resumo-itens li {
     display: flex;
-    align-items: center;
-    padding: 10px 20px;
+    justify-content: space-between;
+    padding: 0.8rem 0;
+    font-size: 1rem;
 }
 
-.sidebar-nav li a i {
-    margin-right: 10px;
+.resumo-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #000;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid #DDD;
 }
 
-.sidebar-nav li a.active,
-.sidebar-nav li a:hover {
-    background: #34495e;
+
+/* Seção de Pagamento (Pagamento.jpg) */
+.payment-section {
+    margin-top: 2rem;
+    border-top: 1px solid #EEE;
+    padding-top: 2rem;
+}
+
+.total-display {
+    text-align: left;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.valor-pago-input-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.valor-pago-input-wrapper label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.valor-pago-input-wrapper input {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1.2rem;
+    border: 1px solid #CCC;
     border-radius: 5px;
 }
 
-.sidebar-user {
-    text-align: center;
-    padding: 20px;
-    border-top: 1px solid #34495e;
+.payment-methods {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 2rem;
 }
 
+.payment-btn {
+    padding: 10px 20px;
+    border: 1px solid #CCC;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.payment-btn.active {
+    background-color: #059669;
+    color: white;
+    border-color: #059669;
+}
+
+.btn-fechar-conta {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    background-color: #10B981;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-fechar-conta:hover {
+    background-color: #059669;
+}
 .main-content {
     flex: 1;
     padding: 30px;

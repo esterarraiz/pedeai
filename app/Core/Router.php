@@ -5,11 +5,14 @@ namespace App\Core;
 class Router
 {
     protected $routes = [];
-    protected $params = [];
+    protected $params = []; // Armazenará TODOS os parâmetros (rota + URL)
 
     public function __construct()
     {
-        // === ROTAS PÚBLICAS ===
+
+
+        // === ROTAS DE AUTENTICAÇÃO ===
+
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
@@ -23,6 +26,11 @@ class Router
         $this->add('POST', 'funcionarios/atualizar', ['controller' => 'FuncionarioController', 'action' => 'update'], ['administrador']);
         $this->add('POST', 'funcionarios/status', ['controller' => 'FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'funcionarios/redefinir-senha', ['controller' => 'FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
+        
+        // === ROTAS DE CAIXA (caixa e admin) ===
+        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
+        $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'CaixaController', 'action' => 'verConta'], ['caixa']);
+        $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'CaixaController', 'action' => 'processarPagamento'], ['caixa']);
 
         // === GARÇOM ===
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
@@ -32,6 +40,7 @@ class Router
         $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido'], ['garçom']);
         $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax'], ['garçom']);
 
+
         // === COZINHEIRO ===
         $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index'], ['cozinheiro']);
 
@@ -39,7 +48,31 @@ class Router
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
         $this->add('GET', 'caixa/mesa/{id:\d+}', ['controller' => 'CaixaDashboardController', 'action' => 'verConta'], ['caixa']);
         $this->add('POST', 'caixa/mesa/fechar', ['controller' => 'CaixaDashboardController', 'action' => 'fecharConta'], ['caixa']);
+    
+
+
+        // === ROTAS DE PEDIDOS ===
+        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
+        $this->add('POST', 'pedidos/criar', ['controller' => 'PedidoController', 'action' => 'criarPedido']);
+        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax']);
+        
+        // === NOVA ROTA PARA BUSCAR PEDIDOS PRONTOS (PARA O GARÇOM) ===
+        $this->add('GET', 'pedidos/prontos', ['controller' => 'PedidoController', 'action' => 'buscarPedidosProntos']);
+
+        // === ROTAS DE MESAS ===
+        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index']);
+        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa']);
+        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
+
+        // rotas cardapio
+
+        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio']);
+        $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem']);
+        $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem']);
+        $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem']);
+        
     }
+    
 
     public function add($method, $route, $params = [], $roles = [])
     {
@@ -70,7 +103,7 @@ class Router
         }
         return false;
     }
-
+    
     public function dispatch()
     {
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
@@ -114,4 +147,6 @@ class Router
         else echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
         exit;
     }
+
 }
+

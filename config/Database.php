@@ -17,14 +17,16 @@ class Database
         $driver = $_ENV['DB_CONNECTION'] ?? 'pgsql';
 
         try {
-            $dsn = "$driver:host=$host;port=$port;dbname=$db";
+            // AQUI ESTÁ A MUDANÇA! Adicionamos o ";sslmode=require"
+            $dsn = "$driver:host=$host;port=$port;dbname=$db;sslmode=require";
+            
             $options = [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ];
 
-            // 🔥 Retorna SEMPRE uma nova conexão
+            // Retorna a nova conexão segura
             return new PDO($dsn, $user, $pass, $options);
 
         } catch (PDOException $e) {

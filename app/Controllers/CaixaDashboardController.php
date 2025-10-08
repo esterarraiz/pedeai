@@ -4,15 +4,19 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Mesa;
+
 use App\Models\PedidoModel;
+
 use Config\Database;
 
 class CaixaDashboardController extends Controller
 {
+
     public function index()
     {
         $pdo = Database::getConnection();
         $mesaModel = new Mesa($pdo);
+
         $empresa_id = $_SESSION['empresa_id'] ?? null;
 
         $mesas = $mesaModel->buscarTodasPorEmpresa($empresa_id);
@@ -65,3 +69,4 @@ class CaixaDashboardController extends Controller
         echo json_encode(['success' => true, 'message' => 'Conta fechada e mesa liberada!']);
     }
 }
+

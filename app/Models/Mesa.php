@@ -57,12 +57,35 @@ class Mesa {
         return $stmt->fetch(\PDO::FETCH_ASSOC); 
     } 
 
-    /** 
-     * Libera uma mesa, alterando seu status para 'disponivel'.
-     */ 
-    public function liberarMesa(int $mesa_id): bool { 
-        $sql = "UPDATE mesas SET status_mesa = 'disponivel' WHERE id = ?"; 
-        $stmt = $this->pdo->prepare($sql); 
-        return $stmt->execute([$mesa_id]); 
-    } 
+
+    public function liberarMesa(int $mesa_id): bool
+    {
+        $sql = "UPDATE mesas SET status_mesa = 'disponivel' WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$mesa_id]);
+    }
+    public function buscarMesasOcupadasOuPagamento(int $empresa_id): array
+    {
+        $sql = "SELECT id, numero, status FROM mesas 
+                WHERE empresa_id = ? AND status IN ('ocupada', 'aguardando_pagamento') 
+                ORDER BY numero ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$empresa_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function buscarMesasComContaAberta(int $empresa_id): array
+    {
+        $sql = "
+            SELECT id, numero, status 
+            FROM mesas 
+            WHERE empresa_id = ? 
+              AND status IN ('ocupada', 'aguardando_pagamento') 
+            ORDER BY numero ASC
+        ";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$empresa_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
