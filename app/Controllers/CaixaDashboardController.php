@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Mesa;
 
-
 use App\Models\PedidoModel;
 
 use Config\Database;
@@ -13,13 +12,10 @@ use Config\Database;
 class CaixaDashboardController extends Controller
 {
 
-
-
     public function index()
     {
         $pdo = Database::getConnection();
         $mesaModel = new Mesa($pdo);
-
 
         $empresa_id = $_SESSION['empresa_id'] ?? null;
 
@@ -72,17 +68,5 @@ class CaixaDashboardController extends Controller
 
         echo json_encode(['success' => true, 'message' => 'Conta fechada e mesa liberada!']);
     }
-
-        $empresa_id = $_SESSION['empresa_id'];
-        
-        // CORRIGIDO: Chama o método com o nome correto.
-        $mesas = $mesaModel->buscarMesasComContaAberta($empresa_id);
-
-        $this->loadView('/caixa/index', [
-            'mesas' => $mesas,
-            'activePage' => 'mesas'
-        ]);
-    }
-
 }
 
