@@ -15,6 +15,7 @@ class PedidoModel
         $this->pdo = $pdo;
     }
 
+    // Buscar pedidos para cozinha
     public function buscarPedidosParaCozinha(int $empresa_id): array
     {
         $sql = "
@@ -28,7 +29,6 @@ class PedidoModel
             WHERE p.empresa_id = ? AND p.status = 'em_preparo'
             ORDER BY p.data_abertura ASC, p.id, ci.nome;
         ";
-
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$empresa_id]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -51,6 +51,7 @@ class PedidoModel
         }
         return array_values($pedidos);
     }
+
 
     public function marcarComoPronto(int $pedido_id, int $empresa_id): bool
     {
@@ -95,35 +96,64 @@ class PedidoModel
         }
     }
 
+
     public function criarNovoPedido(int $empresa_id, int $mesa_id, int $funcionario_id, array $itens): int
     {
         // ... (seu código existente, sem alterações)
         try {
             $valorTotal = 0.0;
+
             $itensParaInserir = []; 
+
             $sql_preco = "SELECT preco, nome FROM cardapio_itens WHERE id = ?";
             $stmt_preco = $this->pdo->prepare($sql_preco);
 
             foreach ($itens as $item_id => $quantidade) {
                 $stmt_preco->execute([$item_id]);
                 $item_info = $stmt_preco->fetch(PDO::FETCH_ASSOC);
-                if (!$item_info) { throw new Exception("O item com ID {$item_id} não foi encontrado no cardápio."); }
-                if (!isset($item_info['preco']) || !is_numeric($item_info['preco'])) { throw new Exception("O item '{$item_info['nome']}' (ID: {$item_id}) está com um preço inválido ou não definido no cardápio.");}
-                $preco_unitario = (float) $item_info['preco'];
+
+
+                if (!$item_info) throw new Exception("Item com ID {$item_id} não encontrado.");
+                if (!isset($item_info['preco'])) throw new Exception("Preço inválido do item {$item_info['nome']}.");
+
+                $preco_unitario = (float)$item_info['preco'];
                 $valorTotal += $preco_unitario * $quantidade;
-                $itensParaInserir[] = ['item_id' => $item_id, 'quantidade' => $quantidade, 'preco' => $preco_unitario ];
+
+                $itensParaInserir[] = [
+                    'item_id' => $item_id,
+                    'quantidade' => $quantidade,
+                    'preco' => $preco_unitario
+                ];
             }
-            $sql_pedido = "INSERT INTO pedidos (empresa_id, mesa_id, funcionario_id, status, data_abertura, valor_total) VALUES (?, ?, ?, 'em_preparo', NOW(), ?) RETURNING id;";
+
+            $sql_pedido = "
+                INSERT INTO pedidos (empresa_id, mesa_id, funcionario_id, status, data_abertura, valor_total)
+                VALUES (?, ?, ?, 'em_preparo', NOW(), ?)
+                RETURNING id;
+            ";
             $stmt_pedido = $this->pdo->prepare($sql_pedido);
             $stmt_pedido->execute([$empresa_id, $mesa_id, $funcionario_id, $valorTotal]);
             $pedido_id = $stmt_pedido->fetchColumn();
-            if (!$pedido_id) { throw new Exception("Falha ao obter o ID do novo pedido criado."); }
-            $sql_itens = "INSERT INTO pedido_itens (pedido_id, item_id, quantidade, preco_unitario_momento) VALUES (:pedido_id, :item_id, :quantidade, :preco);";
+
+            $sql_itens = "
+                INSERT INTO pedido_itens (pedido_id, item_id, quantidade, preco_unitario_momento)
+                VALUES (:pedido_id, :item_id, :quantidade, :preco);
+            ";
             $stmt_itens = $this->pdo->prepare($sql_itens);
+
             foreach ($itensParaInserir as $item) {
-                $stmt_itens->execute([':pedido_id' => $pedido_id, ':item_id' => $item['item_id'], ':quantidade'=> $item['quantidade'], ':preco' => $item['preco']]);
+                $stmt_itens->execute([
+                    ':pedido_id' => $pedido_id,
+                    ':item_id' => $item['item_id'],
+                    ':quantidade' => $item['quantidade'],
+                    ':preco' => $item['preco']
+                ]);
+
             }
             return (int)$pedido_id;
+
+
+
         } catch (PDOException $e) { error_log("Erro no Model (PDO) ao criar pedido: " . $e->getMessage()); throw $e;
         } catch (Exception $e) { error_log("Erro no Model (Geral) ao criar pedido: " . $e->getMessage()); throw $e; }
     }
@@ -131,6 +161,7 @@ class PedidoModel
     public function buscarItensDoUltimoPedidoDaMesa(int $mesa_id, int $empresa_id): ?array
     {
         // ... (seu código existente, sem alterações)
+
         $sql = "
             SELECT p.id AS pedido_id, p.status, p.data_abertura, pi.quantidade, pi.preco_unitario_momento, ci.nome AS item_nome
             FROM pedidos p
@@ -141,13 +172,30 @@ class PedidoModel
         ";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        if (empty($results)) { return null; }
-        $ultimo_pedido = [ 'id' => $results[0]['pedido_id'], 'hora' => date('H:i', strtotime($results[0]['data_abertura'])), 'status' => $results[0]['status'], 'itens' => [], 'total' => 0 ];
+
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($results)) return null;
+
+        $ultimo_pedido = [
+            'id' => $results[0]['pedido_id'],
+            'hora' => date('H:i', strtotime($results[0]['data_abertura'])),
+            'status' => $results[0]['status'],
+            'itens' => [],
+            'total' => 0
+        ];
+
         foreach ($results as $row) {
-            $subtotal_item = $row['quantidade'] * $row['preco_unitario_momento'];
-            $ultimo_pedido['itens'][] = [ 'nome' => $row['item_nome'], 'quantidade' => $row['quantidade'], 'preco_unitario' => $row['preco_unitario_momento'], ];
-            $ultimo_pedido['total'] += $subtotal_item;
+            $subtotal = $row['quantidade'] * $row['preco_unitario_momento'];
+            $ultimo_pedido['itens'][] = [
+                'nome' => $row['item_nome'],
+                'quantidade' => $row['quantidade'],
+                'preco_unitario' => $row['preco_unitario_momento']
+            ];
+            $ultimo_pedido['total'] += $subtotal;
+
+
         }
         return $ultimo_pedido;
     }
