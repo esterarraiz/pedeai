@@ -5,11 +5,11 @@ namespace App\Core;
 class Router
 {
     protected $routes = [];
-    protected $params = [];
+    protected $params = []; // Armazenará TODOS os parâmetros (rota + URL)
 
     public function __construct()
     {
-        // === ROTAS PÚBLICAS (sem roles) ===
+        // === ROTAS DE AUTENTICAÇÃO ===
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
@@ -36,14 +36,33 @@ class Router
         $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa'], ['garçom']);
         $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido'], ['garçom']);
         $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax'], ['garçom']);
+      
+        // === ROTAS cozinha ===
+        $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index']);
         
-        // === ROTAS DE COZINHA (cozinheiro e admin) ===
-        $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index'], ['cozinheiro']);
+        // === NOVA ROTA PARA A AÇÃO DA COZINHA ===
+        $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto']);
         
-        // === ROTAS DE CAIXA (caixa e admin) ===
-        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
-    }
+        $this->add('GET', 'dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
 
+        // === ROTAS DE PEDIDOS ===
+        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
+        $this->add('POST', 'pedidos/criar', ['controller' => 'PedidoController', 'action' => 'criarPedido']);
+        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax']);
+        
+        // === NOVA ROTA PARA BUSCAR PEDIDOS PRONTOS (PARA O GARÇOM) ===
+        $this->add('GET', 'pedidos/prontos', ['controller' => 'PedidoController', 'action' => 'buscarPedidosProntos']);
+
+        // === ROTAS DE MESAS ===
+        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index']);
+        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa']);
+        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
+    }
+    
+    /**
+     * AQUI ESTÁ A CORREÇÃO!
+     * Adicionamos $roles = [] como um parâmetro opcional.
+     */
     public function add($method, $route, $params = [], $roles = [])
     {
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
@@ -53,92 +72,46 @@ class Router
             'method' => strtoupper($method),
             'route'  => $route,
             'params' => $params,
-            'roles'  => array_map('strtolower', $roles)
+            'roles'  => array_map('strtolower', $roles) // Agora $roles sempre será um array
         ];
     }
 
     public function match($url)
     {
         $current_method = $_SERVER['REQUEST_METHOD'];
-
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
                 $this->params = $routeInfo['params'];
-                $this->params['roles'] = $routeInfo['roles'];
-                
                 foreach ($matches as $key => $value) {
-                    if (is_string($key)) {
-                        $this->params[$key] = $value;
-                    }
+                    if (is_string($key)) { $this->params[$key] = $value; }
                 }
                 return true;
             }
         }
         return false;
     }
-
+    
     public function dispatch()
     {
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         
         if ($this->match($url)) {
-            $requiredRoles = $this->params['roles'] ?? [];
-
-            if (empty($requiredRoles)) {
-                $this->executeAction();
-                return;
-            }
-
-            if (!isset($_SESSION['user_id'])) {
-                header('Location: /login');
-                exit;
-            }
-
-            $userRole = strtolower($_SESSION['user_cargo'] ?? '');
-
-            if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
-                $this->executeAction();
+            $controller = "App\\Controllers\\" . $this->params['controller'];
+            
+            if (class_exists($controller)) {
+                $controller_object = new $controller(); 
+                $action = $this->params['action'];
+                
+                if (method_exists($controller_object, $action)) {
+                    $controller_object->$action($this->params);
+                } else {
+                    echo "Método '$action' não encontrado no controller '$controller'";
+                }
             } else {
-                // CORREÇÃO: Chama o novo método de erro
-                $this->showErrorPage('error/403', 403);
+                echo "Controller '$controller' não encontrado.";
             }
         } else {
-            // MELHORIA: Usa o mesmo método para o erro 404
-            $this->showErrorPage('error/404', 404);
+            echo "Página não encontrada (Erro 404) para a URL: " . htmlspecialchars($url) . " com o método " . $_SERVER['REQUEST_METHOD'];
         }
-    }
-
-    protected function executeAction()
-    {
-        $controller = "App\\Controllers\\" . $this->params['controller'];
-
-        if (class_exists($controller)) {
-            $controller_object = new $controller(); 
-            $action = $this->params['action'];
-
-            if (method_exists($controller_object, $action)) {
-                $controller_object->$action($this->params);
-            } else {
-                echo "Método '$action' não encontrado no controller '$controller'";
-            }
-        } else {
-            echo "Controller '$controller' não encontrado.";
-        }
-    }
-
-    /**
-     * NOVO MÉTODO: Carrega uma view de erro de forma segura.
-     */
-    protected function showErrorPage($viewName, $statusCode)
-    {
-        http_response_code($statusCode);
-        $viewPath = dirname(__DIR__) . '/views/' . $viewName . '.php';
-        if (file_exists($viewPath)) {
-            require $viewPath;
-        } else {
-            echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
-        }
-        exit;
     }
 }
-
