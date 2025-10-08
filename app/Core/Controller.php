@@ -4,19 +4,16 @@ namespace App\Core;
 
 abstract class Controller
 {
-
     protected $route_params = [];
 
     public function __construct($route_params = [])
     {
         $this->route_params = $route_params;
         
-
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
     }
-
 
     public function __call($name, $args)
     {
@@ -27,22 +24,12 @@ abstract class Controller
             }
         } else {
             echo "Método $name não encontrado no controller " . get_class($this);
-
         }
     }
 
+    protected function before() {}
 
-    protected function before()
-    {
-
-    }
-
-
-    protected function after()
-    {
-
-    }
-
+    protected function after() {}
 
     protected function requireLogin()
     {
@@ -52,19 +39,29 @@ abstract class Controller
         }
     }
 
-
+    /**
+     * FUNÇÃO CORRIGIDA PARA QUEBRAR O LOOP
+     */
     protected function requireLogout()
     {
         if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-            header('Location: /dashboard');
+            // Pega o ID do cargo do usuário da sessão
+            $cargo_id = $_SESSION['user_cargo_id'] ?? null;
+            
+            // Redireciona para o dashboard específico do cargo
+            switch ($cargo_id) {
+                case 1: header('Location: /dashboard/admin'); break;
+                case 2: header('Location: /dashboard/garcom'); break;
+                case 3: header('Location: /dashboard/caixa'); break;
+                case 4: header('Location: /dashboard/cozinheiro'); break;
+                default: header('Location: /dashboard/generico'); break;
+            }
             exit;
         }
     }
 
-
     protected function loadView($viewName, $data = [])
     {
-
         extract($data);
         
         $file = dirname(__DIR__) . "/Views/$viewName.php";
@@ -74,27 +71,18 @@ abstract class Controller
             throw new \Exception("View '$file' não encontrada.");
         }
     }
+
     public function renderView(string $view, array $data = [])
     {
-        // Constrói o caminho para o arquivo da view
-        // Ex: ../app/Views/pedidos/novo.php
         $viewPath = __DIR__ . '/../Views/' . $view . '.php';
 
-        // Verifica se o arquivo da view realmente existe
         if (file_exists($viewPath)) {
-            // A função extract() é muito útil aqui.
-            // Ela transforma as chaves de um array em variáveis.
-            // Ex: $data['mesa_id'] se torna a variável $mesa_id dentro da view.
             extract($data);
-
-            // Inclui o arquivo da view, que agora tem acesso às variáveis extraídas
             require_once $viewPath;
         } else {
-            // Se o arquivo da view não for encontrado, exibe um erro claro.
             http_response_code(500);
             echo "Erro: Arquivo de View não encontrado em: " . htmlspecialchars($viewPath);
             exit;
         }
     }
-
 }

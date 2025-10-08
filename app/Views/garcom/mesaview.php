@@ -9,6 +9,30 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
+    <style>
+        #notificacao-pedidos-prontos {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 1.1rem;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s, transform 0.5s;
+            transform: translateY(20px);
+        }
+        #notificacao-pedidos-prontos.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 <body>
 
@@ -51,7 +75,6 @@
                                 $statusText = 'Pagamento';
                             }
                             
-                            // Define o link de destino baseado no status da mesa
                             if ($mesa['status'] === 'ocupada' || $mesa['status'] === 'aguardando_pagamento') {
                                 $linkMesa = "/mesas/detalhes/" . $mesa['id'];
                             } else { // Se o status for 'livre'
@@ -78,5 +101,52 @@
             </section>
         </main>
     </div>
+
+    <div id="notificacao-pedidos-prontos"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificacaoDiv = document.getElementById('notificacao-pedidos-prontos');
+            let ultimosPedidosProntos = ''; // Para evitar alertas repetidos
+
+            async function verificarPedidosProntos() {
+                try {
+                    const response = await fetch('/pedidos/prontos');
+                    if (!response.ok) {
+                        console.error('Erro ao buscar pedidos:', response.statusText);
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success && data.pedidos.length > 0) {
+                        const mesas = data.pedidos.map(p => p.mesa_numero).sort((a,b) => a-b);
+                        const pedidosIds = data.pedidos.map(p => p.pedido_id).sort((a,b) => a-b).join(',');
+
+                        if (pedidosIds !== ultimosPedidosProntos) {
+                            ultimosPedidosProntos = pedidosIds;
+                            
+                            const mesasUnicas = [...new Set(mesas)]; // Pega apenas números de mesa únicos
+                            const mesasFormatadas = mesasUnicas.map(m => String(m).padStart(2, '0')).join(', ');
+                            notificacaoDiv.textContent = `Pedidos prontos para as Mesas: ${mesasFormatadas}`;
+                            notificacaoDiv.classList.add('show');
+
+                            setTimeout(() => {
+                                notificacaoDiv.classList.remove('show');
+                            }, 10000); // Esconde depois de 10 segundos
+                        }
+                    } else {
+                        ultimosPedidosProntos = '';
+                        notificacaoDiv.classList.remove('show');
+                    }
+                } catch (error) {
+                    console.error('Falha na requisição:', error);
+                }
+            }
+
+            setInterval(verificarPedidosProntos, 5000); // Verifica a cada 5 segundos
+            verificarPedidosProntos(); // Verifica assim que a página carrega
+        });
+    </script>
 </body>
 </html>

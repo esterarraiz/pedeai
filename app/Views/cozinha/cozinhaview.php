@@ -52,5 +52,52 @@
             </div>
         </main>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('pedidos-container');
+
+    // Usa delegação de eventos para capturar cliques nos botões
+    container.addEventListener('click', (event) => {
+        // Verifica se o elemento clicado é o nosso botão "Marcar como Pronto"
+        if (event.target && event.target.classList.contains('btn-ready')) {
+            const button = event.target;
+            const pedidoId = button.dataset.id;
+            const card = button.closest('.order-card'); // Pega o card do pedido
+
+            if (!pedidoId) {
+                console.error('ID do pedido não encontrado!');
+                return;
+            }
+
+            // Envia a requisição para o servidor
+            fetch('/cozinha/pedido/pronto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // Importante para identificar requisições AJAX
+                },
+                body: JSON.stringify({ id: pedidoId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Animação de saída e remoção do card da tela
+                    card.style.transition = 'opacity 0.5s ease';
+                    card.style.opacity = '0';
+                    setTimeout(() => card.remove(), 500);
+                } else {
+                    alert('Erro ao marcar pedido como pronto: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição:', error);
+                alert('Ocorreu um erro de comunicação com o servidor.');
+            });
+        }
+    });
+});
+</script>
+
 </body>
 </html>

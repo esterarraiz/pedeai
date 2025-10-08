@@ -19,66 +19,70 @@ class Router
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index']);
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index']);
         $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index']);
+        
+        // === NOVA ROTA PARA A AÇÃO DA COZINHA ===
+        $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto']);
+        
         $this->add('GET', 'dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
 
         // === ROTAS DE PEDIDOS ===
         $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
         $this->add('POST', 'pedidos/criar', ['controller' => 'PedidoController', 'action' => 'criarPedido']);
         $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax']);
+        
+        // === NOVA ROTA PARA BUSCAR PEDIDOS PRONTOS (PARA O GARÇOM) ===
+        $this->add('GET', 'pedidos/prontos', ['controller' => 'PedidoController', 'action' => 'buscarPedidosProntos']);
 
         // === ROTAS DE MESAS ===
         $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index']);
         $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa']);
         $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
     }
-
-    public function add($method, $route, $params = [])
+    
+    /**
+     * AQUI ESTÁ A CORREÇÃO!
+     * Adicionamos $roles = [] como um parâmetro opcional.
+     */
+    public function add($method, $route, $params = [], $roles = [])
     {
-        // Converte placeholders como {id:\d+} em grupos de captura nomeados (?P<id>\d+)
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
-        
         $route = '/^' . str_replace('/', '\/', $route) . '$/i';
         
         $this->routes[] = [
             'method' => strtoupper($method),
             'route'  => $route,
-            'params' => $params
+            'params' => $params,
+            'roles'  => array_map('strtolower', $roles) // Agora $roles sempre será um array
         ];
     }
 
     public function match($url)
     {
         $current_method = $_SERVER['REQUEST_METHOD'];
-
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
-                // Combina os parâmetros da rota (controller/action) com os da URL (id)
                 $this->params = $routeInfo['params'];
-                
                 foreach ($matches as $key => $value) {
-                    if (is_string($key)) { // Pega apenas os grupos nomeados
-                        $this->params[$key] = $value;
-                    }
+                    if (is_string($key)) { $this->params[$key] = $value; }
                 }
                 return true;
             }
         }
         return false;
     }
-
+    
     public function dispatch()
     {
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         
         if ($this->match($url)) {
             $controller = "App\\Controllers\\" . $this->params['controller'];
-
+            
             if (class_exists($controller)) {
                 $controller_object = new $controller(); 
                 $action = $this->params['action'];
-
+                
                 if (method_exists($controller_object, $action)) {
-                    // Agora $this->params contém ['controller' => ..., 'action' => ..., 'id' => '1']
                     $controller_object->$action($this->params);
                 } else {
                     echo "Método '$action' não encontrado no controller '$controller'";
