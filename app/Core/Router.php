@@ -68,7 +68,7 @@ class Router
     }
     
 
-    public function add($method, $route, $params = [], $roles = [])
+        public function add($method, $route, $params = [], $roles = [])
     {
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
         $route = '/^' . str_replace('/', '\/', $route) . '$/i';
@@ -77,18 +77,23 @@ class Router
             'method' => strtoupper($method),
             'route'  => $route,
             'params' => $params,
-            'roles'  => array_map('strtolower', $roles) // Agora $roles sempre será um array
+            'roles'  => array_map('strtolower', $roles)
         ];
     }
 
     public function match($url)
     {
         $current_method = $_SERVER['REQUEST_METHOD'];
+
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
                 $this->params = $routeInfo['params'];
+                $this->params['roles'] = $routeInfo['roles'];
+                
                 foreach ($matches as $key => $value) {
-                    if (is_string($key)) { $this->params[$key] = $value; }
+                    if (is_string($key)) {
+                        $this->params[$key] = $value;
+                    }
                 }
                 return true;
             }
@@ -101,22 +106,62 @@ class Router
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         
         if ($this->match($url)) {
-            $controller = "App\\Controllers\\" . $this->params['controller'];
-            
-            if (class_exists($controller)) {
-                $controller_object = new $controller(); 
-                $action = $this->params['action'];
-                
-                if (method_exists($controller_object, $action)) {
-                    $controller_object->$action($this->params);
-                } else {
-                    echo "Método '$action' não encontrado no controller '$controller'";
-                }
+            $requiredRoles = $this->params['roles'] ?? [];
+
+            if (empty($requiredRoles)) {
+                $this->executeAction();
+                return;
+            }
+
+            if (!isset($_SESSION['user_id'])) {
+                header('Location: /login');
+                exit;
+            }
+
+            $userRole = strtolower($_SESSION['user_cargo'] ?? '');
+
+            if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
+                $this->executeAction();
             } else {
-                echo "Controller '$controller' não encontrado.";
+                // CORREÇÃO: Chama o novo método de erro
+                $this->showErrorPage('error/403', 403);
             }
         } else {
-            echo "Página não encontrada (Erro 404) para a URL: " . htmlspecialchars($url) . " com o método " . $_SERVER['REQUEST_METHOD'];
+            // MELHORIA: Usa o mesmo método para o erro 404
+            $this->showErrorPage('error/404', 404);
         }
+    }
+
+    protected function executeAction()
+    {
+        $controller = "App\\Controllers\\" . $this->params['controller'];
+
+        if (class_exists($controller)) {
+            $controller_object = new $controller(); 
+            $action = $this->params['action'];
+
+            if (method_exists($controller_object, $action)) {
+                $controller_object->$action($this->params);
+            } else {
+                echo "Método '$action' não encontrado no controller '$controller'";
+            }
+        } else {
+            echo "Controller '$controller' não encontrado.";
+        }
+    }
+
+    /**
+     * NOVO MÉTODO: Carrega uma view de erro de forma segura.
+     */
+    protected function showErrorPage($viewName, $statusCode)
+    {
+        http_response_code($statusCode);
+        $viewPath = dirname(__DIR__) . '/views/' . $viewName . '.php';
+        if (file_exists($viewPath)) {
+            require $viewPath;
+        } else {
+            echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
+        }
+        exit;
     }
 }
