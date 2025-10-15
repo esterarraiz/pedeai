@@ -50,10 +50,10 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 
 | Feature | User Story | Responsável | Revisor (PR) | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| Cadastro de Empresas e Arquitetura Multi-Tenant | N/A | Nome | Nome | A Fazer |
-| Implementação da API de Status de Pedidos | N/A | Nome | Nome | A Fazer |
-| Edição e Cancelamento de Itens em Pedidos | N/A | Nome | Nome | A Fazer |
-| Relatórios de Vendas e Performance | US10 | Nome | Nome | A Fazer |
-| Funcionalidade de Dividir a Conta e Impressão | N/A | Nome | Nome | A Fazer |
+| Cadastro de Empresas | N/A | Arthur | Vitória | Em andamento |
+| Implementação da API de Status de Pedidos | N/A | Ester | Arthur | Em andamento |
+| Edição e Cancelamento de Itens em Pedidos | N/A | Vitória | Matheus | Em andamento |
+| Relatórios de Vendas e Performance | US10 | Matheus | Jorge | Em andamento |
+| Funcionalidade de Dividir a Conta e Impressão | N/A | Jorge | Ester | Em andamento |
 
 ---
