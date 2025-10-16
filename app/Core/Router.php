@@ -10,6 +10,17 @@ class Router
     public function __construct()
     {
 
+        // === ROTA DA LANDING PAGE ===
+        $this->add('GET', '', ['controller' => 'HomeController', 'action' => 'index']);
+
+        // === ROTAS PÚBLICAS ===
+        $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
+        $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
+
+
+        // === ROTAS DA API DE AUTENTICAÇÃO ===
+        $this->add('POST', 'api/login', ['controller' => 'Api\AuthController', 'action' => 'login']);
+        $this->add('POST', 'api/logout', ['controller' => 'Api\AuthController', 'action' => 'logout'], ['administrador', 'garçom', 'caixa', 'cozinheiro']);
 
         // === ROTAS DE AUTENTICAÇÃO ===
 
@@ -18,7 +29,7 @@ class Router
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
 
         // === ADMIN ===
-        $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
+        $this->add('GET', 'dashboard/administrador', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios', ['controller' => 'FuncionarioController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios/novo', ['controller' => 'FuncionarioController', 'action' => 'showCreateForm'], ['administrador']);
         $this->add('POST', 'funcionarios/criar', ['controller' => 'FuncionarioController', 'action' => 'create'], ['administrador']);

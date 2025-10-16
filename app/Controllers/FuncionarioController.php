@@ -50,35 +50,30 @@ class FuncionarioController extends Controller
     {
         $funcionario_id = $params['id'] ?? null;
 
-        // 1. Validação: Se não houver ID, redireciona de volta
         if (!$funcionario_id) {
-            // Idealmente, adicionar uma mensagem de erro na sessão
             header('Location: /funcionarios');
             exit;
         }
 
         $pdo = Database::getConnection();
         $funcionarioModel = new Funcionario($pdo);
-        
-        // 2. Busca os dados do funcionário no banco
         $funcionario = $funcionarioModel->buscarPorId((int)$funcionario_id);
 
-        // 3. Validação: Se o funcionário não for encontrado, redireciona
         if (!$funcionario) {
             header('Location: /funcionarios');
             exit;
         }
         
-        // Futuramente, carregar os cargos aqui também
-        // $cargos = (new CargoModel($pdo))->buscarTodos();
+        // --- CORREÇÃO APLICADA AQUI ---
+        // Agora, também buscamos e enviamos a lista de cargos para a view de edição.
+        $cargoModel = new CargoModel($pdo);
+        $cargos = $cargoModel->buscarTodos();
 
-        // 4. Carrega a mesma view do formulário, mas agora passando os dados
         $this->loadView('funcionarios/form', [
-            'funcionario' => $funcionario, // Passa os dados para preencher o formulário
-            // 'cargos' => $cargos
+            'funcionario' => $funcionario,
+            'cargos' => $cargos // A lista de cargos agora é enviada para a view
         ]);
     }
-
     /**
      * Processa a criação de um novo funcionário a partir dos dados do formulário.
      */
