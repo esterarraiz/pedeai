@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <a href="javascript:history.back()" class="back-button">voltar</a>
+    <a href="javascript:history.back()" class="back-button">Voltar</a>
 
     <div class="denied-container">
         

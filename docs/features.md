@@ -40,3 +40,20 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 | Ciclo de Notificação de Pedido Pronto (US05 + US03) | Arthur | Vitória | A produzir |
 | Visualização de Conta por Mesa (US06) | Vitória | Matheus | A produzir |
 | Tela do Caixa - Registro de Pagamento (US07) | Matheus | Jorge | A produzir |
+
+---
+
+## Iteração 3: Refatoração Completa para Arquitetura Orientada a API
+Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionalidades planejadas, consulte o [planejamento das iterações](planejamento.md).
+
+### Features Implementadas (Refatorações)
+
+| Feature | Responsável | Revisor (PR) | Status |
+| :--- | :--- | :--- | :--- |
+| Refatoração da Autenticação para API | Responsável | Revisor | A Fazer |
+| Migração do Painel de Administração para API | Responsável | Revisor | A Fazer |
+| Migração do Painel da Cozinha para API | Responsável | Revisor | A Fazer |
+| Migração do Fluxo do Caixa para API | Responsável | Revisor | A Fazer |
+| Migração do Fluxo do Garçom para API | Responsável | Revisor | A Fazer |
+
+---
