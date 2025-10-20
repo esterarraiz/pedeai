@@ -23,31 +23,35 @@ class Mesa {
         return $stmt->fetchAll(PDO::FETCH_ASSOC); 
     } 
 
-    /** 
+    /**
      * Atualiza o status de uma mesa específica no banco de dados.
-     * 
+     *
      * @param int $id O ID da mesa a ser atualizada.
-     * @param string $novoStatus O novo status para a mesa (ex: 'Livre', 'Ocupada').
+     * @param string $novoStatus O novo status para a mesa (ex: 'disponivel', 'ocupada').
      * @return bool Retorna true em caso de sucesso.
      * @throws Exception Lança exceção se falhar.
-     */ 
-    public function atualizarStatus(int $id, string $novoStatus): bool { 
-        try { 
-            $novoStatus = strtolower($novoStatus); 
-            $sql = "UPDATE mesas SET status = :novoStatus WHERE id = :id"; 
-            $stmt = $this->pdo->prepare($sql); 
-            $stmt->bindValue(':novoStatus', $novoStatus, PDO::PARAM_STR); 
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT); 
-            $executou = $stmt->execute(); 
+     */
+    public function atualizarStatus(int $id, string $novoStatus): bool
+    {
+        try {
+            // Converte o status para minúsculas para padronização
+            $novoStatus = strtolower($novoStatus);
 
-            // Verifica se alguma linha foi alterada 
-            if ($stmt->rowCount() === 0) { 
-                throw new Exception("Nenhuma mesa foi atualizada. Verifique se o ID existe."); 
-            } 
-            return $executou; 
-        } catch (\PDOException $e) { 
-            throw new Exception("Erro PDO ao atualizar status da mesa: " . $e->getMessage()); 
-        } 
+            $sql = "UPDATE mesas SET status = :novoStatus WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+
+            $stmt->bindValue(':novoStatus', $novoStatus, PDO::PARAM_STR);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+            // Apenas executa. Se houver um erro no DB, a exceção PDO será capturada.
+            // A verificação de rowCount() foi removida por ser muito restritiva.
+            return $stmt->execute();
+
+        } catch (\PDOException $e) {
+            // Se houver um erro de banco de dados, loga e relança como uma exceção genérica.
+            error_log("Erro PDO ao atualizar status da mesa: " . $e->getMessage());
+            throw new Exception("Erro de banco de dados ao tentar atualizar a mesa.");
+        }
     } 
 
     public function buscarPorId(int $id) { 
