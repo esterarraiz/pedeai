@@ -1,20 +1,21 @@
 <?php
+// Ficheiro: app/Core/Router.php (Versão atualizada e corrigida)
 
 namespace App\Core;
 
 class Router
 {
     protected $routes = [];
-    protected $params = []; // Armazenará TODOS os parâmetros (rota + URL)
+    protected $params = [];
 
     public function __construct()
     {
-        // === ROTAS DE AUTENTICAÇÃO ===
+        // === ROTAS DE AUTENTICAÇÃO (Acesso Público) ===
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
-        
-        // === ROTAS DE ADMIN (só o admin pode aceder) ===
+
+        // === ROTAS DE ADMINISTRADOR ===
         $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios', ['controller' => 'FuncionarioController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios/novo', ['controller' => 'FuncionarioController', 'action' => 'showCreateForm'], ['administrador']);
@@ -23,59 +24,35 @@ class Router
         $this->add('POST', 'funcionarios/atualizar', ['controller' => 'FuncionarioController', 'action' => 'update'], ['administrador']);
         $this->add('POST', 'funcionarios/status', ['controller' => 'FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'funcionarios/redefinir-senha', ['controller' => 'FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
-        
-        // === ROTAS DE CAIXA (caixa e admin) ===
+        // Cardápio
+        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
+        $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem'], ['administrador']);
+        $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem'], ['administrador']);
+        $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem'], ['administrador']);
+
+        // === ROTAS DE CAIXA ===
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
         $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'Caixacontroller', 'action' => 'verConta'], ['caixa']);
         $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'Caixacontroller', 'action' => 'processarPagamento'], ['caixa']);
 
-        // === ROTAS DE GARÇOM (garçom e admin) ===
+        // === ROTAS DE GARÇOM (PÁGINAS ANTIGAS - REMOVIDAS PARA EVITAR CONFLITO) ===
+        // A única rota de página para o garçom agora é o novo dashboard.
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
-        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index'], ['garçom']);
-        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa'], ['garçom']);
-        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa'], ['garçom']);
-        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido'], ['garçom']);
-        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax'], ['garçom']);
-      
-        // === ROTAS cozinha ===
-        $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index']);
         
-        // === NOVA ROTA PARA A AÇÃO DA COZINHA ===
-        $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto']);
-        
-        $this->add('GET', 'dashboard/generico', ['controller' => 'GenericDashboardController', 'action' => 'index']);
+        // === ROTAS DE COZINHEIRO ===
+        $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index'], ['cozinheiro']);
+        $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto'], ['cozinheiro']);
 
-        // === ROTAS DE PEDIDOS ===
-        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
-        $this->add('POST', 'pedidos/criar', ['controller' => 'PedidoController', 'action' => 'criarPedido']);
-        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax']);
-        
-        // === NOVA ROTA PARA BUSCAR PEDIDOS PRONTOS (PARA O GARÇOM) ===
-        $this->add('GET', 'pedidos/prontos', ['controller' => 'PedidoController', 'action' => 'buscarPedidosProntos']);
-
-        // === ROTAS DE MESAS ===
-        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index']);
-        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa']);
-        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
-
-        // rotas cardapio
-
-        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio']);
-        $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem']);
-        $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem']);
-        $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem']);
-        
         // === API DO GARÇOM ===
-$this->add('GET', 'api/garcom/mesas', ['controller' => 'Api\\GarcomApiController', 'action' => 'listarMesas'], ['garçom']);
-$this->add('GET', 'api/garcom/mesas/{id:\\d+}', ['controller' => 'Api\\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']);
-$this->add('GET', 'api/garcom/cardapio', ['controller' => 'Api\\GarcomApiController', 'action' => 'getCardapio'], ['garçom']);
-$this->add('POST', 'api/garcom/pedidos', ['controller' => 'Api\\GarcomApiController', 'action' => 'lancarPedido'], ['garçom']);
-$this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
-$this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
+        $this->add('GET', 'api/garcom/mesas', ['controller' => 'Api\\GarcomApiController', 'action' => 'listarMesas'], ['garçom']);
+        $this->add('GET', 'api/garcom/mesas/{id:\\d+}', ['controller' => 'Api\\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']);
+        $this->add('GET', 'api/garcom/cardapio', ['controller' => 'Api\\GarcomApiController', 'action' => 'getCardapio'], ['garçom']);
+        $this->add('POST', 'api/garcom/pedidos', ['controller' => 'Api\\GarcomApiController', 'action' => 'lancarPedido'], ['garçom']);
+        $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
+        $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
     }
-    
 
-        public function add($method, $route, $params = [], $roles = [])
+    public function add($method, $route, $params = [], $roles = [])
     {
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
         $route = '/^' . str_replace('/', '\/', $route) . '$/i';
@@ -130,12 +107,10 @@ $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\
             if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
                 $this->executeAction();
             } else {
-                // CORREÇÃO: Chama o novo método de erro
-                $this->showErrorPage('error/403', 403);
+                $this->showErrorPage('error/403', 403); // Acesso negado
             }
         } else {
-            // MELHORIA: Usa o mesmo método para o erro 404
-            $this->showErrorPage('error/404', 404);
+            $this->showErrorPage('error/404', 404); // Rota não encontrada
         }
     }
 
@@ -150,20 +125,20 @@ $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\
             if (method_exists($controller_object, $action)) {
                 $controller_object->$action($this->params);
             } else {
-                echo "Método '$action' não encontrado no controller '$controller'";
+                // Em vez de 'echo', usamos a página de erro para consistência
+                $this->showErrorPage('error/500', 500);
+                error_log("Método '$action' não encontrado no controller '$controller'");
             }
         } else {
-            echo "Controller '$controller' não encontrado.";
+            $this->showErrorPage('error/500', 500);
+            error_log("Controller '$controller' não encontrado.");
         }
     }
 
-    /**
-     * NOVO MÉTODO: Carrega uma view de erro de forma segura.
-     */
     protected function showErrorPage($viewName, $statusCode)
     {
         http_response_code($statusCode);
-        $viewPath = dirname(__DIR__) . '/views/' . $viewName . '.php';
+        $viewPath = dirname(__DIR__) . '/Views/' . $viewName . '.php'; // Corrigido 'views' para 'Views'
         if (file_exists($viewPath)) {
             require $viewPath;
         } else {

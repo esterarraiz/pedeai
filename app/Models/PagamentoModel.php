@@ -1,9 +1,12 @@
 <?php
+// Ficheiro: app/Models/PagamentoModel.php (Versão Corrigida e Final)
 
 namespace App\Models;
 
 use PDO;
 use Exception;
+use App\Models\PedidoModel;
+use App\Models\Mesa;
 
 class PagamentoModel
 {
@@ -28,17 +31,25 @@ class PagamentoModel
             }
             $pedido_id = $ultimoPedido['id'];
 
+            // Insere o registo do pagamento
             $sqlPagamento = "INSERT INTO pagamentos (pedido_id, valor, metodo_pagamento, funcionario_id, data_pagamento) VALUES (?, ?, ?, ?, NOW())";
             $stmtPagamento = $this->pdo->prepare($sqlPagamento);
             $stmtPagamento->execute([$pedido_id, $valorPago, $metodoPagamento, $funcionario_id]);
 
+            // Atualiza o status do pedido para 'pago'
             $sqlPedido = "UPDATE pedidos SET status = 'pago', data_fechamento = NOW() WHERE id = ?";
             $stmtPedido = $this->pdo->prepare($sqlPedido);
             $stmtPedido->execute([$pedido_id]);
 
+            // Atualiza o status da mesa para 'disponivel'
             $mesaModel = new Mesa($this->pdo);
-            // Correção final para usar 'disponivel'
             $mesaModel->atualizarStatus($mesa_id, 'disponivel');
+
+            // --- CORREÇÃO ADICIONADA AQUI ---
+            // Após a mesa ser liberada, arquiva automaticamente quaisquer
+            // pedidos que ainda estavam marcados como 'pronto' para esta mesa.
+            $pedidoModel->arquivarPedidosProntosDeMesa($mesa_id);
+            // ------------------------------------
 
             $this->pdo->commit();
 
