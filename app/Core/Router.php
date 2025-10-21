@@ -1,44 +1,22 @@
 <?php
+// Ficheiro: app/Core/Router.php (Versão Definitiva, Corrigida e Organizada)
 
 namespace App\Core;
 
 class Router
 {
     protected $routes = [];
-    protected $params = []; // Armazenará TODOS os parâmetros (rota + URL)
+    protected $params = [];
 
     public function __construct()
     {
-
-        // === ROTA DA LANDING PAGE ===
-        $this->add('GET', '', ['controller' => 'HomeController', 'action' => 'index']);
-
-        // === ROTAS PÚBLICAS ===
-        $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
-        $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
-
-        // === NOVAS ROTAS DA API DO CAIXA (caixa e admin) ===
-        $this->add('GET', 'api/caixa/mesas-abertas', ['controller' => 'Api\\CaixaApiController', 'action' => 'listarMesasComContaAberta'], ['caixa', 'administrador']);
-        $this->add('GET', 'api/caixa/conta/{id:\d+}', ['controller' => 'Api\\CaixaApiController', 'action' => 'obterDetalhesConta'], ['caixa', 'administrador']);
-        $this->add('POST', 'api/caixa/processar-pagamento', ['controller' => 'Api\\CaixaApiController', 'action' => 'processarPagamento'], ['caixa', 'administrador']);
-
-        // === NOVAS ROTAS DA API DO CAIXA (caixa e admin) ===
-        $this->add('GET', 'api/caixa/mesas-abertas', ['controller' => 'CaixaApiController', 'action' => 'listarMesasComContaAberta'], ['caixa', 'administrador']);
-        $this->add('GET', 'api/caixa/conta/{id:\d+}', ['controller' => 'CaixaApiController', 'action' => 'obterDetalhesConta'], ['caixa', 'administrador']);
-        $this->add('POST', 'api/caixa/processar-pagamento', ['controller' => 'CaixaApiController', 'action' => 'processarPagamento'], ['caixa', 'administrador']);
-
-        // === ROTAS DA API DE AUTENTICAÇÃO ===
-        $this->add('POST', 'api/login', ['controller' => 'Api\AuthController', 'action' => 'login']);
-        $this->add('POST', 'api/logout', ['controller' => 'Api\AuthController', 'action' => 'logout'], ['administrador', 'garçom', 'caixa', 'cozinheiro']);
-
-        // === ROTAS DE AUTENTICAÇÃO ===
-
+        // === ROTAS DE AUTENTICAÇÃO (Acesso Público) ===
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
 
-        // === ADMIN ===
-        $this->add('GET', 'dashboard/administrador', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
+        // === ROTAS DE ADMINISTRADOR ===
+        $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios', ['controller' => 'FuncionarioController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios/novo', ['controller' => 'FuncionarioController', 'action' => 'showCreateForm'], ['administrador']);
         $this->add('POST', 'funcionarios/criar', ['controller' => 'FuncionarioController', 'action' => 'create'], ['administrador']);
@@ -46,53 +24,32 @@ class Router
         $this->add('POST', 'funcionarios/atualizar', ['controller' => 'FuncionarioController', 'action' => 'update'], ['administrador']);
         $this->add('POST', 'funcionarios/status', ['controller' => 'FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'funcionarios/redefinir-senha', ['controller' => 'FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
-        
-        // === ROTAS DE CAIXA (caixa e admin) ===
-        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
-        $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'CaixaController', 'action' => 'verConta'], ['caixa']);
-        $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'CaixaController', 'action' => 'processarPagamento'], ['caixa']);
+        // Cardápio
+        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
+        $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem'], ['administrador']);
+        $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem'], ['administrador']);
+        $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem'], ['administrador']);
 
-        // === GARÇOM ===
+        // === ROTAS DE CAIXA ===
+        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
+        $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'Caixacontroller', 'action' => 'verConta'], ['caixa']);
+        $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'Caixacontroller', 'action' => 'processarPagamento'], ['caixa']);
+
+        // === ROTAS DE GARÇOM ===
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
-        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index'], ['garçom']);
-        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa'], ['garçom']);
-        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa'], ['garçom']);
-        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido'], ['garçom']);
-        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax'], ['garçom']);
-
-
-        // === COZINHEIRO ===
+        
+        // === ROTAS DE COZINHEIRO ===
         $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index'], ['cozinheiro']);
+        $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto'], ['cozinheiro']);
 
-        // === CAIXA ===
-        $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
-        $this->add('GET', 'caixa/mesa/{id:\d+}', ['controller' => 'CaixaDashboardController', 'action' => 'verConta'], ['caixa']);
-        $this->add('POST', 'caixa/mesa/fechar', ['controller' => 'CaixaDashboardController', 'action' => 'fecharConta'], ['caixa']);
-    
-
-
-        // === ROTAS DE PEDIDOS ===
-        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido']);
-        $this->add('POST', 'pedidos/criar', ['controller' => 'PedidoController', 'action' => 'criarPedido']);
-        $this->add('POST', 'pedidos/processar-ajax', ['controller' => 'PedidoController', 'action' => 'processarPedidoAjax']);
-        
-        // === NOVA ROTA PARA BUSCAR PEDIDOS PRONTOS (PARA O GARÇOM) ===
-        $this->add('GET', 'pedidos/prontos', ['controller' => 'PedidoController', 'action' => 'buscarPedidosProntos']);
-
-        // === ROTAS DE MESAS ===
-        $this->add('GET', 'mesas', ['controller' => 'MesaController', 'action' => 'index']);
-        $this->add('POST', 'mesas/liberar', ['controller' => 'MesaController', 'action' => 'liberarMesa']);
-        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa']);
-
-        // rotas cardapio
-
-        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio']);
-        $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem']);
-        $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem']);
-        $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem']);
-        
+        // === API DO GARÇOM ===
+        $this->add('GET', 'api/garcom/mesas', ['controller' => 'Api\\GarcomApiController', 'action' => 'listarMesas'], ['garçom']);
+        $this->add('GET', 'api/garcom/mesas/{id:\d+}', ['controller' => 'Api\\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']);
+        $this->add('GET', 'api/garcom/cardapio', ['controller' => 'Api\\GarcomApiController', 'action' => 'getCardapio'], ['garçom']);
+        $this->add('POST', 'api/garcom/pedidos', ['controller' => 'Api\\GarcomApiController', 'action' => 'lancarPedido'], ['garçom']);
+        $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
+        $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
     }
-    
 
     public function add($method, $route, $params = [], $roles = [])
     {
@@ -114,7 +71,7 @@ class Router
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
                 $this->params = $routeInfo['params'];
                 $this->params['roles'] = $routeInfo['roles'];
-
+                
                 foreach ($matches as $key => $value) {
                     if (is_string($key)) $this->params[$key] = $value;
                 }
@@ -124,21 +81,39 @@ class Router
         return false;
     }
     
+    /**
+     * CORREÇÃO PRINCIPAL: A lógica de verificação foi simplificada para evitar o loop de redirecionamento.
+     */
     public function dispatch()
     {
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-
+        
         if ($this->match($url)) {
             $requiredRoles = $this->params['roles'] ?? [];
 
-            if (!empty($requiredRoles) && (!isset($_SESSION['user_id']) || !in_array(strtolower($_SESSION['user_cargo'] ?? ''), $requiredRoles) && strtolower($_SESSION['user_cargo'] ?? '') !== 'administrador')) {
-                $this->showErrorPage('error/403', 403);
+            // 1. Se a rota não exige cargo (é pública como /login), executa imediatamente.
+            if (empty($requiredRoles)) {
+                $this->executeAction();
                 return;
             }
 
-            $this->executeAction();
+            // 2. A partir daqui, todas as rotas são protegidas. Verifica se o utilizador está logado.
+            if (!isset($_SESSION['user_id'])) {
+                header('Location: /login');
+                exit;
+            }
+
+            // 3. Se está logado, verifica se tem o cargo correto (ou se é admin).
+            $userRole = strtolower($_SESSION['user_cargo'] ?? '');
+            if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
+                $this->executeAction();
+            } else {
+                // O utilizador está logado, mas não tem permissão.
+                $this->showErrorPage('error/403', 403); // 403 Forbidden
+            }
         } else {
-            $this->showErrorPage('error/404', 404);
+            // Nenhuma rota foi encontrada.
+            $this->showErrorPage('error/404', 404); // 404 Not Found
         }
     }
 
@@ -152,21 +127,25 @@ class Router
             if (method_exists($controller_object, $action)) {
                 $controller_object->$action($this->params);
             } else {
-                echo "Método '$action' não encontrado no controller '$controller'";
+                $this->showErrorPage('error/500', 500);
+                error_log("Método '$action' não encontrado no controller '$controller'");
             }
         } else {
-            echo "Controller '$controller' não encontrado.";
+            $this->showErrorPage('error/500', 500);
+            error_log("Controller '$controller' não encontrado.");
         }
     }
 
     protected function showErrorPage($viewName, $statusCode)
     {
         http_response_code($statusCode);
-        $viewPath = dirname(__DIR__) . '/views/' . $viewName . '.php';
-        if (file_exists($viewPath)) require $viewPath;
-        else echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
+        // CORREÇÃO: O caminho para as views deve ser capitalizado (PSR-4)
+        $viewPath = dirname(__DIR__) . '/Views/' . $viewName . '.php';
+        if (file_exists($viewPath)) {
+            require $viewPath;
+        } else {
+            echo "<h1>Erro {$statusCode}</h1><p>Página de erro não encontrada.</p>";
+        }
         exit;
     }
-
 }
-
