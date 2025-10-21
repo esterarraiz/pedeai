@@ -17,6 +17,15 @@ class Router
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
 
+        // === NOVAS ROTAS DA API DO CAIXA (caixa e admin) ===
+        $this->add('GET', 'api/caixa/mesas-abertas', ['controller' => 'Api\\CaixaApiController', 'action' => 'listarMesasComContaAberta'], ['caixa', 'administrador']);
+        $this->add('GET', 'api/caixa/conta/{id:\d+}', ['controller' => 'Api\\CaixaApiController', 'action' => 'obterDetalhesConta'], ['caixa', 'administrador']);
+        $this->add('POST', 'api/caixa/processar-pagamento', ['controller' => 'Api\\CaixaApiController', 'action' => 'processarPagamento'], ['caixa', 'administrador']);
+
+        // === NOVAS ROTAS DA API DO CAIXA (caixa e admin) ===
+        $this->add('GET', 'api/caixa/mesas-abertas', ['controller' => 'CaixaApiController', 'action' => 'listarMesasComContaAberta'], ['caixa', 'administrador']);
+        $this->add('GET', 'api/caixa/conta/{id:\d+}', ['controller' => 'CaixaApiController', 'action' => 'obterDetalhesConta'], ['caixa', 'administrador']);
+        $this->add('POST', 'api/caixa/processar-pagamento', ['controller' => 'CaixaApiController', 'action' => 'processarPagamento'], ['caixa', 'administrador']);
 
         // === ROTAS DA API DE AUTENTICAÇÃO ===
         $this->add('POST', 'api/login', ['controller' => 'Api\AuthController', 'action' => 'login']);

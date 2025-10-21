@@ -4,37 +4,38 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Mesa;
-use App\Models\PedidoModel;
 use Config\Database;
 
 class CaixaController extends Controller
 {
-    public function index()
+    /**
+     * Mostra a página de resumo da conta.
+     * Os dados serão carregados via JavaScript (API).
+     */
+    public function verConta($params)
     {
-        // Aqui você pode listar todas as mesas se quiser
-        $pdo = Database::getConnection();
-        $mesaModel = new Mesa($pdo);
-        $empresa_id = $_SESSION['empresa_id'] ?? null;
-        $mesas = $mesaModel->buscarTodasPorEmpresa($empresa_id);
+        $mesa_id = $params['id'] ?? null;
+        if (!$mesa_id) {
+            header('Location: /dashboard/caixa');
+            exit;
+        }
 
-        $this->loadView('caixa/index', ['mesas' => $mesas]);
+        try {
+            $pdo = Database::getConnection();
+            $mesaModel = new Mesa($pdo);
+            $mesa = $mesaModel->buscarPorId($mesa_id);
+
+            // Apenas carrega a view com o número da mesa.
+            // O restante dos dados (pedido, total) será carregado via API.
+            $this->loadView('caixa/resumo_conta', [
+                'pageTitle' => 'Resumo da Conta - Mesa ' . $mesa['numero'],
+                'mesa' => $mesa
+            ]);
+        } catch (\Exception $e) {
+            $this->loadView('error', ['message' => $e->getMessage()]);
+        }
     }
-
-    public function detalhesMesa($params)
-    {
-        $mesa_id = $params['id'];
-        $empresa_id = $_SESSION['empresa_id'];
-
-        $pdo = Database::getConnection();
-        $mesaModel = new Mesa($pdo);
-        $mesa = $mesaModel->buscarPorId($mesa_id);
-
-        $pedidoModel = new PedidoModel($pdo);
-        $ultimo_pedido = $pedidoModel->buscarItensDoUltimoPedidoDaMesa($mesa_id, $empresa_id);
-
-        $this->loadView('caixa/mesa', [
-            'mesa' => $mesa,
-            'pedido' => $ultimo_pedido
-        ]);
-    }
+    
+    // O método processarPagamento() foi completamente removido daqui
+    // pois sua lógica agora está na CaixaApiController.
 }
