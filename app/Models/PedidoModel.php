@@ -151,4 +151,26 @@ class PedidoModel
         }
         return $ultimo_pedido;
     }
+    /**
+     * Atualiza o status de um pedido para 'entregue'.
+     * Usado pelo garçom ao entregar o pedido vindo da cozinha.
+     */
+    public function marcarComoEntregue(int $pedido_id, int $empresa_id): bool
+    {
+        // Apenas pedidos 'pronto' podem ser marcados como 'entregue'
+        $sql = "UPDATE pedidos 
+                SET status = 'entregue' 
+                WHERE id = :pedido_id 
+                  AND empresa_id = :empresa_id 
+                  AND status = 'pronto'";
+                  
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':pedido_id' => $pedido_id,
+            ':empresa_id' => $empresa_id
+        ]);
+
+        // Retorna true se alguma linha foi afetada, false caso contrário.
+        return $stmt->rowCount() > 0;
+    }
 }

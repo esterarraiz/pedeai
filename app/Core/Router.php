@@ -65,6 +65,13 @@ class Router
         $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem']);
         $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem']);
         
+        // === API DO GARÇOM ===
+$this->add('GET', 'api/garcom/mesas', ['controller' => 'Api\\GarcomApiController', 'action' => 'listarMesas'], ['garçom']);
+$this->add('GET', 'api/garcom/mesas/{id:\\d+}', ['controller' => 'Api\\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']);
+$this->add('GET', 'api/garcom/cardapio', ['controller' => 'Api\\GarcomApiController', 'action' => 'getCardapio'], ['garçom']);
+$this->add('POST', 'api/garcom/pedidos', ['controller' => 'Api\\GarcomApiController', 'action' => 'lancarPedido'], ['garçom']);
+$this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
+$this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
     }
     
 
