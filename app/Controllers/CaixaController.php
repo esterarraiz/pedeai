@@ -6,7 +6,7 @@ use App\Core\Controller;
 use App\Models\Mesa;
 use Config\Database;
 
-class Caixacontroller extends Controller
+class CaixaController extends Controller
 {
     /**
      * Mostra a página de resumo da conta.

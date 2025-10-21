@@ -1,5 +1,5 @@
 <?php
-// Ficheiro: app/Core/Router.php (Versão atualizada e corrigida)
+// Ficheiro: app/Core/Router.php (Versão Definitiva, Corrigida e Organizada)
 
 namespace App\Core;
 
@@ -35,8 +35,7 @@ class Router
         $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'Caixacontroller', 'action' => 'verConta'], ['caixa']);
         $this->add('POST', 'caixa/pagamento/processar', ['controller' => 'Caixacontroller', 'action' => 'processarPagamento'], ['caixa']);
 
-        // === ROTAS DE GARÇOM (PÁGINAS ANTIGAS - REMOVIDAS PARA EVITAR CONFLITO) ===
-        // A única rota de página para o garçom agora é o novo dashboard.
+        // === ROTAS DE GARÇOM ===
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
         
         // === ROTAS DE COZINHEIRO ===
@@ -45,7 +44,7 @@ class Router
 
         // === API DO GARÇOM ===
         $this->add('GET', 'api/garcom/mesas', ['controller' => 'Api\\GarcomApiController', 'action' => 'listarMesas'], ['garçom']);
-        $this->add('GET', 'api/garcom/mesas/{id:\\d+}', ['controller' => 'Api\\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']);
+        $this->add('GET', 'api/garcom/mesas/{id:\d+}', ['controller' => 'Api\\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']);
         $this->add('GET', 'api/garcom/cardapio', ['controller' => 'Api\\GarcomApiController', 'action' => 'getCardapio'], ['garçom']);
         $this->add('POST', 'api/garcom/pedidos', ['controller' => 'Api\\GarcomApiController', 'action' => 'lancarPedido'], ['garçom']);
         $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
@@ -68,16 +67,13 @@ class Router
     public function match($url)
     {
         $current_method = $_SERVER['REQUEST_METHOD'];
-
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
                 $this->params = $routeInfo['params'];
                 $this->params['roles'] = $routeInfo['roles'];
                 
                 foreach ($matches as $key => $value) {
-                    if (is_string($key)) {
-                        $this->params[$key] = $value;
-                    }
+                    if (is_string($key)) $this->params[$key] = $value;
                 }
                 return true;
             }
@@ -85,6 +81,9 @@ class Router
         return false;
     }
     
+    /**
+     * CORREÇÃO PRINCIPAL: A lógica de verificação foi simplificada para evitar o loop de redirecionamento.
+     */
     public function dispatch()
     {
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
@@ -92,25 +91,29 @@ class Router
         if ($this->match($url)) {
             $requiredRoles = $this->params['roles'] ?? [];
 
+            // 1. Se a rota não exige cargo (é pública como /login), executa imediatamente.
             if (empty($requiredRoles)) {
                 $this->executeAction();
                 return;
             }
 
+            // 2. A partir daqui, todas as rotas são protegidas. Verifica se o utilizador está logado.
             if (!isset($_SESSION['user_id'])) {
                 header('Location: /login');
                 exit;
             }
 
+            // 3. Se está logado, verifica se tem o cargo correto (ou se é admin).
             $userRole = strtolower($_SESSION['user_cargo'] ?? '');
-
             if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
                 $this->executeAction();
             } else {
-                $this->showErrorPage('error/403', 403); // Acesso negado
+                // O utilizador está logado, mas não tem permissão.
+                $this->showErrorPage('error/403', 403); // 403 Forbidden
             }
         } else {
-            $this->showErrorPage('error/404', 404); // Rota não encontrada
+            // Nenhuma rota foi encontrada.
+            $this->showErrorPage('error/404', 404); // 404 Not Found
         }
     }
 
@@ -119,13 +122,11 @@ class Router
         $controller = "App\\Controllers\\" . $this->params['controller'];
 
         if (class_exists($controller)) {
-            $controller_object = new $controller(); 
+            $controller_object = new $controller();
             $action = $this->params['action'];
-
             if (method_exists($controller_object, $action)) {
                 $controller_object->$action($this->params);
             } else {
-                // Em vez de 'echo', usamos a página de erro para consistência
                 $this->showErrorPage('error/500', 500);
                 error_log("Método '$action' não encontrado no controller '$controller'");
             }
@@ -138,7 +139,8 @@ class Router
     protected function showErrorPage($viewName, $statusCode)
     {
         http_response_code($statusCode);
-        $viewPath = dirname(__DIR__) . '/Views/' . $viewName . '.php'; // Corrigido 'views' para 'Views'
+        // CORREÇÃO: O caminho para as views deve ser capitalizado (PSR-4)
+        $viewPath = dirname(__DIR__) . '/Views/' . $viewName . '.php';
         if (file_exists($viewPath)) {
             require $viewPath;
         } else {

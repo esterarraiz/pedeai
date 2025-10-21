@@ -1,5 +1,5 @@
 <?php
-// Ficheiro: app/Controllers/Api/GarcomApiController.php (Versão Atualizada e Otimizada)
+// Ficheiro: app/Controllers/Api/GarcomApiController.php (Versão Definitiva e Corrigida)
 
 namespace App\Controllers\Api;
 
@@ -112,7 +112,6 @@ class GarcomApiController extends Controller
     {
         try {
             $pedidoModel = new PedidoModel($this->pdo);
-            // A lógica de filtragem foi movida para o PedidoModel, onde pertence.
             $pedidosProntos = $pedidoModel->buscarPedidosProntosPorEmpresa($this->empresa_id);
             $this->jsonResponse(['success' => true, 'data' => $pedidosProntos]);
         } catch (\Exception $e) {
@@ -121,26 +120,29 @@ class GarcomApiController extends Controller
     }
 
     /**
-     * Endpoint para o garçom marcar um pedido como entregue. (POST /api/garcom/pedidos/marcar-entregue)
+     * ATUALIZAÇÃO FINAL: Endpoint para o garçom marcar TODOS os pedidos prontos de uma MESA como entregues.
      */
     public function marcarComoEntregue()
     {
         $json = file_get_contents('php://input');
         $data = json_decode($json);
-        $pedido_id = filter_var($data->id ?? null, FILTER_VALIDATE_INT);
+        
+        // Agora esperamos um 'mesa_id' vindo do JavaScript
+        $mesa_id = filter_var($data->mesa_id ?? null, FILTER_VALIDATE_INT);
 
-        if (!$pedido_id) {
-            $this->jsonResponse(['success' => false, 'message' => 'ID do pedido não fornecido.'], 400);
+        if (!$mesa_id) {
+            $this->jsonResponse(['success' => false, 'message' => 'ID da mesa não fornecido.'], 400);
         }
         
         try {
             $pedidoModel = new PedidoModel($this->pdo);
-            $sucesso = $pedidoModel->marcarComoEntregue($pedido_id, $this->empresa_id);
+            // Chama o novo método do Model que atualiza todos os pedidos da mesa
+            $sucesso = $pedidoModel->marcarPedidosDaMesaComoEntregues($mesa_id, $this->empresa_id);
 
             if ($sucesso) {
-                $this->jsonResponse(['success' => true, 'message' => 'Pedido marcado como entregue!']);
+                $this->jsonResponse(['success' => true, 'message' => 'Pedidos da mesa marcados como entregues!']);
             } else {
-                throw new \Exception("Não foi possível atualizar o status do pedido (pode já ter sido entregue ou não existe).");
+                throw new \Exception("Nenhum pedido 'pronto' encontrado para esta mesa para ser atualizado.");
             }
         } catch (\Exception $e) {
             $this->jsonResponse(['success' => false, 'message' => $e->getMessage()], 500);

@@ -1,5 +1,5 @@
 <?php
-// Ficheiro: app/Models/PagamentoModel.php (Versão Corrigida e Final)
+// Ficheiro: app/Models/PagamentoModel.php (Versão para Resolver o Conflito)
 
 namespace App\Models;
 
@@ -24,6 +24,11 @@ class PagamentoModel
 
             $pedidoModel = new PedidoModel($this->pdo);
             $empresa_id = $_SESSION['empresa_id'] ?? 0;
+            
+            if ($empresa_id === 0) {
+                throw new Exception("ID da empresa não encontrado na sessão.");
+            }
+            
             $ultimoPedido = $pedidoModel->buscarItensDoUltimoPedidoDaMesa($mesa_id, $empresa_id);
 
             if (!$ultimoPedido) {
@@ -31,25 +36,22 @@ class PagamentoModel
             }
             $pedido_id = $ultimoPedido['id'];
 
-            // Insere o registo do pagamento
+            // 1. Insere o registo do pagamento
             $sqlPagamento = "INSERT INTO pagamentos (pedido_id, valor, metodo_pagamento, funcionario_id, data_pagamento) VALUES (?, ?, ?, ?, NOW())";
             $stmtPagamento = $this->pdo->prepare($sqlPagamento);
             $stmtPagamento->execute([$pedido_id, $valorPago, $metodoPagamento, $funcionario_id]);
 
-            // Atualiza o status do pedido para 'pago'
-            $sqlPedido = "UPDATE pedidos SET status = 'pago', data_fechamento = NOW() WHERE id = ?";
+            // 2. Atualiza o status do pedido para 'pago'
+            $sqlPedido = "UPDATE pedidos SET status = 'pago', data_fechamento = NOW() WHERE id = ? AND empresa_id = ?";
             $stmtPedido = $this->pdo->prepare($sqlPedido);
-            $stmtPedido->execute([$pedido_id]);
+            $stmtPedido->execute([$pedido_id, $empresa_id]);
 
-            // Atualiza o status da mesa para 'disponivel'
+            // 3. Atualiza o status da mesa para 'disponivel'
             $mesaModel = new Mesa($this->pdo);
             $mesaModel->atualizarStatus($mesa_id, 'disponivel');
 
-            // --- CORREÇÃO ADICIONADA AQUI ---
-            // Após a mesa ser liberada, arquiva automaticamente quaisquer
-            // pedidos que ainda estavam marcados como 'pronto' para esta mesa.
+            // 4. Limpa automaticamente as notificações de 'pronto' para esta mesa
             $pedidoModel->arquivarPedidosProntosDeMesa($mesa_id);
-            // ------------------------------------
 
             $this->pdo->commit();
 
@@ -60,6 +62,7 @@ class PagamentoModel
                 $this->pdo->rollBack();
             }
             error_log("Erro ao registrar pagamento: " . $e->getMessage());
+            // Lança a exceção para que o controller possa tratá-la e mostrar um erro
             throw $e;
         }
     }

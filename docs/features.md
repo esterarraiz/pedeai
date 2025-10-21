@@ -57,3 +57,20 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 | Funcionalidade de Dividir a Conta e Impressão | N/A | Jorge | Ester | Em andamento |
 
 ---
+
+---
+
+## Iteração 3: Refatoração Completa para Arquitetura Orientada a API
+Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionalidades planejadas, consulte o [planejamento das iterações](planejamento.md).
+
+### Features Implementadas (Refatorações)
+
+| Feature | Responsável | Revisor (PR) | Status |
+| :--- | :--- | :--- | :--- |
+| Refatoração da Autenticação para API | Responsável | Revisor | A Fazer |
+| Migração do Painel de Administração para API | Responsável | Revisor | A Fazer |
+| Migração do Painel da Cozinha para API | Responsável | Revisor | A Fazer |
+| Migração do Fluxo do Caixa para API | Responsável | Revisor | A Fazer |
+| Migração do Fluxo do Garçom para API | Responsável | Revisor | A Fazer |
+
+---

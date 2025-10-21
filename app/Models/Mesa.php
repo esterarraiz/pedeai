@@ -1,44 +1,40 @@
-<?php
+<?php namespace App\Models; 
 
-namespace App\Models;
+use PDO; 
+use Exception; 
 
-use PDO;
-use Exception;
+class Mesa { 
+    private PDO $pdo; 
 
-class Mesa
-{
-    private PDO $pdo;
+    public function __construct(PDO $pdo) { 
+        $this->pdo = $pdo; 
+    } 
 
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-    }
-
-    /**
+    /** 
      * Busca todas as mesas de uma empresa específica, ordenadas pelo número.
-     *
+     * 
      * @param int $empresa_id O ID da empresa.
      * @return array A lista de mesas ou um array vazio se não houver.
-     */
-    public function buscarTodasPorEmpresa(int $empresa_id): array
-    {
-        $sql = "SELECT id, numero, status FROM mesas WHERE empresa_id = ? ORDER BY numero ASC";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([$empresa_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+     */ 
+    public function buscarTodasPorEmpresa(int $empresa_id): array { 
+        $sql = "SELECT id, numero, status FROM mesas WHERE empresa_id = ? ORDER BY numero ASC"; 
+        $stmt = $this->pdo->prepare($sql); 
+        $stmt->execute([$empresa_id]); 
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
+    } 
 
     /**
      * Atualiza o status de uma mesa específica no banco de dados.
      *
      * @param int $id O ID da mesa a ser atualizada.
-     * @param string $novoStatus O novo status para a mesa (ex: 'Livre', 'Ocupada').
+     * @param string $novoStatus O novo status para a mesa (ex: 'disponivel', 'ocupada').
      * @return bool Retorna true em caso de sucesso.
      * @throws Exception Lança exceção se falhar.
      */
     public function atualizarStatus(int $id, string $novoStatus): bool
     {
         try {
+            // Converte o status para minúsculas para padronização
             $novoStatus = strtolower($novoStatus);
 
             $sql = "UPDATE mesas SET status = :novoStatus WHERE id = :id";
@@ -47,30 +43,25 @@ class Mesa
             $stmt->bindValue(':novoStatus', $novoStatus, PDO::PARAM_STR);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
-            $executou = $stmt->execute();
-
-            // Verifica se alguma linha foi alterada
-            if ($stmt->rowCount() === 0) {
-                throw new Exception("Nenhuma mesa foi atualizada. Verifique se o ID existe.");
-            }
-
-            return $executou;
+            // Apenas executa. Se houver um erro no DB, a exceção PDO será capturada.
+            // A verificação de rowCount() foi removida por ser muito restritiva.
+            return $stmt->execute();
 
         } catch (\PDOException $e) {
-            throw new Exception("Erro PDO ao atualizar status da mesa: " . $e->getMessage());
+            // Se houver um erro de banco de dados, loga e relança como uma exceção genérica.
+            error_log("Erro PDO ao atualizar status da mesa: " . $e->getMessage());
+            throw new Exception("Erro de banco de dados ao tentar atualizar a mesa.");
         }
-    }
-    public function buscarPorId(int $id)
-    {
-        $sql = "SELECT * FROM mesas WHERE id = ?";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
-    }
-    
-    /**
-     * Libera uma mesa, alterando seu status para 'disponivel'.
-     */
+    } 
+
+    public function buscarPorId(int $id) { 
+        $sql = "SELECT * FROM mesas WHERE id = ?"; 
+        $stmt = $this->pdo->prepare($sql); 
+        $stmt->execute([$id]); 
+        return $stmt->fetch(\PDO::FETCH_ASSOC); 
+    } 
+
+
     public function liberarMesa(int $mesa_id): bool
     {
         $sql = "UPDATE mesas SET status_mesa = 'disponivel' WHERE id = ?";
@@ -100,4 +91,5 @@ class Mesa
         $stmt->execute([$empresa_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 }

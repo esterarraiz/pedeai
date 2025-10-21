@@ -1,34 +1,14 @@
 <?php
-// Ficheiro: app/Core/Controller.php (Versão Simplificada)
+// Ficheiro: app/Core/Controller.php (Versão Definitiva e Corrigida)
 
 namespace App\Core;
 
 abstract class Controller
 {
-    protected $route_params = [];
-
-    public function __construct($route_params = [])
+    public function __construct()
     {
-        // A lógica de session_start() foi movida para public/index.php
-        // para garantir que é executada uma única vez no início de tudo.
-        $this->route_params = $route_params;
+        // A lógica de session_start() está em public/index.php.
     }
-
-    public function __call($name, $args)
-    {
-        if (method_exists($this, $name)) {
-            if ($this->before() !== false) {
-                call_user_func_array([$this, $name], $args);
-                $this->after();
-            }
-        } else {
-            echo "Método $name não encontrado no controller " . get_class($this);
-        }
-    }
-
-    protected function before() {}
-
-    protected function after() {}
 
     protected function requireLogin()
     {
@@ -42,13 +22,14 @@ abstract class Controller
     {
         if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
             $cargo = $_SESSION['user_cargo'] ?? null;
+            $location = '/'; 
             switch ($cargo) {
-                case 'administrador': header('Location: /dashboard/admin'); break;
-                case 'garçom': header('Location: /dashboard/garcom'); break;
-                case 'caixa': header('Location: /dashboard/caixa'); break;
-                case 'cozinheiro': header('Location: /dashboard/cozinheiro'); break;
-                default: header('Location: /'); break;
+                case 'administrador': $location = '/dashboard/admin'; break;
+                case 'garçom': $location = '/dashboard/garcom'; break;
+                case 'caixa': $location = '/dashboard/caixa'; break;
+                case 'cozinheiro': $location = '/dashboard/cozinheiro'; break;
             }
+            header('Location: ' . $location);
             exit;
         }
     }
