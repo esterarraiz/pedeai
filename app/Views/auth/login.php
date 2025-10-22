@@ -1,6 +1,3 @@
-<?php
-$login_error = $data['login_error'] ?? null;
-?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -47,7 +44,7 @@ $login_error = $data['login_error'] ?? null;
         const loginButton = document.getElementById('login-button');
 
         form.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Impede o envio tradicional do formulário
+            event.preventDefault();
 
             errorMessageDiv.style.display = 'none';
             loginButton.textContent = 'Aguarde...';
@@ -57,24 +54,31 @@ $login_error = $data['login_error'] ?? null;
             const data = Object.fromEntries(formData.entries());
 
             try {
-                const response = await fetch('/api/login', {
+                // --- CORREÇÃO APLICADA AQUI ---
+                // A URL foi alterada de '/api/login' para a rota correta: '/login/process'
+                const response = await fetch('/login/process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(data)
                 });
+                // --------------------------------
+
                 const result = await response.json();
 
                 if (response.ok) {
+                    // Se o login for bem-sucedido, o servidor nos dirá para onde ir.
                     window.location.href = result.redirectTo;
                 } else {
+                    // Se houver um erro (ex: senha errada), mostra a mensagem do servidor.
                     errorMessageDiv.textContent = result.message;
                     errorMessageDiv.style.display = 'block';
-                    loginButton.textContent = 'Entrar';
-                    loginButton.disabled = false;
                 }
             } catch (error) {
+                // Se a comunicação falhar (como no erro 404), mostra a mensagem genérica.
                 errorMessageDiv.textContent = 'Erro de comunicação com o servidor.';
                 errorMessageDiv.style.display = 'block';
+            } finally {
+                // Garante que o botão volte ao normal, mesmo em caso de erro.
                 loginButton.textContent = 'Entrar';
                 loginButton.disabled = false;
             }

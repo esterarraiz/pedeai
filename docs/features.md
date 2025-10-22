@@ -35,11 +35,28 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 
 | Feature | Responsável | Revisor (PR) | Status |
 |---------|-------------|--------------|--------|
-| Gerenciamento de Cardápio (US08) | Jorge | Ester | A produzir |
-| Gerenciamento de Usuários (US09) | Ester | Arthur | A produzir |
-| Ciclo de Notificação de Pedido Pronto (US05 + US03) | Arthur | Vitória | A produzir |
-| Visualização de Conta por Mesa (US06) | Vitória | Matheus | A produzir |
-| Tela do Caixa - Registro de Pagamento (US07) | Matheus | Jorge | A produzir |
+| Gerenciamento de Cardápio (US08) | Jorge | Ester | Concluída |
+| Gerenciamento de Usuários (US09) | Ester | Arthur | Concluída |
+| Ciclo de Notificação de Pedido Pronto (US05 + US03) | Arthur | Vitória | Concluída |
+| Visualização de Conta por Mesa (US06) | Vitória | Matheus | Concluída |
+| Tela do Caixa - Registro de Pagamento (US07) | Matheus | Jorge | Concluída |
+
+---
+
+## Iteração 3: De Produto a Plataforma (SaaS, API e Inteligência)
+
+Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionalidades planejadas, consulte o [planejamento das iterações](planejamento.md).
+
+
+| Feature | User Story | Responsável | Revisor (PR) | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| Cadastro de Empresas | N/A | Arthur | Vitória | Em andamento |
+| Implementação da API de Status de Pedidos | N/A | Ester | Arthur | Em andamento |
+| Edição e Cancelamento de Itens em Pedidos | N/A | Vitória | Matheus | Em andamento |
+| Relatórios de Vendas e Performance | US10 | Matheus | Jorge | Em andamento |
+| Funcionalidade de Dividir a Conta e Impressão | N/A | Jorge | Ester | Em andamento |
+
+---
 
 ---
 
