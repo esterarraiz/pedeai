@@ -10,6 +10,8 @@ class Router
 
     public function __construct()
     {
+        // === ROTA DA LANDING PAGE ===
+        $this->add('GET', '', ['controller' => 'HomeController', 'action' => 'index']);
         // === ROTAS DE AUTENTICAÇÃO (Acesso Público) ===
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
@@ -42,13 +44,18 @@ class Router
         $this->add('GET', 'dashboard/cozinheiro', ['controller' => 'CozinheiroDashboardController', 'action' => 'index'], ['cozinheiro']);
         $this->add('POST', 'cozinha/pedido/pronto', ['controller' => 'CozinheiroDashboardController', 'action' => 'marcarPronto'], ['cozinheiro']);
 
-        // === API DO GARÇOM ===
-        $this->add('GET', 'api/garcom/mesas', ['controller' => 'Api\\GarcomApiController', 'action' => 'listarMesas'], ['garçom']);
-        $this->add('GET', 'api/garcom/mesas/{id:\d+}', ['controller' => 'Api\\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']);
-        $this->add('GET', 'api/garcom/cardapio', ['controller' => 'Api\\GarcomApiController', 'action' => 'getCardapio'], ['garçom']);
-        $this->add('POST', 'api/garcom/pedidos', ['controller' => 'Api\\GarcomApiController', 'action' => 'lancarPedido'], ['garçom']);
-        $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
-        $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
+       // === ROTAS DE GARÇOM (VIEWS) ===
+        $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
+        $this->add('GET', 'mesas/detalhes/{id:\d+}', ['controller' => 'MesaController', 'action' => 'showDetalhesMesa'], ['garçom']); // View Controller Detalhes (pode ser refatorado para API)
+        $this->add('GET', 'pedidos/novo/{id:\d+}', ['controller' => 'PedidoController', 'action' => 'showFormNovoPedido'], ['garçom']); // View Lançar Pedido
+
+        // === ROTAS DA API DO GARÇOM ===
+        $this->add('GET', 'api/garcom/mesas', ['controller' => 'Api\GarcomApiController', 'action' => 'listarMesas'], ['garçom']);
+        $this->add('GET', 'api/garcom/mesas/{id:\d+}', ['controller' => 'Api\GarcomApiController', 'action' => 'detalhesMesa'], ['garçom']); // Endpoint para detalhes via API
+        $this->add('GET', 'api/garcom/cardapio', ['controller' => 'Api\GarcomApiController', 'action' => 'getCardapio'], ['garçom']); // Endpoint para buscar cardápio
+        $this->add('POST', 'api/pedidos', ['controller' => 'Api\PedidoController','action' => 'criarPedido'], ['garçom']); // Endpoint CORRETO para criar pedido
+        $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
+        $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
     }
 
     public function add($method, $route, $params = [], $roles = [])
