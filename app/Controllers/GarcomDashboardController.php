@@ -17,7 +17,7 @@ class GarcomDashboardController extends Controller
 
     public function index()
     {
-        $this->loadView('garcom/dashboard_api', [
+        $this->loadView('garcom/dashboard_garcom', [
             'pageTitle' => 'Dashboard do Garçom'
         ]);
     }
