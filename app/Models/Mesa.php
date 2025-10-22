@@ -10,64 +10,65 @@ class Mesa {
         $this->pdo = $pdo; 
     } 
 
-    /** 
-     * Busca todas as mesas de uma empresa específica, ordenadas pelo número.
-     * 
-     * @param int $empresa_id O ID da empresa.
-     * @return array A lista de mesas ou um array vazio se não houver.
-     */ 
+    // ... (buscarTodasPorEmpresa, atualizarStatus, buscarPorId - sem alterações) ...
     public function buscarTodasPorEmpresa(int $empresa_id): array { 
         $sql = "SELECT id, numero, status FROM mesas WHERE empresa_id = ? ORDER BY numero ASC"; 
         $stmt = $this->pdo->prepare($sql); 
         $stmt->execute([$empresa_id]); 
         return $stmt->fetchAll(PDO::FETCH_ASSOC); 
     } 
-
-    /**
-     * Atualiza o status de uma mesa específica no banco de dados.
-     *
-     * @param int $id O ID da mesa a ser atualizada.
-     * @param string $novoStatus O novo status para a mesa (ex: 'disponivel', 'ocupada').
-     * @return bool Retorna true em caso de sucesso.
-     * @throws Exception Lança exceção se falhar.
-     */
     public function atualizarStatus(int $id, string $novoStatus): bool
     {
         try {
-            // Converte o status para minúsculas para padronização
             $novoStatus = strtolower($novoStatus);
-
             $sql = "UPDATE mesas SET status = :novoStatus WHERE id = :id";
             $stmt = $this->pdo->prepare($sql);
-
             $stmt->bindValue(':novoStatus', $novoStatus, PDO::PARAM_STR);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-
-            // Apenas executa. Se houver um erro no DB, a exceção PDO será capturada.
-            // A verificação de rowCount() foi removida por ser muito restritiva.
             return $stmt->execute();
-
         } catch (\PDOException $e) {
-            // Se houver um erro de banco de dados, loga e relança como uma exceção genérica.
             error_log("Erro PDO ao atualizar status da mesa: " . $e->getMessage());
             throw new Exception("Erro de banco de dados ao tentar atualizar a mesa.");
         }
     } 
-
     public function buscarPorId(int $id) { 
         $sql = "SELECT * FROM mesas WHERE id = ?"; 
         $stmt = $this->pdo->prepare($sql); 
         $stmt->execute([$id]); 
         return $stmt->fetch(\PDO::FETCH_ASSOC); 
     } 
+    // FIM dos métodos sem alteração
 
 
-    public function liberarMesa(int $mesa_id): bool
+    /**
+     * Atualiza o status de uma mesa para 'disponivel' após o pagamento.
+     * CORRIGIDO: Removida a verificação de status anterior (IN ('ocupada', ...)).
+     * Agora, força a mesa a ficar 'disponivel' desde que o ID e empresa_id batam.
+     */
+    public function liberarMesa(int $mesa_id, int $empresa_id): bool
     {
-        $sql = "UPDATE mesas SET status_mesa = 'disponivel' WHERE id = ?";
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([$mesa_id]);
+        // --- ALTERAÇÃO AQUI ---
+        // Removida a cláusula 'AND status IN (...)'.
+        // Se estamos chamando liberarMesa, ela DEVE ser liberada,
+        // independentemente do status anterior.
+        $sql = "UPDATE mesas 
+                SET status = 'disponivel'
+                WHERE id = :mesa_id 
+                  AND empresa_id = :empresa_id";
+
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
+            // Retorna true se a mesa foi encontrada e atualizada
+            return $stmt->rowCount() > 0; 
+        } catch (\PDOException $e) {
+            error_log("Erro no Model (PDO) ao liberar mesa: " . $e->getMessage());
+            return false; // Retorna false em caso de erro
+        }
     }
+
+    // ... (buscarMesasOcupadasOuPagamento, buscarMesasComContaAberta - sem alterações) ...
     public function buscarMesasOcupadasOuPagamento(int $empresa_id): array
     {
         $sql = "SELECT id, numero, status FROM mesas 
@@ -86,10 +87,9 @@ class Mesa {
               AND status IN ('ocupada', 'aguardando_pagamento') 
             ORDER BY numero ASC
         ";
-        
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$empresa_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 }
+

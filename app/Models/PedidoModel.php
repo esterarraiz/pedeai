@@ -15,9 +15,9 @@ class PedidoModel
         $this->pdo = $pdo;
     }
 
+    // ... (buscarPedidosParaCozinha, marcarComoPronto, etc. - sem alteração) ...
     public function buscarPedidosParaCozinha(int $empresa_id): array
     {
-        // ... (código existente, sem alterações)
         $sql = "
             SELECT
                 p.id AS pedido_id, p.data_abertura, m.numero AS mesa_numero,
@@ -51,10 +51,8 @@ class PedidoModel
         }
         return array_values($pedidos);
     }
-
     public function marcarComoPronto(int $pedido_id, int $empresa_id): bool
     {
-        // ... (código existente, sem alterações)
         $sql = "
             UPDATE pedidos
             SET status = 'pronto', data_pronto = NOW()
@@ -69,25 +67,19 @@ class PedidoModel
             return false;
         }
     }
-
-    /**
-     * ATUALIZAÇÃO DEFINITIVA: Busca as MESAS que têm pedidos prontos.
-     * GARANTE que a mesa ainda está 'ocupada' e que apenas UMA notificação por mesa é mostrada.
-     */
     public function buscarPedidosProntosPorEmpresa(int $empresa_id): array
     {
         $sql = "
             SELECT
-                m.id AS mesa_id,      -- ID da mesa
-                m.numero AS mesa_numero -- Número da mesa
+                m.id AS mesa_id,
+                m.numero AS mesa_numero
             FROM pedidos p
             JOIN mesas m ON p.mesa_id = m.id
             WHERE p.empresa_id = :empresa_id 
               AND p.status = 'pronto'
-              -- Opcional: Garante que só notifica se a mesa ainda estiver ocupada
-              AND m.status = 'ocupada' 
-            GROUP BY m.id, m.numero -- <-- Agrupa para ter uma linha por mesa
-            ORDER BY MIN(p.data_pronto) ASC; -- Ordena pela notificação mais antiga primeiro
+              AND m.status = 'ocupada'
+            GROUP BY m.id, m.numero
+            ORDER BY MIN(p.data_pronto) ASC;
         ";
 
         try {
@@ -99,16 +91,15 @@ class PedidoModel
             return [];
         }
     }
-
     public function criarNovoPedido(int $empresa_id, int $mesa_id, int $funcionario_id, array $itens): int
     {
-        // ... (código existente, sem alterações)
         try {
-            $valorTotal = 0.0; $itensParaInserir = [];
+            $valorTotal = 0.0;
+            $itensParaInserir = [];
             $sql_preco = "SELECT preco, nome FROM cardapio_itens WHERE id = :item_id AND empresa_id = :empresa_id";
             $stmt_preco = $this->pdo->prepare($sql_preco);
             foreach ($itens as $item_id => $quantidade) {
-                 if ($quantidade <= 0) continue;
+                if ($quantidade <= 0) continue;
                 $stmt_preco->execute([':item_id' => $item_id, ':empresa_id' => $empresa_id]);
                 $item_info = $stmt_preco->fetch(PDO::FETCH_ASSOC);
                 if (!$item_info) { throw new Exception("O item com ID {$item_id} não foi encontrado."); }
@@ -131,11 +122,9 @@ class PedidoModel
         } catch (PDOException $e) { error_log("Erro PDO ao criar pedido: " . $e->getMessage()); throw $e;
         } catch (Exception $e) { error_log("Erro Geral ao criar pedido: " . $e->getMessage()); throw $e; }
     }
-
     public function buscarItensDoUltimoPedidoDaMesa(int $mesa_id, int $empresa_id): ?array
     {
-        // ... (código existente, sem alterações)
-         $sql = "
+        $sql = "
             SELECT p.id AS pedido_id, p.status, p.data_abertura, pi.quantidade, pi.preco_unitario_momento, ci.nome AS item_nome
             FROM pedidos p
             JOIN pedido_itens pi ON p.id = pi.pedido_id
@@ -155,10 +144,57 @@ class PedidoModel
         }
         return $ultimo_pedido;
     }
+    public function buscarPedidosPorMesa(int $mesa_id, int $empresa_id): array
+    {
+        $sql = "
+            SELECT
+                p.id AS pedido_id,
+                p.status,
+                p.data_abertura,
+                pi.quantidade,
+                pi.preco_unitario_momento,
+                ci.nome AS item_nome
+            FROM pedidos p
+            JOIN pedido_itens pi ON p.id = pi.pedido_id
+            JOIN cardapio_itens ci ON pi.item_id = ci.id
+            WHERE p.mesa_id = :mesa_id 
+              AND p.empresa_id = :empresa_id
+              AND p.status IN ('em_preparo', 'pronto', 'entregue') 
+            ORDER BY p.data_abertura ASC, ci.nome ASC;
+        ";
 
-    /**
-     * NOVO MÉTODO (A SOLUÇÃO): Marca TODOS os pedidos 'pronto' de uma MESA como 'entregue'.
-     */
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Agrupa os itens por pedido
+        $pedidos_agrupados = [];
+        foreach ($results as $row) {
+            $pedido_id = $row['pedido_id'];
+            if (!isset($pedidos_agrupados[$pedido_id])) {
+                $pedidos_agrupados[$pedido_id] = [
+                    'id' => $pedido_id,
+                    'hora' => date('H:i', strtotime($row['data_abertura'])),
+                    'status' => $row['status'],
+                    'itens' => [],
+                    'subtotal' => 0
+                ];
+            }
+            
+            $subtotal_item = $row['quantidade'] * $row['preco_unitario_momento'];
+            
+            $pedidos_agrupados[$pedido_id]['itens'][] = [
+                'nome' => $row['item_nome'],
+                'quantidade' => $row['quantidade'],
+                'preco_unitario' => $row['preco_unitario_momento'],
+                'subtotal' => $subtotal_item
+            ];
+            
+            $pedidos_agrupados[$pedido_id]['subtotal'] += $subtotal_item;
+        }
+
+        return array_values($pedidos_agrupados);
+    }
     public function marcarPedidosDaMesaComoEntregues(int $mesa_id, int $empresa_id): bool
     {
         $sql = "UPDATE pedidos
@@ -166,16 +202,37 @@ class PedidoModel
                 WHERE mesa_id = :mesa_id
                   AND empresa_id = :empresa_id
                   AND status = 'pronto'";
-        
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
-            // Retorna true se pelo menos uma linha foi afetada (indica que havia pedidos prontos)
-            return $stmt->rowCount() > 0; 
+            return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
             error_log("Erro ao marcar pedidos da mesa como entregues: " . $e->getMessage());
             return false;
         }
     }
-}
 
+    /**
+     * Marca todos os pedidos ativos de uma mesa como 'pago'.
+     */
+    public function marcarPedidosDaMesaComoPagos(int $mesa_id, int $empresa_id): bool
+    {
+        // --- CORREÇÃO DO BUG AQUI ---
+        // O status de um pedido deve ser 'pago', não 'disponível'.
+        $sql = "UPDATE pedidos
+                SET status = 'pago' 
+                WHERE mesa_id = :mesa_id
+                  AND empresa_id = :empresa_id
+                  AND status IN ('em_preparo', 'pronto', 'entregue')"; 
+        
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
+            return true; 
+        } catch (PDOException $e) {
+            error_log("Erro no Model (PDO) ao marcar pedidos da mesa como pagos: " . $e->getMessage());
+            return false;
+        }
+    }
+
+}
