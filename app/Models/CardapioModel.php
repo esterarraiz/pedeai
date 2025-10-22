@@ -22,7 +22,8 @@ class CardapioModel
                 ci.nome,
                 ci.descricao,
                 ci.preco,
-                c.nome AS categoria_nome
+                c.nome AS categoria_nome,
+                ci.categoria_id -- <-- CORREÇÃO: Adicionado para selecionar o ID da categoria
             FROM cardapio_itens ci
             JOIN categorias c ON ci.categoria_id = c.id
             WHERE ci.empresa_id = ? AND ci.disponivel = TRUE
@@ -45,7 +46,8 @@ class CardapioModel
 
         return $cardapio_agrupado;
     }
- public function buscarTodasCategorias(int $empresa_id): array
+
+    public function buscarTodasCategorias(int $empresa_id): array
     {
         $sql = "SELECT id, nome FROM categorias WHERE empresa_id = ? ORDER BY nome ASC";
         $stmt = $this->pdo->prepare($sql);
