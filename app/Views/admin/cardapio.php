@@ -37,6 +37,8 @@
                 </button>
             </header>
 
+            <div id="feedback-container"></div>
+            
             <?php if (isset($_SESSION['feedback_success'])): ?>
                 <div class="alert alert-success"><?= $_SESSION['feedback_success']; ?><?php unset($_SESSION['feedback_success']); ?></div>
             <?php endif; ?>
@@ -44,52 +46,9 @@
                 <div class="alert alert-danger"><?= $_SESSION['feedback_error']; ?><?php unset($_SESSION['feedback_error']); ?></div>
             <?php endif; ?>
 
-            <?php if (empty($cardapio)): ?>
-                <div class="alert alert-info text-center mt-4">Nenhum item encontrado no cardápio.</div>
-            <?php else: ?>
-                <?php foreach ($cardapio as $categoriaNome => $itens): ?>
-                    <h3 class="category-header"><?= htmlspecialchars($categoriaNome) ?></h3>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Descrição</th>
-                                    <th class="text-end">Preço</th>
-                                    <th class="text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($itens as $item): ?>
-                                    <tr>
-                                        <td><strong><?= htmlspecialchars($item['nome']) ?></strong></td>
-                                        <td><?= htmlspecialchars($item['descricao'] ?? '') ?></td>
-                                        <td class="text-end">R$ <?= number_format($item['preco'], 2, ',', '.') ?></td>
-                                        <td class="actions-cell" style="justify-content: center;">
-                                            <a class="action-icon btn-editar" title="Editar"
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#modalEditarItem"
-                                                data-id="<?= $item['id'] ?>"
-                                                data-nome="<?= htmlspecialchars($item['nome']) ?>"
-                                                data-descricao="<?= htmlspecialchars($item['descricao'] ?? '') ?>"
-                                                data-preco="<?= $item['preco'] ?>"
-                                                data-categoria_id="<?= $item['categoria_id'] ?? '' ?>">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="/dashboard/admin/cardapio/remover" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este item?');">
-                                                <input type="hidden" name="id" value="<?= $item['id'] ?>">
-                                                <button type="submit" class="action-icon" title="Remover" style="border:none; background:none; cursor:pointer;">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+            <div id="cardapio-container">
+                <p>Carregando cardápio...</p>
+            </div>
         </main>
     </div>
 
@@ -97,7 +56,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <h3>Adicionar Novo Item</h3>
-                <form action="/dashboard/admin/cardapio/adicionar" method="POST">
+                <form id="formAdicionarItem">
                     <div class="form-group">
                         <label>Nome do Item</label>
                         <input type="text" name="nome" class="form-control" required>
@@ -112,11 +71,8 @@
                     </div>
                     <div class="form-group">
                         <label>Categoria</label>
-                        <select name="categoria_id" class="form-select" required>
-                            <option value="" disabled selected>Selecione uma categoria...</option>
-                            <?php foreach ($categorias as $categoria): ?>
-                                <option value="<?= $categoria['id'] ?>"><?= htmlspecialchars($categoria['nome']) ?></option>
-                            <?php endforeach; ?>
+                        <select name="categoria_id" id="add-categoria_id" class="form-select" required>
+                            <option value="" disabled selected>Carregando categorias...</option>
                         </select>
                     </div>
                     <div class="form-actions">
@@ -132,7 +88,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <h3>Editar Item</h3>
-                <form action="/dashboard/admin/cardapio/editar" method="POST">
+                <form id="formEditarItem">
                     <input type="hidden" name="id" id="edit-id">
                     <div class="form-group">
                         <label>Nome do Item</label>
@@ -150,9 +106,6 @@
                         <label>Categoria</label>
                         <select id="edit-categoria_id" name="categoria_id" class="form-select" required>
                             <option value="" disabled>Selecione uma categoria...</option>
-                            <?php foreach ($categorias as $categoria): ?>
-                                <option value="<?= $categoria['id'] ?>"><?= htmlspecialchars($categoria['nome']) ?></option>
-                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-actions">
@@ -165,26 +118,261 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var modalEditar = document.getElementById('modalEditarItem');
-        if(modalEditar) {
-            modalEditar.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var id = button.getAttribute('data-id');
-                var nome = button.getAttribute('data-nome');
-                var descricao = button.getAttribute('data-descricao');
-                var preco = button.getAttribute('data-preco');
-                var categoria_id = button.getAttribute('data-categoria_id');
+        
+        // --- CONSTANTES GLOBAIS ---
+        const apiBaseUrl = '/api/admin/cardapio';
+        const cardapioContainer = document.getElementById('cardapio-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        
+        // Objetos JS do Bootstrap para controlar os modais
+        const modalAdicionar = new bootstrap.Modal(document.getElementById('modalAdicionarItem'));
+        const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarItem'));
 
-                var modal = this;
-                modal.querySelector('#edit-id').value = id;
-                modal.querySelector('#edit-nome').value = nome;
-                modal.querySelector('#edit-descricao').value = descricao;
-                modal.querySelector('#edit-preco').value = String(preco).replace(',', '.');
-                modal.querySelector('#edit-categoria_id').value = categoria_id;
+        // *** CORREÇÃO APLICADA AQUI ***
+        // Elemento HTML do modal (para adicionar listeners)
+        const modalEditarElement = document.getElementById('modalEditarItem'); 
+
+        // Elementos dos formulários
+        const formAdicionar = document.getElementById('formAdicionarItem');
+        const formEditar = document.getElementById('formEditarItem');
+
+        // Selects de categoria
+        const selectAddCategoria = document.getElementById('add-categoria_id');
+        const selectEditCategoria = document.getElementById('edit-categoria_id');
+
+        // --- FUNÇÕES DE RENDERIZAÇÃO ---
+
+        /**
+         * Preenche os <select> de categoria nos modais.
+         */
+        function renderizarCategorias(categorias) {
+            const selects = [selectAddCategoria, selectEditCategoria];
+            selects.forEach(select => {
+                const placeholder = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(placeholder);
+                
+                if (categorias && categorias.length > 0) {
+                    placeholder.text = 'Selecione uma categoria...';
+                    categorias.forEach(cat => {
+                        const option = new Option(cat.nome, cat.id);
+                        select.add(option);
+                    });
+                } else {
+                    placeholder.text = 'Nenhuma categoria encontrada';
+                }
             });
         }
+
+        /**
+         * Constrói as tabelas de cardápio dinamicamente no container.
+         */
+        function renderizarCardapio(cardapioAgrupado) {
+            cardapioContainer.innerHTML = ''; // Limpa o "Carregando..."
+
+            if (!cardapioAgrupado || Object.keys(cardapioAgrupado).length === 0) {
+                cardapioContainer.innerHTML = '<div class="alert alert-info text-center mt-4">Nenhum item encontrado no cardápio.</div>';
+                return;
+            }
+
+            let html = '';
+            for (const [categoriaNome, itens] of Object.entries(cardapioAgrupado)) {
+                
+                let itensHtml = '';
+                itens.forEach(item => {
+                    const precoFormatado = parseFloat(item.preco).toFixed(2).replace('.', ',');
+                    itensHtml += `
+                        <tr>
+                            <td><strong>${escapeHTML(item.nome)}</strong></td>
+                            <td>${escapeHTML(item.descricao || '')}</td>
+                            <td class="text-end">R$ ${precoFormatado}</td>
+                            <td class="actions-cell" style="justify-content: center;">
+                                <a class="action-icon btn-editar" title="Editar"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalEditarItem"
+                                    data-id="${item.id}"
+                                    data-nome="${escapeHTML(item.nome)}"
+                                    data-descricao="${escapeHTML(item.descricao || '')}"
+                                    data-preco="${item.preco}"
+                                    data-categoria_id="${item.categoria_id || ''}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="action-icon btn-remover" title="Remover" data-id="${item.id}" data-nome="${escapeHTML(item.nome)}" style="border:none; background:none; cursor:pointer;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                    <h3 class="category-header">${escapeHTML(categoriaNome)}</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th class="text-end">Preço</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itensHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            cardapioContainer.innerHTML = html;
+        }
+
+        // --- FUNÇÃO PRINCIPAL DE CARREGAMENTO ---
+
+        /**
+         * Busca os dados da API (GET) e chama as funções de renderização.
+         */
+        async function carregarDados() {
+            try {
+                const response = await fetch(apiBaseUrl); // GET /api/admin/cardapio
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    renderizarCategorias(data.categorias);
+                    renderizarCardapio(data.cardapio);
+                } else {
+                    mostrarFeedback(data.message || 'Não foi possível carregar os dados.', 'danger');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                mostrarFeedback('Erro de comunicação com o servidor. (verifique F12 > Rede)', 'danger');
+            }
+        }
+
+        // --- HELPERS (Funções de utilidade) ---
+
+        /**
+         * Exibe uma mensagem de feedback temporária.
+         */
+        function mostrarFeedback(mensagem, tipo = 'success') {
+            const alertClass = (tipo === 'success') ? 'alert-success' : 'alert-danger';
+            feedbackContainer.innerHTML = `<div class="alert ${alertClass}">${mensagem}</div>`;
+            setTimeout(() => { feedbackContainer.innerHTML = ''; }, 5000);
+        }
+
+        /**
+         * Evita XSS (Cross-Site Scripting) ao inserir dados no HTML.
+         */
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]));
+        }
+
+        // --- EVENT LISTENERS (Ações do Usuário) ---
+
+        // (ADICIONAR) Envio do formulário
+        formAdicionar.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const dados = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(apiBaseUrl, { // POST /api/admin/cardapio
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    modalAdicionar.hide(); // Usa o objeto Bootstrap
+                    mostrarFeedback(result.message);
+                    carregarDados(); // Recarrega a lista
+                    this.reset();
+                } else {
+                    mostrarFeedback(result.message || 'Erro ao adicionar.', 'danger');
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar:', error);
+                mostrarFeedback('Erro de comunicação ao adicionar.', 'danger');
+            }
+        });
+
+        // (EDITAR) Preencher o modal
+        // *** CORREÇÃO APLICADA AQUI ***
+        // Usamos 'modalEditarElement' (o elemento HTML) para o listener
+        modalEditarElement.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            if (!button) return;
+            this.querySelector('#edit-id').value = button.getAttribute('data-id');
+            this.querySelector('#edit-nome').value = button.getAttribute('data-nome');
+            this.querySelector('#edit-descricao').value = button.getAttribute('data-descricao');
+            this.querySelector('#edit-preco').value = String(button.getAttribute('data-preco')).replace(',', '.');
+            this.querySelector('#edit-categoria_id').value = button.getAttribute('data-categoria_id');
+        });
+
+        // (EDITAR) Enviar o formulário
+        formEditar.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const dados = Object.fromEntries(formData.entries());
+            const id = dados.id;
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/${id}`, { // PUT /api/admin/cardapio/{id}
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    modalEditar.hide(); // Usa o objeto Bootstrap
+                    mostrarFeedback(result.message);
+                    carregarDados(); // Recarrega a lista
+                } else {
+                    mostrarFeedback(result.message || 'Erro ao atualizar.', 'danger');
+                }
+            } catch (error) {
+                console.error('Erro ao editar:', error);
+                mostrarFeedback('Erro de comunicação ao atualizar.', 'danger');
+            }
+        });
+
+        // (REMOVER) Delegação de evento (escuta cliques no container principal)
+        cardapioContainer.addEventListener('click', async function(e) {
+            const btnRemover = e.target.closest('.btn-remover');
+            if (btnRemover) {
+                const id = btnRemover.dataset.id;
+                const nome = btnRemover.dataset.nome;
+                
+                if (confirm(`Tem certeza que deseja remover o item "${nome}"?`)) {
+                    try {
+                        const response = await fetch(`${apiBaseUrl}/${id}`, { method: 'DELETE' }); // DELETE /api/admin/cardapio/{id}
+                        const result = await response.json();
+
+                        if (response.ok && result.status === 'success') {
+                            mostrarFeedback(result.message);
+                            carregarDados(); // Recarrega a lista
+                        } else {
+                            mostrarFeedback(result.message || 'Erro ao remover.', 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao remover:', error);
+                        mostrarFeedback('Erro de comunicação ao remover.', 'danger');
+                    }
+                }
+            }
+        });
+
+        // --- INICIALIZAÇÃO ---
+        carregarDados(); // Carrega o cardápio ao iniciar a página
     });
     </script>
 </body>

@@ -1,5 +1,5 @@
 <?php
-// Ficheiro: app/Core/Router.php (Versão Definitiva, Corrigida e Organizada)
+// Ficheiro: app/Core/Router.php (Versão com API de Cardápio)
 
 namespace App\Core;
 
@@ -24,11 +24,15 @@ class Router
         $this->add('POST', 'funcionarios/atualizar', ['controller' => 'FuncionarioController', 'action' => 'update'], ['administrador']);
         $this->add('POST', 'funcionarios/status', ['controller' => 'FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'funcionarios/redefinir-senha', ['controller' => 'FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
+        
         // Cardápio
+        // (ALTERAÇÃO) Esta rota GET agora só carrega a "casca" da página
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
-        $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem'], ['administrador']);
-        $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem'], ['administrador']);
-        $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem'], ['administrador']);
+        
+        // (ALTERAÇÃO) Rotas POST antigas desativadas - A API vai substituí-las
+        // $this->add('POST', 'dashboard/admin/cardapio/adicionar', ['controller' => 'AdminDashboardController', 'action' => 'adicionarItem'], ['administrador']);
+        // $this->add('POST', 'dashboard/admin/cardapio/editar', ['controller' => 'AdminDashboardController', 'action' => 'editarItem'], ['administrador']);
+        // $this->add('POST', 'dashboard/admin/cardapio/remover', ['controller' => 'AdminDashboardController', 'action' => 'removerItem'], ['administrador']);
 
         // === ROTAS DE CAIXA ===
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
@@ -49,10 +53,25 @@ class Router
         $this->add('POST', 'api/garcom/pedidos', ['controller' => 'Api\\GarcomApiController', 'action' => 'lancarPedido'], ['garçom']);
         $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
         $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
+
+        // === (NOVO) API DO ADMIN (Cardápio) ===
+        // Adicionadas as rotas RESTful para o cardápio
+        $this->add('GET', 'api/admin/cardapio', 
+            ['controller' => 'Api\\AdminCardapioController', 'action' => 'listar'], ['administrador']);
+
+        $this->add('POST', 'api/admin/cardapio', 
+            ['controller' => 'Api\\AdminCardapioController', 'action' => 'criar'], ['administrador']);
+
+        $this->add('PUT', 'api/admin/cardapio/{id:\d+}', 
+            ['controller' => 'Api\\AdminCardapioController', 'action' => 'atualizar'], ['administrador']);
+
+        $this->add('DELETE', 'api/admin/cardapio/{id:\d+}', 
+            ['controller' => 'Api\\AdminCardapioController', 'action' => 'remover'], ['administrador']);
     }
 
     public function add($method, $route, $params = [], $roles = [])
     {
+        // ... (Seu método add() original - sem alterações)
         $route = preg_replace('/\{([a-z]+):([^\}]+)\}/', '(?P<\1>\2)', $route);
         $route = '/^' . str_replace('/', '\/', $route) . '$/i';
         
@@ -66,6 +85,7 @@ class Router
 
     public function match($url)
     {
+        // ... (Seu método match() original - sem alterações)
         $current_method = $_SERVER['REQUEST_METHOD'];
         foreach ($this->routes as $routeInfo) {
             if ($routeInfo['method'] === $current_method && preg_match($routeInfo['route'], $url, $matches)) {
@@ -81,39 +101,32 @@ class Router
         return false;
     }
     
-    /**
-     * CORREÇÃO PRINCIPAL: A lógica de verificação foi simplificada para evitar o loop de redirecionamento.
-     */
     public function dispatch()
     {
+        // ... (Seu método dispatch() original - sem alterações)
         $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         
         if ($this->match($url)) {
             $requiredRoles = $this->params['roles'] ?? [];
 
-            // 1. Se a rota não exige cargo (é pública como /login), executa imediatamente.
             if (empty($requiredRoles)) {
                 $this->executeAction();
                 return;
             }
 
-            // 2. A partir daqui, todas as rotas são protegidas. Verifica se o utilizador está logado.
             if (!isset($_SESSION['user_id'])) {
                 header('Location: /login');
                 exit;
             }
 
-            // 3. Se está logado, verifica se tem o cargo correto (ou se é admin).
             $userRole = strtolower($_SESSION['user_cargo'] ?? '');
             if ($userRole === 'administrador' || in_array($userRole, $requiredRoles)) {
                 $this->executeAction();
             } else {
-                // O utilizador está logado, mas não tem permissão.
-                $this->showErrorPage('error/403', 403); // 403 Forbidden
+                $this->showErrorPage('error/403', 403);
             }
         } else {
-            // Nenhuma rota foi encontrada.
-            $this->showErrorPage('error/404', 404); // 404 Not Found
+            $this->showErrorPage('error/404', 404);
         }
     }
 
@@ -122,7 +135,13 @@ class Router
         $controller = "App\\Controllers\\" . $this->params['controller'];
 
         if (class_exists($controller)) {
-            $controller_object = new $controller();
+            
+            // (CORREÇÃO VITAL)
+            // Precisamos passar '$this->params' para o construtor.
+            // O seu 'Controller.php' base espera por '$route_params'
+            // para poder iniciar a sessão (session_start()).
+            $controller_object = new $controller($this->params); // <- CORRIGIDO
+            
             $action = $this->params['action'];
             if (method_exists($controller_object, $action)) {
                 $controller_object->$action($this->params);
@@ -138,8 +157,8 @@ class Router
 
     protected function showErrorPage($viewName, $statusCode)
     {
+        // ... (Seu método showErrorPage() original - sem alterações)
         http_response_code($statusCode);
-        // CORREÇÃO: O caminho para as views deve ser capitalizado (PSR-4)
         $viewPath = dirname(__DIR__) . '/Views/' . $viewName . '.php';
         if (file_exists($viewPath)) {
             require $viewPath;
