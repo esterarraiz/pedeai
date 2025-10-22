@@ -136,25 +136,28 @@
 
             const carregarMesas = async () => {
                 const response = await apiFetch('/api/garcom/mesas');
-                const mesas = Array.isArray(response) ? response : (response?.data ?? []); 
+                // CORREÇÃO: A sua API /api/garcom/mesas retorna {success: true, data: [...] }
+                const mesas = response?.data ?? []; 
 
-                if (response?.success === false || mesas === null) {
-                     mesasGrid.innerHTML = `<p>Erro ao carregar mesas: ${response?.message || 'Falha na comunicação'}</p>`;
-                     return;
+                if (response?.success === false || !Array.isArray(mesas)) {
+                        mesasGrid.innerHTML = `<p>Erro ao carregar mesas: ${response?.message || 'Falha na comunicação'}</p>`;
+                        return;
                 }
                 
                 mesasGrid.innerHTML = ''; 
                 
                 if (mesas.length === 0) {
-                     mesasGrid.innerHTML = '<p>Nenhuma mesa encontrada.</p>';
-                     return;
+                        mesasGrid.innerHTML = '<p>Nenhuma mesa encontrada.</p>';
+                        return;
                 }
 
                 mesas.forEach(mesa => {
+                    // CORREÇÃO: O status 'disponivel' deve ser usado, não 'livre'.
                     let statusClass = 'status-livre'; let statusText = 'Livre';
                     let linkHref = `/pedidos/novo/${mesa.id}`; 
                     if (mesa.status === 'ocupada') { statusClass = 'status-ocupada'; statusText = 'Ocupada'; linkHref = `/mesas/detalhes/${mesa.id}`; } 
                     else if (mesa.status === 'aguardando_pagamento') { statusClass = 'status-pagamento'; statusText = 'Pagamento'; linkHref = `/mesas/detalhes/${mesa.id}`; }
+                    else if (mesa.status === 'disponivel') { /* já é o padrão */ }
 
                     const linkMesa = document.createElement('a');
                     linkMesa.className = 'table-card-link';
@@ -172,6 +175,7 @@
 
                         if (mesaStatus === 'disponivel') {
                             // Redireciona para novo pedido
+                            // ESTA É A OUTRA PÁGINA, SE O BUG ESTIVER LÁ, PRECISAMOS VER ESSE ARQUIVO
                             window.location.href = `/pedidos/novo/${mesaId}`;
                         } else {
                             // Abre modal com detalhes do pedido atual
@@ -187,15 +191,18 @@
 
             const carregarPedidosProntos = async () => {
                 const response = await apiFetch('/api/garcom/pedidos/prontos');
-                const pedidos = Array.isArray(response) ? response : (response?.data ?? []);
+                const pedidos = response?.data ?? [];
 
-                if (response?.success === false || pedidos === null) {
+                // ----> ADICIONE ESTA LINHA <----
+                console.log('API /api/garcom/pedidos/prontos retornou:', JSON.stringify(pedidos));
+                // ----> FIM DA LINHA ADICIONADA <----
+
+                if (response?.success === false || !Array.isArray(pedidos)) {
                     pedidosProntosContainer.innerHTML = `<p>Erro ao carregar pedidos prontos: ${response?.message || 'Falha na comunicação'}</p>`;
                     return;
                 }
                 
                 pedidosProntosContainer.innerHTML = ''; 
-                
                 if (pedidos.length === 0) {
                     pedidosProntosContainer.innerHTML = '<p>Nenhum pedido pronto no momento.</p>';
                     return;
@@ -212,38 +219,26 @@
                 });
             };
 
+            // Event listener para marcar como entregue (já estava correto)
             pedidosProntosContainer.addEventListener('click', async (event) => {
-                console.log('Clique detetado em pedidosProntosContainer'); // Log 1
                 if (event.target.classList.contains('btn-entregar')) {
-                    console.log('Botão .btn-entregar clicado'); // Log 2
-                    
                     const mesaId = event.target.dataset.mesaId; 
-                    console.log('Mesa ID lido:', mesaId); // Log 3
-
                     if (!mesaId) {
-                         console.error('Mesa ID não encontrado no botão!'); 
-                         return;
+                        console.error('Mesa ID não encontrado no botão!'); 
+                        return;
                     }
 
-                    console.log('Enviando requisição para marcar como entregue...'); // Log 4
                     const response = await apiFetch('/api/garcom/pedidos/marcar-entregue', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ mesa_id: mesaId }) 
                     });
                     
-                    console.log('Resposta da API (marcar-entregue):', response); // Log 5
-
-                    // Verifica se a resposta indica sucesso explicitamente ou se é um objeto vazio (caso comum de sucesso)
-                    if (response && (response.success === true || Object.keys(response).length === 0 || response.message)) {
-                        console.log('Sucesso ao marcar como entregue, atualizando dashboard...'); // Log 6
+                    if (response && response.success) {
                         atualizarDashboard(); 
                     } else {
-                        console.error('Falha ao marcar como entregue:', response); // Log 7
                         alert(response?.message || 'Erro ao marcar como entregue.');
                     }
-                } else {
-                     console.log('Clique não foi no botão .btn-entregar'); // Log se clicar noutra área
                 }
             });
 
@@ -256,12 +251,14 @@
                 conteudoDetalhes.querySelector('ul').innerHTML = '<li>Carregando detalhes...</li>';
                 conteudoDetalhes.querySelector('p').textContent = '';
 
+                // A API /api/garcom/mesas/{id} retorna { success: true, data: { mesa: ..., pedido: ... } }
                 const response = await apiFetch(`/api/garcom/mesas/${mesaId}`); 
                 if (response?.success && response.data?.pedido) { 
                     renderizarDetalhesPedido(response.data.pedido);
                 } else {
-                     conteudoDetalhes.querySelector('ul').innerHTML = '<li>Nenhum pedido ativo ou erro ao carregar.</li>';
-                     conteudoDetalhes.querySelector('p').textContent = '';
+                    // Se não há pedido, oferece para criar um novo
+                    conteudoDetalhes.querySelector('ul').innerHTML = '<li>Nenhum pedido ativo.</li>';
+                    conteudoDetalhes.querySelector('p').textContent = '';
                 }
                 modal.style.display = 'flex'; 
             };
@@ -274,6 +271,7 @@
                     let total = 0;
                     pedido.itens.forEach(item => {
                         const quantidade = parseFloat(item.quantidade) || 0;
+                        // CORREÇÃO: O seu JSON usa 'preco_unitario_momento' ou 'preco_unitario'
                         const preco = parseFloat(item.preco_unitario_momento || item.preco_unitario) || 0; 
                         const itemTotal = quantidade * preco;
                         total += itemTotal;
@@ -286,9 +284,102 @@
                 }
             };
 
-            const carregarCardapio = async () => { /* ... (sem alterações) ... */ };
-            const renderizarCardapio = (categorias) => { /* ... (sem alterações) ... */ };
-            formNovoPedido.addEventListener('submit', async (e) => { /* ... (sem alterações) ... */ });
+            // --- CÓDIGO CORRIGIDO/ADICIONADO ---
+            const carregarCardapio = async () => {
+                if (cardapioCache) return cardapioCache; // Usa cache
+                
+                // API /api/garcom/cardapio retorna { success: true, data: [...] }
+                const response = await apiFetch('/api/garcom/cardapio');
+                if (response?.success && response.data) {
+                    cardapioCache = response.data;
+                    return cardapioCache;
+                } else {
+                    alert('Erro ao carregar o cardápio.');
+                    return null;
+                }
+            };
+            
+            // --- CÓDIGO CORRIGIDO/ADICIONADO ---
+            const renderizarCardapio = (categorias) => {
+                const container = document.getElementById('cardapio-categorias');
+                container.innerHTML = '';
+                if (!categorias) {
+                    container.innerHTML = '<p>Erro ao carregar cardápio.</p>';
+                    return;
+                }
+                for (const [categoria, itens] of Object.entries(categorias)) {
+                    const bloco = document.createElement('div');
+                    bloco.className = 'categoria-bloco';
+                    let itensHtml = '';
+                    itens.forEach(item => {
+                        itensHtml += `
+                            <div class="item-cardapio">
+                                <label for="item-${item.id}">${item.nome} (R$ ${parseFloat(item.preco).toFixed(2)})</label>
+                                <input type="number" id="item-${item.id}" name="itens[${item.id}]" min="0" value="0" data-id="${item.id}">
+                            </div>
+                        `;
+                    });
+                    bloco.innerHTML = `<h4 class="categoria-titulo">${categoria}</h4>${itensHtml}`;
+                    container.appendChild(bloco);
+                }
+            };
+            
+            // --- CÓDIGO CORRIGIDO/ADICIONADO (ESTE É O BUG) ---
+            formNovoPedido.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btnSubmit = e.target.querySelector('button[type="submit"]');
+                btnSubmit.disabled = true;
+                btnSubmit.textContent = 'Enviando...';
+
+                const formData = new FormData(formNovoPedido);
+                const mesaId = formData.get('mesa_id');
+                const itens = {};
+                
+                // Coleta apenas itens com quantidade > 0
+                formData.forEach((value, key) => {
+                    if (key.startsWith('itens[') && value > 0) {
+                        // Extrai o ID do item
+                        const id = key.match(/\[(\d+)\]/)[1];
+                        itens[id] = parseInt(value, 10);
+                    }
+                });
+
+                if (Object.keys(itens).length === 0) {
+                    alert('Nenhum item selecionado.');
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = 'Lançar Pedido';
+                    return;
+                }
+
+                // A ROTA CORRETA é /api/pedidos (do PedidoController)
+                const response = await apiFetch('/api/pedidos', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        mesa_id: mesaId,
+                        itens: itens
+                    })
+                });
+
+                if (response && response.success) {
+                    // *** A CORREÇÃO ESTÁ AQUI ***
+                    // NÃO mexemos na lista de "Pedidos Prontos" manualmente.
+                    // Apenas fechamos o modal e chamamos a função que 
+                    // recarrega TUDO do servidor.
+                    fecharModal();
+                    atualizarDashboard(); // <-- ISTO É O CORRETO A FAZER
+                    
+                } else {
+                    alert(response?.message || 'Erro ao lançar pedido.');
+                }
+                
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Lançar Pedido';
+            });
+            
+            // --- FIM DA CORREÇÃO ---
+
+
             const fecharModal = () => {
                 modal.style.display = 'none';
                 conteudoDetalhes.style.display = 'none';
@@ -297,13 +388,32 @@
 
             closeModalBtn.addEventListener('click', fecharModal);
             window.addEventListener('click', (event) => { if (event.target == modal) fecharModal(); });
-            btnAdicionarItens.addEventListener('click', async () => { /* ... (sem alterações) ... */ });
-            const atualizarDashboard = () => { carregarMesas(); carregarPedidosProntos(); };
             
+            // --- CÓDIGO CORRIGIDO/ADICIONADO ---
+            btnAdicionarItens.addEventListener('click', async () => {
+                // Carrega o cardápio (do cache ou da API)
+                const cardapio = await carregarCardapio();
+                if (cardapio) {
+                    // Renderiza o cardápio no formulário
+                    renderizarCardapio(cardapio);
+                    // Alterna a visão do modal
+                    conteudoDetalhes.style.display = 'none';
+                    conteudoNovoPedido.style.display = 'block';
+                }
+            });
+            
+            // Função central para atualizar tudo
+            const atualizarDashboard = () => { 
+                carregarMesas(); 
+                carregarPedidosProntos(); 
+            };
+            
+            // Carga inicial
             atualizarDashboard();
-            setInterval(atualizarDashboard, 15000); 
+            
+            // Polling (busca atualizações) a cada 15 segundos
+            setInterval(atualizarDashboard, 5000); 
         });
     </script>
 </body>
 </html>
-

@@ -69,13 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('ID do pedido não encontrado!');
                 return;
             }
+            
+            button.disabled = true; // Desabilita o botão
+            button.textContent = 'Marcando...';
 
-            // Envia a requisição para o servidor
-            fetch('/cozinha/pedido/pronto', {
+            // ATUALIZAÇÃO DA URL: Aponta para a nova rota da API
+            fetch('/api/pedidos/marcar-pronto', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest' // Importante para identificar requisições AJAX
+                    'Accept': 'application/json' // Adicionado por segurança
                 },
                 body: JSON.stringify({ id: pedidoId })
             })
@@ -87,14 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.style.opacity = '0';
                     setTimeout(() => card.remove(), 500);
                 } else {
+                    // Usa o alert personalizado (se você o tiver) ou o alert normal
                     alert('Erro ao marcar pedido como pronto: ' + data.message);
+                    button.disabled = false; // Reabilita o botão em caso de erro
+                    button.textContent = 'Marcar como Pronto';
                 }
             })
             .catch(error => {
                 console.error('Erro na requisição:', error);
                 alert('Ocorreu um erro de comunicação com o servidor.');
+                button.disabled = false; // Reabilita o botão em caso de erro
+                button.textContent = 'Marcar como Pronto';
             });
         }
+        setInterval(atualizarDashboard, 5000); 
     });
 });
 </script>

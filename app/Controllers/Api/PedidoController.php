@@ -102,4 +102,37 @@ class PedidoController extends JsonController
             $this->jsonResponse(['message' => 'Falha ao marcar pedido como entregue (verifique o status atual).'], 500);
         }
     }
+    public function marcarPedidoPronto()
+    {
+        try {
+            // Pega o corpo da requisição POST (que o JavaScript envia como JSON)
+            $data = $this->getJsonData();
+
+            // Valida os dados recebidos
+            $pedido_id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
+            $empresa_id = $this->empresa_id; // Pego do construtor
+
+            if (!$pedido_id || !$empresa_id) {
+                // Usa 'Exception' (baseado no 'use' do topo)
+                throw new Exception("ID do pedido ou ID da empresa inválido.");
+            }
+
+            // Executa a lógica de negócio no Model
+            $sucesso = $this->pedidoModel->marcarComoPronto($pedido_id, $empresa_id);
+
+            if ($sucesso) {
+                // Se o model retornar true, a atualização foi bem-sucedida.
+                $this->jsonResponse(['success' => true, 'message' => "Pedido #{$pedido_id} marcado como pronto!"]);
+            } else {
+                // Se o model retornar false, a atualização falhou (0 linhas afetadas).
+                // Usa 'Exception' (baseado no 'use' do topo)
+                throw new Exception("O Pedido #{$pedido_id} não pôde ser atualizado. Ele pode já ter sido marcado como 'pronto' ou o seu estado não é 'em preparo'.");
+            }
+
+        } catch (Exception $e) { // CORRIGIDO: Padrão igual ao 'criarPedido'
+            // Em caso de qualquer erro, retorna uma resposta JSON com a mensagem de erro.
+            error_log("Erro ao marcar pedido como pronto: " . $e->getMessage()); // CORRIGIDO: Adiciona log
+            $this->jsonResponse(['success' => false, 'message' => $e->getMessage()], 500); // CORRIGIDO: Muda para 500
+        }
+    }
 }

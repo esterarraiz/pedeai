@@ -18,6 +18,8 @@ class PedidoModel
     // ... (buscarPedidosParaCozinha, marcarComoPronto, etc. - sem alteração) ...
     public function buscarPedidosParaCozinha(int $empresa_id): array
     {
+        // Esta SQL foi modificada para buscar apenas o pedido 'em_preparo'
+        // mais recente (com o ID mais alto) de cada mesa.
         $sql = "
             SELECT
                 p.id AS pedido_id, p.data_abertura, m.numero AS mesa_numero,
@@ -26,13 +28,23 @@ class PedidoModel
             JOIN mesas m ON p.mesa_id = m.id
             JOIN pedido_itens pi ON p.id = pi.pedido_id
             JOIN cardapio_itens ci ON pi.item_id = ci.id
-            WHERE p.empresa_id = :empresa_id AND p.status = 'em_preparo'
+            WHERE p.id IN (
+                -- Subconsulta para encontrar o ID do último pedido 'em_preparo' de CADA mesa
+                SELECT MAX(p_sub.id)
+                FROM pedidos p_sub
+                WHERE p_sub.empresa_id = :empresa_id
+                  AND p_sub.status = 'em_preparo'
+                GROUP BY p_sub.mesa_id
+            )
             ORDER BY p.data_abertura ASC, p.id, ci.nome;
         ";
+        
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':empresa_id' => $empresa_id]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // O restante da lógica de agrupar os itens por pedido (em PHP)
+        // continua exatamente igual e vai funcionar perfeitamente.
         $pedidos = [];
         foreach ($results as $row) {
             $pedido_id = $row['pedido_id'];
