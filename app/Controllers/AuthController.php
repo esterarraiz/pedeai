@@ -1,4 +1,5 @@
 <?php
+// Ficheiro: app/Controllers/AuthController.php (Versão Final para API)
 
 namespace App\Controllers;
 
@@ -8,68 +9,75 @@ use Config\Database;
 
 class AuthController extends Controller
 {
-
+    /**
+     * Mostra a página de login.
+     */
     public function showLogin()
     {
-        
-        $login_error = null;
-        if (isset($_SESSION['login_error'])) {
-            $login_error = $_SESSION['login_error'];
-            unset($_SESSION['login_error']);
-        }
-        
-        $this->loadView('auth/login', ['login_error' => $login_error]);
+        $this->loadView('auth/login');
     }
 
+    /**
+     * Processa a tentativa de login (chamado via JavaScript).
+     */
     public function processLogin()
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /login');
-            exit;
-        }
+        header('Content-Type: application/json');
 
-        $empresa_id = filter_input(INPUT_POST, 'empresa_id', FILTER_SANITIZE_NUMBER_INT);
-        $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-        $senha = $_POST['senha'];
+        try {
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
 
-        $pdo = Database::getConnection();
-        $funcionarioModel = new Funcionario($pdo);
-        $user = $funcionarioModel->validarLogin($empresa_id, $email, $senha);
+            $empresa_id = filter_var($data['empresa_id'] ?? null, FILTER_SANITIZE_NUMBER_INT);
+            $email = filter_var($data['email'] ?? null, FILTER_SANITIZE_EMAIL);
+            $senha = $data['senha'] ?? null;
 
-        if ($user) {
-            $_SESSION['logged_in'] = true;
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_nome'] = $user['nome'];
-            $_SESSION['empresa_id'] = $user['empresa_id'];
-            $_SESSION['user_cargo'] = strtolower($user['nome_cargo']); 
-            
-            session_regenerate_id(true); 
-
-            switch ($_SESSION['user_cargo']) {
-                case 'administrador': 
-                    header('Location: /dashboard/admin');
-                    break;
-                case 'garçom': 
-                    header('Location: /dashboard/garcom');
-                    break;
-                case 'caixa': 
-                    header('Location: /dashboard/caixa');
-                    break;
-                case 'cozinheiro': 
-                    header('Location: /dashboard/cozinheiro');
-                    break;
-                default:
-                    header('Location: /dashboard/generico');
-                    break;
+            if (empty($empresa_id) || empty($email) || empty($senha)) {
+                throw new \Exception("Todos os campos são obrigatórios.");
             }
-            exit;
 
-        } else {
-            $_SESSION['login_error'] = 'ID da empresa, e-mail ou senha incorretos.';
-            header('Location: /login');
+            $pdo = Database::getConnection();
+            $funcionarioModel = new Funcionario($pdo);
+            $user = $funcionarioModel->validarLogin($empresa_id, $email, $senha);
+
+            if ($user) {
+                // Login bem-sucedido: cria a sessão
+                $_SESSION['logged_in'] = true;
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_nome'] = $user['nome'];
+                $_SESSION['empresa_id'] = $user['empresa_id'];
+                $_SESSION['user_cargo'] = strtolower($user['nome_cargo']);
+                session_regenerate_id(true);
+
+                // Define para qual URL o JavaScript deve redirecionar
+                $redirectTo = '/';
+                switch ($_SESSION['user_cargo']) {
+                    case 'administrador': $redirectTo = '/dashboard/admin'; break;
+                    case 'garçom': $redirectTo = '/dashboard/garcom'; break;
+                    case 'caixa': $redirectTo = '/dashboard/caixa'; break;
+                    case 'cozinheiro': $redirectTo = '/dashboard/cozinheiro'; break;
+                }
+                
+                // Envia a resposta de sucesso em JSON
+                echo json_encode(['success' => true, 'redirectTo' => $redirectTo]);
+                exit;
+
+            } else {
+                // Login falhou: lança um erro
+                throw new \Exception("ID da empresa, e-mail ou senha incorretos.");
+            }
+
+        } catch (\Exception $e) {
+            // Em caso de qualquer erro, envia uma resposta de erro em JSON
+            http_response_code(401); // 401 Unauthorized é mais apropriado para falha de login
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
             exit;
         }
     }
+
+    /**
+     * Efetua o logout do utilizador.
+     */
     public function logout()
     {
         session_unset();
@@ -78,4 +86,3 @@ class AuthController extends Controller
         exit;
     }
 }
-

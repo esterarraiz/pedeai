@@ -32,20 +32,25 @@ Consolidar o sistema com as funcionalidades essenciais de **administração** (c
 
 ---
 
-## Iteração 3: De Produto a Plataforma (SaaS, API e Inteligência)
+## Iteração 3: Refatoração Completa para Arquitetura Orientada a API
 
 [➡️ Ver registro de implementação desta iteração](features.md)
 
-**Valor da Iteração:**
-Transformar a arquitetura do PedeAI em um modelo **SaaS (Software as a Service)**, permitindo que múltiplos restaurantes se cadastrem e utilizem o sistema de forma isolada e segura. Esta iteração também eleva o nível técnico do sistema com a introdução de uma **API interna**, tornando a comunicação mais dinâmica. Por fim, introduz as primeiras **ferramentas de análise de dados (BI)**, transformando dados operacionais em insights estratégicos para os gestores.
+**Valor da Iteração:**  
+Transformar a arquitetura do projeto de uma aplicação monolítica renderizada no servidor para um sistema desacoplado, com um back-end PHP servindo uma API RESTful e um front-end dinâmico consumindo essa API. Esta mudança estabelece a base para futuras expansões, como aplicações mobile, e melhora drasticamente a interatividade e a performance da interface do usuário, eliminando a necessidade de recarregar a página para a maioria das ações.
 
 ### Funcionalidades
 
-  - **Cadastro de Empresas:** Criar um fluxo público de cadastro para novos restaurantes. A implementação inclui o formulário de registro, a lógica de back-end para criar a empresa e o primeiro usuário Administrador..
-  - **Implementação da API de Status de Pedidos:** Desenvolver o ciclo completo da API para notificações: criar os *endpoints* da API (back-end) para gerenciar o status dos pedidos e refatorar as telas da Cozinha e do Garçom (front-end) para consumir essa API, permitindo atualizações em tempo real sem recarregar a página.
-  - **Edição e Cancelamento de Itens em Pedidos Abertos:** Implementar a funcionalidade que permite ao garçom modificar um pedido que já foi enviado, adicionando ou removendo itens antes que o preparo seja iniciado pela cozinha.
-  - **Relatórios de Vendas e Performance (US10):** Desenvolver a primeira versão do painel de Business Intelligence para o Administrador, com a lógica de back-end para agregar dados de vendas e a interface para exibir faturamento diário e os produtos mais vendidos.
-  - **Funcionalidade de Dividir a Conta e Impressão:** Refinar o fluxo de caixa, implementando a funcionalidade para dividir o valor total de uma conta entre várias pessoas e adicionando um botão que gera uma versão da conta em HTML formatada para impressão.
+* **Refatoração da Autenticação para API:** Migrar o sistema de login e logout para uma arquitetura de API, transformando a página de login em uma **Single-Page Application (SPA)** para uma autenticação mais rápida e sem recarregamento de página.
 
------
+* **Migração do Fluxo do Garçom para API:** Recriar todas as telas do perfil de Garçom (visualização de mesas, lançamento de pedidos, notificações) como **SPAs** que consomem a API, proporcionando uma experiência de usuário totalmente dinâmica e em tempo real.
+
+* **Migração do Painel da Cozinha para API:** Refatorar o painel da Cozinha para uma **SPA**, permitindo que a lista de pedidos seja atualizada e os status sejam marcados como “Pronto” através da API, eliminando a necessidade de recarregar a página.
+
+* **Migração do Fluxo do Caixa para API:** Transformar as telas do Caixa em **SPAs** que consomem a API para visualizar mesas ocupadas, consultar contas e registrar pagamentos de forma assíncrona.
+
+* **Migração do Painel de Administração para API:** Desenvolver os **endpoints CRUD** da API para gerenciar usuários e o cardápio, e refatorar as respectivas páginas de administração para **SPAs**, tornando a gestão do sistema mais ágil e interativa.
+
+
+---
 

@@ -43,17 +43,17 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 
 ---
 
-## Iteração 3: De Produto a Plataforma (SaaS, API e Inteligência)
-
+## Iteração 3: Refatoração Completa para Arquitetura Orientada a API
 Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionalidades planejadas, consulte o [planejamento das iterações](planejamento.md).
 
+### Features Implementadas (Refatorações)
 
-| Feature | User Story | Responsável | Revisor (PR) | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| Cadastro de Empresas | N/A | Arthur | Vitória | Em andamento |
-| Implementação da API de Status de Pedidos | N/A | Ester | Arthur | Em andamento |
-| Edição e Cancelamento de Itens em Pedidos | N/A | Vitória | Matheus | Em andamento |
-| Relatórios de Vendas e Performance | US10 | Matheus | Jorge | Em andamento |
-| Funcionalidade de Dividir a Conta e Impressão | N/A | Jorge | Ester | Em andamento |
+| Feature | Responsável | Revisor (PR) | Status |
+| :--- | :--- | :--- | :--- |
+| Refatoração da Autenticação para API | Ester | Arthur | Concluída |
+| Migração do Painel de Administração para API | Jorge | Ester | A Fazer |
+| Migração do Painel da Cozinha para API | Vitória | Matheus | Concluída |
+| Migração do Fluxo do Caixa para API | Matheus | Jorge | Concluída |
+| Migração do Fluxo do Garçom para API | Arthur | Ester | Concluída |
 
 ---

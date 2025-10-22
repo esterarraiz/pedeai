@@ -1,4 +1,5 @@
 <?php
+// Ficheiro: app/Controllers/CozinheiroDashboardController.php (Versão Corrigida e Final)
 
 namespace App\Controllers;
 
@@ -8,11 +9,12 @@ use Config\Database;
 
 class CozinheiroDashboardController extends Controller
 {
-
+    /**
+     * Carrega a view principal da cozinha com os pedidos pendentes.
+     */
     public function index()
     {
         $pdo = Database::getConnection();
-        
         $pedidoModel = new PedidoModel($pdo);
 
         $empresa_id = $_SESSION['empresa_id'] ?? 0;
@@ -24,7 +26,8 @@ class CozinheiroDashboardController extends Controller
     }
 
     /**
-     * NOVO MÉTODO PARA MARCAR O PEDIDO COMO PRONTO (CHAMADO VIA AJAX)
+     * API endpoint para marcar um pedido como 'pronto'.
+     * Esta função é chamada via JavaScript (AJAX/Fetch).
      */
     public function marcarPronto()
     {
@@ -32,35 +35,43 @@ class CozinheiroDashboardController extends Controller
         header('Content-Type: application/json');
 
         try {
-            // Pega o corpo da requisição POST (que nosso JavaScript enviou como JSON)
+            // Garante que a requisição é do tipo POST para segurança
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new \Exception("Método de requisição inválido. Apenas POST é permitido.");
+            }
+            
+            // Pega o corpo da requisição POST (que o JavaScript envia como JSON)
             $json = file_get_contents('php://input');
             $data = json_decode($json);
 
-            $pedido_id = $data->id ?? null;
-
-            if (!$pedido_id) {
-                throw new \Exception("ID do pedido não fornecido.");
-            }
-
-            $pdo = Database::getConnection();
-            $pedidoModel = new PedidoModel($pdo);
+            // Valida os dados recebidos
+            $pedido_id = filter_var($data->id ?? null, FILTER_VALIDATE_INT);
             $empresa_id = $_SESSION['empresa_id'] ?? 0;
 
-            // Chama o método no model que vamos criar no Passo 4
-            $sucesso = $pedidoModel->marcarComoPronto((int)$pedido_id, $empresa_id);
+            if (!$pedido_id || !$empresa_id) {
+                throw new \Exception("ID do pedido ou ID da empresa inválido.");
+            }
+
+            // Executa a lógica de negócio no Model
+            $pdo = Database::getConnection();
+            $pedidoModel = new PedidoModel($pdo);
+            $sucesso = $pedidoModel->marcarComoPronto($pedido_id, $empresa_id);
 
             if ($sucesso) {
-                // Se o model retornar sucesso, enviamos uma resposta positiva
-                echo json_encode(['success' => true, 'message' => 'Pedido marcado como pronto!']);
+                // Se o model retornar true, a atualização foi bem-sucedida.
+                echo json_encode(['success' => true, 'message' => "Pedido #{$pedido_id} marcado como pronto!"]);
             } else {
-                // Se o model falhar (ex: pedido não existe), lançamos um erro
-                throw new \Exception("Não foi possível atualizar o pedido. Verifique se ele já foi atualizado ou pertence a outra empresa.");
+                // Se o model retornar false, a atualização falhou (0 linhas afetadas).
+                // Isto acontece se o pedido não estava com o estado 'em_preparo'.
+                throw new \Exception("O Pedido #{$pedido_id} não pôde ser atualizado. Ele pode já ter sido marcado como 'pronto' ou o seu estado não é 'em preparo'.");
             }
 
         } catch (\Exception $e) {
-            // Em caso de qualquer erro, retorna uma resposta com a mensagem de erro
+            // Em caso de qualquer erro, retorna uma resposta JSON com a mensagem de erro.
             http_response_code(400); // Código de erro para "Bad Request"
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
+        // Garante que o script para após enviar a resposta JSON
+        exit;
     }
 }
