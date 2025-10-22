@@ -32,24 +32,25 @@ Consolidar o sistema com as funcionalidades essenciais de **administração** (c
 
 ---
 
-## Iteração 3: API e Refinamento da Experiência
+## Iteração 3: Refatoração Completa para Arquitetura Orientada a API
 
 [➡️ Ver registro de implementação desta iteração](features.md)
 
-**Valor da Iteração:**
-Evoluir o PedeAI de uma aplicação web tradicional para uma plataforma dinâmica e responsiva, por meio da criação de uma **API interna**. O objetivo é permitir a comunicação em tempo real entre o salão e a cozinha, eliminando recarregamentos de página. Além disso, esta iteração aprimora o fluxo do **Caixa** e introduz as primeiras **ferramentas de análise de dados** para o Administrador.
+**Valor da Iteração:**  
+Transformar a arquitetura do projeto de uma aplicação monolítica renderizada no servidor para um sistema desacoplado, com um back-end PHP servindo uma API RESTful e um front-end dinâmico consumindo essa API. Esta mudança estabelece a base para futuras expansões, como aplicações mobile, e melhora drasticamente a interatividade e a performance da interface do usuário, eliminando a necessidade de recarregar a página para a maioria das ações.
 
 ### Funcionalidades
 
-* **Criação do Back-end da API de Pedidos:** Desenvolver os endpoints da API (em PHP) responsáveis pelo gerenciamento do status dos pedidos. A API deverá retornar dados em formato JSON e permitir operações como: listar os pedidos de um garçom e atualizar o status de um item para “Pronto”.
+* **Refatoração da Autenticação para API:** Migrar o sistema de login e logout para uma arquitetura de API, transformando a página de login em uma **Single-Page Application (SPA)** para uma autenticação mais rápida e sem recarregamento de página.
 
-* **Refatoração do Painel da Cozinha (Consumidor da API):** Atualizar a interface da Cozinha para que, ao marcar um item como “Pronto”, a página não seja recarregada. A atualização deverá ocorrer de forma assíncrona utilizando **JavaScript (fetch)** para comunicação com a API.
+* **Migração do Fluxo do Garçom para API:** Recriar todas as telas do perfil de Garçom (visualização de mesas, lançamento de pedidos, notificações) como **SPAs** que consomem a API, proporcionando uma experiência de usuário totalmente dinâmica e em tempo real.
 
-* **Painel Dinâmico de Pedidos para o Garçom (Consumidor da API):** Criar uma nova tela de **Pedidos Ativos**, onde o Garçom possa acompanhar o status de seus pedidos em tempo real. A interface fará consultas periódicas à API usando **fetch** e **setInterval**, atualizando automaticamente os pedidos sem necessidade de recarregar a página.
+* **Migração do Painel da Cozinha para API:** Refatorar o painel da Cozinha para uma **SPA**, permitindo que a lista de pedidos seja atualizada e os status sejam marcados como “Pronto” através da API, eliminando a necessidade de recarregar a página.
 
-* **Divisão de Conta no Caixa:** Implementar a funcionalidade de **dividir a conta** entre várias pessoas na tela do Caixa. O sistema deve permitir divisão igualitária ou inserção manual de valores personalizados para cada cliente.
+* **Migração do Fluxo do Caixa para API:** Transformar as telas do Caixa em **SPAs** que consomem a API para visualizar mesas ocupadas, consultar contas e registrar pagamentos de forma assíncrona.
 
-* **Relatório Simples de Vendas (US10) e Impressão de Conta:** Criar a primeira versão da tela de relatórios para o Administrador, exibindo o **faturamento diário**. Adicionalmente, implementar no Caixa um botão que gera uma **versão da conta em HTML** formatada para **impressão**.
+* **Migração do Painel de Administração para API:** Desenvolver os **endpoints CRUD** da API para gerenciar usuários e o cardápio, e refatorar as respectivas páginas de administração para **SPAs**, tornando a gestão do sistema mais ágil e interativa.
+
 
 ---
 
