@@ -27,10 +27,7 @@
                 <div class="select-container">
                     <select id="functionFilter">
                         <option value="todos">Função: Todos</option>
-                        <option value="administrador">Administrador</option>
-                        <option value="garçom">Garçom</option>
-                        <option value="cozinheiro">Cozinheiro</option>
-                        <option value="caixa">Caixa</option>
+                        <!-- Os cargos serão carregados aqui via API -->
                     </select>
                 </div>
             </div>
@@ -46,56 +43,15 @@
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php foreach ($data['funcionarios'] as $func): ?>
-                            <tr data-funcionario-id="<?= $func['id'] ?>">
-                                <td>
-                                    <div class="user-initials">
-                                        <?php
-                                            $name = $func['nome'];
-                                            $words = explode(' ', $name);
-                                            $initials = mb_substr($words[0], 0, 1);
-                                            if (count($words) > 1) {
-                                                $initials .= mb_substr(end($words), 0, 1);
-                                            }
-                                            echo htmlspecialchars(strtoupper($initials));
-                                        ?>
-                                    </div>
-                                </td>
-                                <td><?= htmlspecialchars($func['nome']) ?></td>
-                                <td><?= htmlspecialchars($func['nome_cargo']) ?></td>
-                                <td>
-                                    <?php if ($func['ativo']): ?>
-                                        <span class="badge-ativo">Ativo</span>
-                                    <?php else: ?>
-                                        <span class="badge-inativo">Inativo</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <div class="actions-cell">
-                                        <a href="/funcionarios/editar/<?= $func['id'] ?>" class="action-icon" title="Editar"><i class="fas fa-pencil-alt"></i></a>
-                                        <span class="action-icon btn-reset-password" title="Redefinir Senha" 
-                                              data-id="<?= $func['id'] ?>" 
-                                              data-nome="<?= htmlspecialchars($func['nome']) ?>">
-                                            <i class="fas fa-key"></i>
-                                        </span>
-                                        <span class="action-icon btn-toggle-status" title="<?= $func['ativo'] ? 'Desativar' : 'Ativar' ?> Usuário" 
-                                              data-id="<?= $func['id'] ?>" 
-                                              data-status="<?= $func['ativo'] ? '1' : '0' ?>"
-                                              data-nome="<?= htmlspecialchars($func['nome']) ?>">
-                                            <i class="fas fa-ban"></i>
-                                        </span>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
+                    <tbody id="funcionarios-table-body">
+                        <tr><td colspan="5" style="text-align: center; padding: 20px;">A carregar funcionários...</td></tr>
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
 
-    <!-- Modais e Toast -->
+    <!-- Modais (senha, confirmação) -->
     <div id="modal-senha" class="modal">
         <div class="modal-content">
             <h2>Redefinir Senha</h2>
@@ -129,38 +85,35 @@
         <button class="close-toast" onclick="this.parentElement.classList.remove('show')">&times;</button>
     </div>
 
+    <!-- JavaScript para a SPA -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const tableBody = document.getElementById('funcionarios-table-body');
         const searchInput = document.getElementById('searchInput');
         const functionFilter = document.getElementById('functionFilter');
-        const tableRows = document.querySelectorAll('.data-table tbody tr');
+        let funcionariosData = []; // Cache dos dados
+
         const modalSenha = document.getElementById('modal-senha');
         const formSenha = document.getElementById('form-redefinir-senha');
         const modalConfirmacao = document.getElementById('modal-confirmacao');
         const toast = document.getElementById('toast-notification');
-
-        function filterTable() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const functionValue = functionFilter.value.toLowerCase();
-
-            tableRows.forEach(row => {
-                const nomeCell = row.cells[1].textContent.toLowerCase();
-                const funcaoCell = row.cells[2].textContent.toLowerCase();
-
-                const searchMatch = nomeCell.includes(searchTerm);
-                const functionMatch = (functionValue === 'todos' || funcaoCell.includes(functionValue));
-
-                if (searchMatch && functionMatch) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        if (searchInput) searchInput.addEventListener('input', filterTable);
-        if (functionFilter) functionFilter.addEventListener('change', filterTable);
         
+        // --- Funções Auxiliares ---
+        const apiFetch = async (url, options = {}) => {
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Erro no servidor');
+                }
+                return data;
+            } catch (error) {
+                console.error('Erro na API Fetch:', error);
+                showToast(error.message, false);
+                return null;
+            }
+        };
+
         let toastTimeout;
         function showToast(message, isSuccess = true) {
             clearTimeout(toastTimeout);
@@ -168,12 +121,8 @@
             toast.querySelector('#toast-message').textContent = message;
             toast.querySelector('#toast-icon').innerHTML = isSuccess ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>';
             toast.classList.add(isSuccess ? 'success' : 'error');
-            
             setTimeout(() => { toast.classList.add('show'); }, 10);
-
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
+            toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
 
         const fecharModal = (modal) => {
@@ -184,10 +133,93 @@
             btn.addEventListener('click', (e) => fecharModal(e.target.closest('.modal')));
         });
 
-        document.querySelector('.data-table tbody').addEventListener('click', function(event) {
+        // --- Lógica Principal ---
+        function renderizarTabela(funcionarios) {
+            tableBody.innerHTML = '';
+            if (!funcionarios || funcionarios.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">Nenhum funcionário encontrado.</td></tr>';
+                return;
+            }
+
+            funcionarios.forEach(func => {
+                const tr = document.createElement('tr');
+                tr.dataset.funcionarioId = func.id;
+
+                const statusBadge = func.ativo
+                    ? `<span class="badge-ativo">Ativo</span>`
+                    : `<span class="badge-inativo">Inativo</span>`;
+
+                const toggleIcon = func.ativo ? 'fa-ban' : 'fa-check-circle';
+                const toggleTitle = func.ativo ? 'Desativar' : 'Ativar';
+                
+                let initials = '??';
+                if (func.nome) {
+                    const words = func.nome.split(' ');
+                    initials = words[0].charAt(0);
+                    if (words.length > 1) {
+                        initials += words[words.length - 1].charAt(0);
+                    }
+                }
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="user-initials" data-initials="${initials.toUpperCase()}"></div>
+                    </td>
+                    <td>${func.nome}</td>
+                    <td>${func.nome_cargo}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="actions-cell">
+                            <a href="/funcionarios/editar/${func.id}" class="action-icon" title="Editar"><i class="fas fa-pencil-alt"></i></a>
+                            <span class="action-icon btn-reset-password" title="Redefinir Senha" data-id="${func.id}" data-nome="${func.nome}">
+                                <i class="fas fa-key"></i>
+                            </span>
+                            <span class="action-icon btn-toggle-status" title="${toggleTitle} Usuário" data-id="${func.id}" data-status="${func.ativo ? '1' : '0'}" data-nome="${func.nome}">
+                                <i class="fas ${toggleIcon}"></i>
+                            </span>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function filtrarErenderizar() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const cargoTerm = functionFilter.value.toLowerCase();
+
+            const filtrados = funcionariosData.filter(func => {
+                const nomeMatch = func.nome.toLowerCase().includes(searchTerm);
+                const cargoMatch = (cargoTerm === 'todos' || func.nome_cargo.toLowerCase() === cargoTerm);
+                return nomeMatch && cargoMatch;
+            });
+            renderizarTabela(filtrados);
+        }
+
+        async function carregarFuncionarios() {
+            const data = await apiFetch('/api/funcionarios');
+            if (data) {
+                funcionariosData = Array.isArray(data) ? data : [];
+                filtrarErenderizar();
+            }
+        }
+        
+        async function carregarCargos() {
+            const cargos = await apiFetch('/api/cargos');
+            if (cargos && Array.isArray(cargos)) {
+                cargos.forEach(cargo => {
+                    const option = document.createElement('option');
+                    option.value = cargo.nome_cargo.toLowerCase();
+                    option.textContent = cargo.nome_cargo;
+                    functionFilter.appendChild(option);
+                });
+            }
+        }
+
+        // --- Ações da Tabela (com delegação de eventos) ---
+        tableBody.addEventListener('click', (event) => {
             const target = event.target.closest('.action-icon');
             if (!target) return;
-
             const id = target.dataset.id;
             const nome = target.dataset.nome;
 
@@ -196,69 +228,55 @@
                 document.getElementById('modal-funcionario-id-senha').value = id;
                 modalSenha.style.display = 'flex';
             }
-            
+
             if (target.classList.contains('btn-toggle-status')) {
                 const statusAtual = target.dataset.status === '1';
                 const acao = statusAtual ? 'desativar' : 'ativar';
-                
                 document.getElementById('modal-confirmacao-titulo').textContent = `${acao.charAt(0).toUpperCase() + acao.slice(1)} Utilizador`;
                 document.getElementById('modal-confirmacao-texto').textContent = `Tem a certeza que deseja ${acao} o utilizador ${nome}?`;
-                
                 const btnConfirmar = document.getElementById('btn-confirmar-acao');
-                btnConfirmar.classList.remove('btn-success', 'btn-danger');
-                btnConfirmar.classList.add(statusAtual ? 'btn-danger' : 'btn-success');
-
+                btnConfirmar.className = `btn ${statusAtual ? 'btn-danger' : 'btn-success'}`;
                 const newBtn = btnConfirmar.cloneNode(true);
                 btnConfirmar.parentNode.replaceChild(newBtn, btnConfirmar);
-
-                newBtn.addEventListener('click', function() {
-                    executarToggleStatus(id, !statusAtual);
-                });
-                
+                newBtn.addEventListener('click', () => executarToggleStatus(id, !statusAtual));
                 modalConfirmacao.style.display = 'flex';
             }
         });
 
-        function executarToggleStatus(id, novoStatus) {
-            fetch('/funcionarios/status', {
+        async function executarToggleStatus(id, novoStatus) {
+            const response = await apiFetch('/api/funcionarios/status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: id, status: novoStatus })
-            })
-            .then(res => res.json().then(data => ({ ok: res.ok, data })))
-            .then(({ ok, data }) => {
-                if (ok) {
-                    showToast(data.message || 'Estado alterado com sucesso!');
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    showToast(data.message || 'Erro ao alterar o estado.', false);
-                }
-            })
-            .catch(err => showToast('Erro de comunicação com o servidor.', false))
-            .finally(() => fecharModal(modalConfirmacao));
+            });
+            fecharModal(modalConfirmacao);
+            if (response?.success) {
+                showToast('Status alterado com sucesso!');
+                carregarFuncionarios(); // Recarrega os dados
+            }
         }
 
-        formSenha.addEventListener('submit', function(event) {
+        formSenha.addEventListener('submit', async (event) => {
             event.preventDefault();
             const id = document.getElementById('modal-funcionario-id-senha').value;
             const senha = document.getElementById('nova_senha').value;
-
-            fetch('/funcionarios/redefinir-senha', {
+            const response = await apiFetch('/api/funcionarios/redefinir-senha', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: id, senha: senha })
-            })
-            .then(res => res.json().then(data => ({ ok: res.ok, data })))
-            .then(({ ok, data }) => {
-                if (ok) {
-                    showToast(data.message || 'Senha redefinida com sucesso!');
-                    fecharModal(modalSenha);
-                } else {
-                    showToast(data.message || 'Não foi possível redefinir a senha.', false);
-                }
-            })
-            .catch(err => showToast('Erro de comunicação com o servidor.', false));
+            });
+            if (response?.success) {
+                showToast(response.message);
+                fecharModal(modalSenha);
+            }
         });
+
+        // --- Carregamento Inicial ---
+        searchInput.addEventListener('input', filtrarErenderizar);
+        functionFilter.addEventListener('change', filtrarErenderizar);
+        
+        carregarFuncionarios(); // Carga inicial dos funcionários
+        carregarCargos(); // Carga inicial dos cargos para o filtro
     });
     </script>
 </body>
