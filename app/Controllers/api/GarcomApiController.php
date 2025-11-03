@@ -83,25 +83,49 @@ class GarcomApiController extends Controller
      */
     public function lancarPedido()
     {
+        // Este controller usa 'file_get_contents'
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
 
-        if (empty($data['mesa_id']) || empty($data['itens'])) {
-            $this->jsonResponse(['success' => false, 'message' => 'Dados incompletos para o pedido.'], 400);
+        $mesa_id = filter_var($data['mesa_id'] ?? null, FILTER_SANITIZE_NUMBER_INT);
+        $itens_pedido = $data['itens'] ?? [];
+        $itens_validos = array_filter($itens_pedido, fn($qtd) => is_numeric($qtd) && $qtd > 0);
+        
+        $funcionario_id = $_SESSION['user_id'] ?? null;
+
+        if (empty($itens_validos) || !$mesa_id) {
+            return $this->jsonResponse(['message' => 'Pedido inválido ou sem itens.'], 400);
+        }
+        if (!$this->empresa_id || !$funcionario_id) {
+            return $this->jsonResponse(['message' => 'Sessão inválida ou expirada.'], 401);
         }
 
         try {
+            // A transação deve ser movida para dentro do Model (como no PagamentoModel)
+            // ou controlada aqui, como no PedidoController.
+            // Por agora, vamos focar em corrigir a ordem dos argumentos.
+            
             $pedidoModel = new PedidoModel($this->pdo);
+
+            // --- CORREÇÃO DA ORDEM DOS ARGUMENTOS ---
+            // O Model espera: (empresa_id, mesa_id, funcionario_id, itens)
             $pedido_id = $pedidoModel->criarNovoPedido(
-                (int)$data['mesa_id'],
-                $data['itens'],
-                $_SESSION['user_id'],
-                $this->empresa_id
+                $this->empresa_id,      // 1. empresa_id
+                (int)$mesa_id,          // 2. mesa_id
+                (int)$funcionario_id,   // 3. funcionario_id
+                $itens_validos          // 4. itens
             );
+            // --- FIM DA CORREÇÃO ---
+
+            // Se o 'criarNovoPedido' não atualiza a mesa, precisamos fazer aqui:
+            $mesaModel = new Mesa($this->pdo);
+            $mesaModel->atualizarStatus($mesa_id, 'ocupada');
+            
             $this->jsonResponse(['success' => true, 'message' => 'Pedido criado com sucesso!', 'pedido_id' => $pedido_id]);
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             error_log("Erro em lancarPedido API: " . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Erro interno ao criar o pedido.'], 500);
+            $this->jsonResponse(['success' => false, 'message' => 'Erro interno ao criar o pedido: ' . $e->getMessage()], 500);
         }
     }
 
@@ -111,13 +135,20 @@ class GarcomApiController extends Controller
     public function buscarPedidosProntos()
     {
         try {
+            if (!$this->empresa_id) { throw new Exception("Sessão inválida."); }
+
             $pedidoModel = new PedidoModel($this->pdo);
+            
+            // ELA CHAMA O MÉTODO 'buscarPedidosProntosPorEmpresa'
             $pedidosProntos = $pedidoModel->buscarPedidosProntosPorEmpresa($this->empresa_id);
+            
+            // Se o PedidoModel filtrar por 'pronto', $pedidosProntos deve ser um array VAZIO.
             $this->jsonResponse(['success' => true, 'data' => $pedidosProntos]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->jsonResponse(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
 
     /**
      * ATUALIZAÇÃO FINAL: Endpoint para o garçom marcar TODOS os pedidos prontos de uma MESA como entregues.

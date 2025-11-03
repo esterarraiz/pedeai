@@ -1,0 +1,87 @@
+/* --- Conteúdo Principal (sem .dashboard-container ou body) --- */
+.main-content {
+    flex-grow: 1;
+    padding: 32px;
+}
+
+.main-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+/* --- Grid da Cozinha --- */
+.kitchen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+/* --- Card de Pedido (RENOMEADO) --- */
+.kitchen-order-card {
+    background-color: #ffeadb; /* Cor de pêssego/laranja claro */
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Efeito de transição (RENOMEADO) */
+.kitchen-order-card.kitchen-fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.kitchen-order-card-header h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.kitchen-order-card-body {
+    margin: 20px 0;
+}
+
+.kitchen-order-card-body ul {
+    list-style: none;
+}
+
+.kitchen-order-card-body li {
+    font-size: 1.15rem;
+    color: #555;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.kitchen-order-card-footer {
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* --- Botão "Pronto" (RENOMEADO) --- */
+.kitchen-btn-ready {
+    background-color: #ffffff;
+    border: 2px solid #28a745; /* Borda verde */
+    color: #28a745; /* Texto verde */
+    padding: 10px 30px;
+    border-radius: 50px; /* Formato de pílula */
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.kitchen-btn-ready:hover {
+    background-color: #28a745; /* Fundo verde no hover */
+    color: #ffffff; /* Texto branco no hover */
+}
+
+.kitchen-btn-ready:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    border-color: #ced4da;
+    cursor: not-allowed;
+}
