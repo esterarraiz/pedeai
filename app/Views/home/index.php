@@ -23,7 +23,8 @@
                     <li><a href="#testimonials">Depoimentos</a></li>
                     <li><a href="#contact">Contato</a></li>
                     <li><a href="/login" class="nav-login-link">Entrar</a></li>
-                    <li><a href="/cadastro" class="nav-signup-button">Criar Conta</a></li>
+                    
+                    <li><a href="/registrar" class="nav-signup-button">Criar Conta</a></li>
                 </ul>
             </nav>
         </div>
@@ -36,7 +37,8 @@
                     <h1>Diga adeus à comanda de papel.</h1>
                     <h2>O PedeAI digitaliza o fluxo do seu restaurante, do garçom à cozinha, tornando o atendimento mais rápido, preciso e eficiente.</h2>
                     <p>Reduza erros, agilize a comunicação e otimize o fechamento de contas. Transforme a gestão de pedidos do seu estabelecimento.</p>
-                    <a href="/cadastro" class="cta-button">Comece seu Teste Grátis</a>
+                    
+                    <a href="/registrar" class="cta-button">Comece seu Teste Grátis</a>
                 </div>
                 <div class="hero-image">
                     <img src="images/home_ilustração.png" alt="Ilustração de um garçom usando o sistema PedeAI">
@@ -75,7 +77,7 @@
 
         <section id="features" class="features">
             <div class="container">
-                 <h2>Tudo que você precisa para otimizar seu restaurante</h2>
+                <h2>Tudo que você precisa para otimizar seu restaurante</h2>
                  <div class="features-grid">
                     <div class="feature-item">
                         <img src="https://img.icons8.com/ios/100/4CAF50/restaurant-menu.png" alt="Ícone Cardápio" class="feature-icon">
@@ -101,7 +103,6 @@
             </div>
         </section>
 
-        <!-- NOVA SEÇÃO DE DEPOIMENTOS -->
         <section id="testimonials" class="testimonials">
             <div class="container">
                 <h2>O que dizem nossos clientes</h2>
@@ -156,4 +157,3 @@
 
 </body>
 </html>
-

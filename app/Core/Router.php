@@ -11,16 +11,23 @@ class Router
     {
         // === ROTA DA LANDING PAGE ===
         $this->add('GET', '', ['controller' => 'HomeController', 'action' => 'index']);
+        
         // === ROTAS DE AUTENTICAÇÃO (Acesso Público) ===
         $this->add('GET', 'login', ['controller' => 'AuthController', 'action' => 'showLogin']);
         $this->add('POST', 'login/process', ['controller' => 'AuthController', 'action' => 'processLogin']);
         $this->add('GET', 'logout', ['controller' => 'AuthController', 'action' => 'logout']);
+
+        // --- ADIÇÃO PARA O REGISTRO DE EMPRESAS ---
+        $this->add('GET', 'registrar', ['controller' => 'NovaEmpresaController', 'action' => 'showRegistrationForm']);
+        $this->add('POST', 'registrar', ['controller' => 'NovaEmpresaController', 'action' => 'processRegistration']);
+        // --- FIM DA ADIÇÃO ---
+
         // === ROTAS DA API DE AUTENTICAÇÃO (PÚBLICAS) ===
         $this->add('POST', 'api/login', ['controller' => 'Api\AuthController', 'action' => 'login']);
         // $this->add('POST', 'api/register', ['controller' => 'Api\AuthController', 'action' => 'register']); // Exemplo
 
         // === ROTAS PROTEGIDAS POR SESSÃO ===
-// === ROTAS DE ADMINISTRADOR (VIEWS) ===
+        // === ROTAS DE ADMINISTRADOR (VIEWS) ===
         $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
         // Páginas de "casca" dos Funcionários
         $this->add('GET', 'funcionarios', ['controller' => 'FuncionarioController', 'action' => 'index'], ['administrador']);
@@ -36,7 +43,7 @@ class Router
         $this->add('POST', 'api/funcionarios/status', ['controller' => 'Api\FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'api/funcionarios/redefinir-senha', ['controller' => 'Api\FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
         // API de Cargos
-        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);        
+        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);         
         // Admin: Gerenciamento de Cardápio (Views)
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)
@@ -208,7 +215,7 @@ class Router
         
         // Se for um erro de API, retorna JSON
         if ($apiMessage !== null) {
-            header('Content-Type: application/json; charset=utf-8');
+            header('Content-Type: application/json; charset=utf-D');
             echo json_encode(['success' => false, 'message' => $apiMessage]);
             exit;
         }
@@ -223,4 +230,3 @@ class Router
         exit;
     }
 }
-
