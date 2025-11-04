@@ -29,7 +29,6 @@ class Router
         // === ROTAS PROTEGIDAS POR SESSÃO ===
         // === ROTAS DE ADMINISTRADOR (VIEWS) ===
         $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
-        // Páginas de "casca" dos Funcionários
         $this->add('GET', 'funcionarios', ['controller' => 'FuncionarioController', 'action' => 'index'], ['administrador']);
         $this->add('GET', 'funcionarios/novo', ['controller' => 'FuncionarioController', 'action' => 'showCreateForm'], ['administrador']);
         $this->add('GET', 'funcionarios/editar/{id:\d+}', ['controller' => 'FuncionarioController', 'action' => 'showEditForm'], ['administrador']);
@@ -46,10 +45,17 @@ class Router
         $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);         
         // Admin: Gerenciamento de Cardápio (Views)
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
+        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)
+        // (NOVO) Admin: Relatórios (View)
+        $this->add('GET', 'relatorios/vendas', ['controller' => 'RelatorioController', 'action' => 'index'], ['administrador']);
         $this->add('POST', 'api/cardapio/adicionar', ['controller' => 'Api\CardapioController', 'action' => 'adicionarItem'], ['administrador']);
         $this->add('POST', 'api/cardapio/editar', ['controller' => 'Api\CardapioController', 'action' => 'editarItem'], ['administrador']);
         $this->add('POST', 'api/cardapio/remover', ['controller' => 'Api\CardapioController', 'action' => 'removerItem'], ['administrador']);
+        // === (NOVO) API DO ADMIN (Relatórios) ===
+        $this->add('GET', 'api/relatorios/vendas', 
+            ['controller' => 'Api\RelatorioController', 'action' => 'getRelatorioVendas'], ['administrador']);
+        $this->add('GET', 'api/admin/dashboard', ['controller' => 'Api\AdminDashboardController', 'action' => 'getDadosDashboard'], ['administrador']);
 
         // === ROTAS DE GARÇOM (VIEWS) ===
         $this->add('GET', 'dashboard/garcom', ['controller' => 'GarcomDashboardController', 'action' => 'index'], ['garçom']);
