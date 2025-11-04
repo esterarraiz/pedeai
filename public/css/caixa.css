@@ -1,4 +1,4 @@
-/* Estilo geral para os cards do caixa */
+
 .caixa-card {
     max-width: 600px;
     margin: 2rem auto;
@@ -15,7 +15,7 @@
     color: #333;
 }
 
-/* Estilo para a lista de mesas (Selecionar_Mesa.jpg) */
+
 .mesa-list {
     display: flex;
     flex-direction: column;
@@ -34,7 +34,6 @@
     background-color: #f7f7f7;
 }
 
-/* Estilo para o resumo da conta (Resumo_Pedidos_Mesa.jpg) */
 .resumo-mesa {
     margin-bottom: 2rem;
 }
@@ -70,7 +69,7 @@
 }
 
 
-/* Seção de Pagamento (Pagamento.jpg) */
+
 .payment-section {
     margin-top: 2rem;
     border-top: 1px solid #EEE;
@@ -225,4 +224,267 @@
 
 .btn-fechar:hover {
     background: #e74c3c;
+}
+
+
+.account-card { 
+    background: #fff; 
+    border-radius: 12px; 
+    padding: 30px; 
+    box-shadow: var(--shadow-sm); 
+    max-width: 800px; 
+    margin: 0 auto; 
+}
+.account-header { 
+    text-align: center; 
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 20px; 
+    margin-bottom: 20px; 
+}
+
+
+.item-list { 
+    list-style: none; 
+    padding: 0; 
+}
+.item-list li { 
+    display: flex; 
+    justify-content: space-between; 
+    padding: 12px 0; 
+    border-bottom: 1px dashed var(--border-color); 
+}
+.item-list li span:first-child { 
+    font-weight: 500; 
+}
+.item-list .quantity { 
+    color: var(--text-light); 
+}
+
+
+.total-section { 
+    text-align: right; 
+    margin-top: 30px; 
+    padding-top: 20px; 
+    border-top: 2px solid var(--text-dark); 
+}
+.total-section h3 { 
+    font-size: 1.8rem; 
+    margin: 0; 
+    color: var(--text-dark); 
+}
+
+
+.payment-methods .btn.active {
+    background-color: #28a745; 
+    color: #ffffff;
+    border-color: #28a745;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+
+.split-section {
+    text-align: center; 
+    margin: 25px 0; 
+    border-top: 1px dashed #ddd; 
+    padding-top: 25px;
+}
+.split-section label {
+    font-weight: 600; 
+    margin-right: 10px; 
+    font-size: 1.1rem;
+    color: var(--text-dark);
+}
+.split-section input {
+    width: 70px; 
+    padding: 8px; 
+    border-radius: 6px; 
+    border: 1px solid #ccc; 
+    text-align: center; 
+    font-size: 1.1rem;
+}
+.split-section h4 {
+    margin-top: 15px; 
+    font-size: 1.25rem; 
+    color: var(--blue-action); 
+    min-height: 1.5rem;
+}
+
+
+.btn-print {
+    width: 100%;
+    background-color: #6c757d;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 8px; 
+    cursor: pointer;
+}
+.btn-print:hover {
+    background-color: #5a6268;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+#btn-fechar-conta {
+    width: 100%;
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease-in-out;
+    margin-top: 0; 
+    border-radius: 8px;
+    cursor: pointer;
+}
+#btn-fechar-conta:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    background-color: #218838; 
+}
+#btn-fechar-conta:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+
+@media print {
+    body {
+        background-color: #fff;
+        font-family: Arial, sans-serif;
+    }
+    
+    .dashboard-container > .sidebar,
+    .main-content > .main-header,
+    #payment-form,
+    .split-section,
+    .custom-alert-overlay { 
+        display: none !important;
+    }
+
+    .dashboard-container,
+    .main-content {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: block;
+    }
+
+
+    .account-card {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+    }
+    
+    .account-header {
+        text-align: left; 
+        border-bottom: 2px solid #000;
+    }
+    .account-header h2 { display: none; } 
+    .account-header h3 { font-size: 1.5rem; }
+
+    .item-list li {
+        font-size: 0.9rem;
+        border-color: #ccc;
+    }
+    
+    .total-section {
+        border-top: 2px solid #000;
+        text-align: right;
+    }
+    .total-section h3 {
+        font-size: 1.3rem;
+        color: #000;
+    }
+
+    .resumo-mesa {
+        display: block !important;
+    }
+}
+
+
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.custom-alert-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.custom-alert-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md); 
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.2s ease;
+}
+
+.custom-alert-overlay.show .custom-alert-box {
+    transform: scale(1);
+}
+
+.custom-alert-box h4 {
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--text-dark); 
+
+.custom-alert-box p {
+    margin-bottom: 25px;
+    font-size: 1rem;
+    color: var(--text-light);
+}
+
+.custom-alert-box .btn {
+    width: 100%;
+    padding: 12px;
+}
+
+.custom-alert-box .btn-success {
+    background-color: var(--green-dark);
+    color: white;
+}
+.custom-alert-box .btn-danger {
+    background-color: var(--red-status-text);
+    color: white;
 }
