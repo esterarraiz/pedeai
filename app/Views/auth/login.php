@@ -34,7 +34,11 @@
                 <a href="/esqueci-senha" class="forgot-password">Esqueci minha senha?</a>
                 <button type="submit" id="login-button" class="btn-entrar">Entrar</button>
             </form>
-        </div>
+
+            <p style="text-align: center; margin-top: 15px;">
+                Não tem uma conta? <a href="/registrar">Crie sua conta aqui!</a>
+            </p>
+            </div>
     </div>
 
     <script>
