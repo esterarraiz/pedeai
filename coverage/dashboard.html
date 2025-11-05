@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for C:\Users\Cliente\Documents\Projeto Eng - Soft\pedeai\app</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="_css/bootstrap.min.css?v=12.4.0" rel="stylesheet" type="text/css">
+  <link href="_css/billboard.min.css?v=12.4.0" rel="stylesheet" type="text/css">
+  <link href="_css/style.css?v=12.4.0" rel="stylesheet" type="text/css">
+  <link href="_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="index.html">C:\Users\Cliente\Documents\Projeto Eng - Soft\pedeai\app</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classesCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Models/PagamentoModel.php.html#11">App\Models\PagamentoModel</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#10">App\Services\AuthService</a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+         <th class="text-right">Complexity</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Models/PagamentoModel.php.html#11">App\Models\PagamentoModel</a></td><td class="text-right">0.0%</td><td class="text-right">8</td><td class="text-right">72</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#10">App\Services\AuthService</a></td><td class="text-right">0.0%</td><td class="text-right">6</td><td class="text-right">42</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2 style="margin-top: 3rem;">Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodsCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Models/PagamentoModel.php.html#15"><abbr title="App\Models\PagamentoModel::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Models/PagamentoModel.php.html#23"><abbr title="App\Models\PagamentoModel::registrarPagamento">registrarPagamento</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#16"><abbr title="App\Services\AuthService::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#24"><abbr title="App\Services\AuthService::getFuncionarioModel">getFuncionarioModel</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#39"><abbr title="App\Services\AuthService::attemptLogin">attemptLogin</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#65"><abbr title="App\Services\AuthService::logout">logout</abbr></a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+         <th class="text-right">Complexity</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Models/PagamentoModel.php.html#23"><abbr title="App\Models\PagamentoModel::registrarPagamento">registrarPagamento</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">7</td><td class="text-right">56</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#24"><abbr title="App\Services\AuthService::getFuncionarioModel">getFuncionarioModel</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+       <tr><td><a href="Services/AuthService.php.html#39"><abbr title="App\Services\AuthService::attemptLogin">attemptLogin</abbr></a></td><td class="text-right">0.0%</td><td class="text-right">2</td><td class="text-right">6</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 12.4.0</a> using <a href="https://www.php.net/" target="_top">PHP 8.4.11</a> and <a href="https://phpunit.de/">PHPUnit 12.4.2</a> at Wed Nov 5 0:09:45 UTC 2025.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="_js/billboard.pkgd.min.js?v=12.4.0" type="text/javascript"></script>
+  <script type="application/json" id="complexity_class">[[0,8,"Models\/PagamentoModel.php.html#11","App\\Models\\PagamentoModel","72"],[0,6,"Services\/AuthService.php.html#10","App\\Services\\AuthService","42"],[100,3,"Models\/AdminDashboardModel.php.html#8","App\\Models\\AdminDashboardModel","3"],[100,8,"Models\/CardapioModel.php.html#5","App\\Models\\CardapioModel","8"],[100,2,"Models\/CargoModel.php.html#7","App\\Models\\CargoModel","2"],[100,14,"Models\/Funcionario.php.html#8","App\\Models\\Funcionario","14"],[100,9,"Models\/Mesa.php.html#6","App\\Models\\Mesa","9"],[100,5,"Models\/NovaEmpresaModel.php.html#8","App\\Models\\NovaEmpresaModel","5"],[100,28,"Models\/PedidoModel.php.html#9","App\\Models\\PedidoModel","28"],[100,4,"Models\/RelatorioModel.php.html#9","App\\Models\\RelatorioModel","4"]]</script>
+  <script type="application/json" id="complexity_method">[[0,1,"Models\/PagamentoModel.php.html#15","App\\Models\\PagamentoModel::__construct","2"],[0,7,"Models\/PagamentoModel.php.html#23","App\\Models\\PagamentoModel::registrarPagamento","56"],[0,1,"Services\/AuthService.php.html#16","App\\Services\\AuthService::__construct","2"],[0,2,"Services\/AuthService.php.html#24","App\\Services\\AuthService::getFuncionarioModel","6"],[0,2,"Services\/AuthService.php.html#39","App\\Services\\AuthService::attemptLogin","6"],[0,1,"Services\/AuthService.php.html#65","App\\Services\\AuthService::logout","2"],[100,1,"Models\/AdminDashboardModel.php.html#12","App\\Models\\AdminDashboardModel::__construct","1"],[100,1,"Models\/AdminDashboardModel.php.html#20","App\\Models\\AdminDashboardModel::getMetricas","1"],[100,1,"Models\/AdminDashboardModel.php.html#64","App\\Models\\AdminDashboardModel::getPedidosRecentes","1"],[100,1,"Models\/CardapioModel.php.html#9","App\\Models\\CardapioModel::__construct","1"],[100,3,"Models\/CardapioModel.php.html#17","App\\Models\\CardapioModel::buscarItensAgrupados","3"],[100,1,"Models\/CardapioModel.php.html#50","App\\Models\\CardapioModel::buscarTodasCategorias","1"],[100,1,"Models\/CardapioModel.php.html#61","App\\Models\\CardapioModel::criarItem","1"],[100,1,"Models\/CardapioModel.php.html#78","App\\Models\\CardapioModel::atualizarItem","1"],[100,1,"Models\/CardapioModel.php.html#100","App\\Models\\CardapioModel::removerItem","1"],[100,1,"Models\/CargoModel.php.html#11","App\\Models\\CargoModel::__construct","1"],[100,1,"Models\/CargoModel.php.html#19","App\\Models\\CargoModel::buscarTodos","1"],[100,1,"Models\/Funcionario.php.html#12","App\\Models\\Funcionario::__construct","1"],[100,4,"Models\/Funcionario.php.html#20","App\\Models\\Funcionario::validarLogin","4"],[100,1,"Models\/Funcionario.php.html#51","App\\Models\\Funcionario::buscarTodosPorEmpresa","1"],[100,1,"Models\/Funcionario.php.html#65","App\\Models\\Funcionario::buscarPorId","1"],[100,1,"Models\/Funcionario.php.html#83","App\\Models\\Funcionario::buscarPorEmail","1"],[100,2,"Models\/Funcionario.php.html#97","App\\Models\\Funcionario::criar","2"],[100,2,"Models\/Funcionario.php.html#112","App\\Models\\Funcionario::atualizar","2"],[100,1,"Models\/Funcionario.php.html#126","App\\Models\\Funcionario::atualizarStatus","1"],[100,1,"Models\/Funcionario.php.html#135","App\\Models\\Funcionario::redefinirSenha","1"],[100,1,"Models\/Mesa.php.html#9","App\\Models\\Mesa::__construct","1"],[100,1,"Models\/Mesa.php.html#14","App\\Models\\Mesa::buscarTodasPorEmpresa","1"],[100,2,"Models\/Mesa.php.html#20","App\\Models\\Mesa::atualizarStatus","2"],[100,1,"Models\/Mesa.php.html#34","App\\Models\\Mesa::buscarPorId","1"],[100,2,"Models\/Mesa.php.html#48","App\\Models\\Mesa::liberarMesa","2"],[100,1,"Models\/Mesa.php.html#72","App\\Models\\Mesa::buscarMesasOcupadasOuPagamento","1"],[100,1,"Models\/Mesa.php.html#81","App\\Models\\Mesa::buscarMesasComContaAberta","1"],[100,1,"Models\/NovaEmpresaModel.php.html#12","App\\Models\\NovaEmpresaModel::__construct","1"],[100,2,"Models\/NovaEmpresaModel.php.html#23","App\\Models\\NovaEmpresaModel::create","2"],[100,1,"Models\/NovaEmpresaModel.php.html#57","App\\Models\\NovaEmpresaModel::findByEmail","1"],[100,1,"Models\/NovaEmpresaModel.php.html#65","App\\Models\\NovaEmpresaModel::findByCnpj","1"],[100,1,"Models\/PedidoModel.php.html#13","App\\Models\\PedidoModel::__construct","1"],[100,3,"Models\/PedidoModel.php.html#19","App\\Models\\PedidoModel::buscarPedidosParaCozinha","3"],[100,2,"Models\/PedidoModel.php.html#66","App\\Models\\PedidoModel::marcarComoPronto","2"],[100,2,"Models\/PedidoModel.php.html#82","App\\Models\\PedidoModel::buscarPedidosProntosPorEmpresa","2"],[100,10,"Models\/PedidoModel.php.html#106","App\\Models\\PedidoModel::criarNovoPedido","10"],[100,3,"Models\/PedidoModel.php.html#137","App\\Models\\PedidoModel::buscarItensDoUltimoPedidoDaMesa","3"],[100,3,"Models\/PedidoModel.php.html#159","App\\Models\\PedidoModel::buscarPedidosPorMesa","3"],[100,2,"Models\/PedidoModel.php.html#210","App\\Models\\PedidoModel::marcarPedidosDaMesaComoEntregues","2"],[100,2,"Models\/PedidoModel.php.html#230","App\\Models\\PedidoModel::marcarPedidosDaMesaComoPagos","2"],[100,1,"Models\/RelatorioModel.php.html#13","App\\Models\\RelatorioModel::__construct","1"],[100,1,"Models\/RelatorioModel.php.html#21","App\\Models\\RelatorioModel::buscarSumarioVendas","1"],[100,1,"Models\/RelatorioModel.php.html#60","App\\Models\\RelatorioModel::buscarTransacoes","1"],[100,1,"Models\/RelatorioModel.php.html#92","App\\Models\\RelatorioModel::buscarItensMaisVendidos","1"]]</script>
+  <script type="text/javascript" defer>
+  const barLabels = [
+    '0%',
+    '0-10%',
+    '10-20%',
+    '20-30%',
+    '30-40%',
+    '40-50%',
+    '50-60%',
+    '60-70%',
+    '70-80%',
+    '80-90%',
+    '90-100%',
+    '100%'
+  ];
+  const barConfig = (name, fullName, values) => ({
+    axis: {
+      x: {
+        type: "category",
+        categories: barLabels,
+      },
+      y: {
+        label: {
+          text: `#${name}`,
+          position: 'outer-top',
+        },
+      },
+    },
+    bindto: `#${name}CoverageDistribution`,
+    data: {
+      columns: [
+        [fullName].concat(values),
+      ],
+      colors: {
+        [fullName]: "rgba(69, 114, 167, 0.75)",
+      },
+      type: "bar",
+    },
+    bar: {
+      width: {
+        ratio: 0.9,
+      },
+    },
+    grid: {
+      focus: {
+        show: false,
+      },
+      x: {
+        show: true,
+      },
+      y: {
+        show: true,
+      },
+    },
+    legend: {
+      show: false,
+    },
+    tooltip: {
+      contents: function (data) {
+        return `<table class="bb-tooltip"><tbody>
+            <tr><th colspan="2">Coverage ${barLabels[data[0].x]}</th></tr>
+            <tr><td class="value">${data[0].value} ${name}</td></tr>
+          </tbody></table>`;
+      },
+      grouped: false,
+    },
+  });
+  bb.generate(
+    barConfig('classes', "Class Coverage", [2,0,0,0,0,0,0,0,0,0,0,8])
+  );
+  bb.generate(
+    barConfig('methods', "Method Coverage", [6,0,0,0,0,0,0,0,0,0,0,44])
+  );
+
+  const scatterConfig = (name, complexityData) => ({
+    axis: {
+      x: {
+        label: {
+          text: 'Code Coverage (in percent)',
+          position: 'outer-right',
+        },
+        tick: {
+          values: [0, 20, 40, 60, 80, 100],
+        },
+      },
+      y: {
+        label: {
+          text: 'Cyclomatic Complexity',
+          position: 'outer-top',
+        },
+        min: 0,
+        padding: {
+          bottom: 0,
+          top: 5,
+        },
+      },
+    },
+    bindto: `#${name}Complexity`,
+    data: {
+      columns: [
+        ["complexity_x"].concat(complexityData.map(d => d[0])),
+        ["complexity"].concat(complexityData.map(d => d[1])),
+      ],
+      onclick: function(data, element) {
+        window.location = complexityData[data.index][2];
+      },
+      type: "scatter",
+      xs: {
+        "complexity": "complexity_x",
+      },
+    },
+    grid: {
+      focus: {
+        show: true,
+        y: true,
+      },
+      x: {
+        show: true,
+      },
+      y: {
+        show: true,
+      },
+    },
+    legend: {
+      show: false,
+    },
+    tooltip: {
+      contents: function (data) {
+        const coverage = Math.round(data[0].x);
+        const complexity = data[0].value;
+        const targetName = complexityData[data[0].index][3];
+        const crap = complexityData[data[0].index][4];
+        return `<table class="bb-tooltip"><tbody>
+            <tr><th colspan="2">${targetName}</th></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Coverage</td><td class="name">${coverage}%</td></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Complexity</td><td class="value">${complexity}</td></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Crap</td><td class="value">${crap}</td></tr>
+          </tbody></table>`;
+      },
+      grouped: false,
+    },
+  });
+  const classComplexityData = JSON.parse(document.getElementById('complexity_class').textContent);
+  bb.generate(
+    scatterConfig("class", classComplexityData)
+  );
+  const methodComplexityData = JSON.parse(document.getElementById('complexity_method').textContent);
+  bb.generate(
+    scatterConfig("method", methodComplexityData),
+  );
+  </script>
+ </body>
+</html>

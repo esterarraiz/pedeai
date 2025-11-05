@@ -19,8 +19,7 @@ class Router
 
         // --- ADIÇÃO PARA O REGISTRO DE EMPRESAS ---
         $this->add('GET', 'registrar', ['controller' => 'NovaEmpresaController', 'action' => 'showRegistrationForm']);
-        $this->add('POST', 'registrar', ['controller' => 'NovaEmpresaController', 'action' => 'processRegistration']);
-        // --- FIM DA ADIÇÃO ---
+        $this->add('POST', 'api/registrar', ['controller' => 'Api\NovaEmpresaController', 'action' => 'processRegistration']);        // --- FIM DA ADIÇÃO ---
 
         // === ROTAS DA API DE AUTENTICAÇÃO (PÚBLICAS) ===
         $this->add('POST', 'api/login', ['controller' => 'Api\AuthController', 'action' => 'login']);
@@ -112,6 +111,20 @@ class Router
 
         $this->add('DELETE', 'api/admin/cardapio/{id:\d+}', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'remover'], ['administrador']);
+
+        // Mesas Admin
+        $this->add('GET', 'estabelecimento', 
+            ['controller' => 'EstabelecimentoController', 'action' => 'index'], ['administrador']);
+            
+        // Rotas da API (para o JavaScript buscar e enviar dados)
+        $this->add('GET', 'api/estabelecimento/mesas', 
+            ['controller' => 'Api\EstabelecimentoController', 'action' => 'listarMesas'], ['administrador']);
+            
+        $this->add('POST', 'api/estabelecimento/mesas', 
+            ['controller' => 'Api\EstabelecimentoController', 'action' => 'criarMesas'], ['administrador']);
+
+        $this->add('POST', 'api/estabelecimento/mesas/excluir', 
+            ['controller' => 'Api\EstabelecimentoController', 'action' => 'excluirMesa'], ['administrador']);
     }
 
     public function add($method, $route, $params = [], $roles = [])

@@ -1,0 +1,205 @@
+/* * CSS para a página de Gerenciamento de Estabelecimento 
+ * (public/css/estabelecimento.css)
+ */
+
+/* * Card de Adicionar Mesas
+ * Vamos estilizar o card que você circulou.
+ */
+.card-add-mesas {
+    background-color: #ffffff;
+    border-radius: 8px; /* Cantos arredondados */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra suave */
+    border: 1px solid #e9ecef; /* Borda leve */
+    margin-bottom: 30px; /* Espaço abaixo do card */
+    overflow: hidden; /* Para o header se encaixar nos cantos */
+    max-width: 600px; /* Limita a largura */
+    
+    /* Centraliza o card na página */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card-add-mesas .card-header {
+    background-color: #f8f9fa;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.card-add-mesas .card-header h4 {
+    margin: 0;
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+    color: var(--text-dark); /* Usando suas variáveis de cor */
+}
+
+.card-add-mesas .card-body {
+    padding: 24px;
+}
+
+.card-add-mesas .card-body p {
+    font-size: 0.95rem; /* 15px */
+    color: var(--text-gray); /* Usando suas variáveis de cor */
+    line-height: 1.6;
+    margin-top: 0;
+    margin-bottom: 20px; /* Mais espaço antes do formulário */
+}
+
+/* * =========================================
+ * ESTILOS ATUALIZADOS PARA O FORMULÁRIO
+ * =========================================
+ */
+.card-add-mesas .form-group-mesas {
+    /* Remove o flex-direction: row */
+    display: block; 
+}
+
+.quantity-picker {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    overflow: hidden; /* Para os cantos arredondados funcionarem */
+    
+    /* Centraliza o seletor de quantidade */
+    width: max-content; /* Faz o seletor ter a largura do seu conteúdo */
+    margin: 0 auto 20px auto; /* Centraliza e adiciona espaço abaixo */
+}
+
+.quantity-picker .btn-qtd {
+    background-color: #f8f9fa;
+    border: none;
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--text-dark, #333);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.quantity-picker .btn-qtd:hover {
+    background-color: #e9ecef;
+}
+
+.quantity-picker .btn-qtd:disabled {
+    color: #ced4da;
+    cursor: not-allowed;
+}
+
+.quantity-picker #quantidade {
+    width: 70px;
+    height: 48px;
+    border: none;
+    border-left: 1px solid #ced4da;
+    border-right: 1px solid #ced4da;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-dark, #333);
+    padding: 0 5px;
+    /* Remove as setas do input[type=number] (se usar) */
+    -moz-appearance: textfield;
+}
+
+.quantity-picker #quantidade::-webkit-outer-spin-button,
+.quantity-picker #quantidade::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+/* Botão de Gerar Mesas */
+.card-add-mesas .btn-success {
+    height: 48px; /* Mesma altura */
+    border-radius: 6px !important; /* Raio completo */
+    border: 0;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #28a745;
+    transition: background-color 0.2s;
+    
+    /* Faz o botão ocupar 100% da largura do card */
+    width: 100%;
+    display: block;
+}
+/* =========================================
+ * FIM DOS ESTILOS ATUALIZADOS
+ * =========================================
+ */
+
+.card-add-mesas .btn-success:hover {
+    background-color: #218838; /* Verde mais escuro no hover */
+}
+
+/* Mensagem de feedback dentro do card */
+#form-mensagem {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 12px;
+    height: 1.2em; /* Reserva espaço para a mensagem */
+    text-align: center; /* Centraliza a mensagem de erro/sucesso */
+}
+
+#form-mensagem .text-danger {
+    color: #dc3545;
+}
+#form-mensagem .text-success {
+    color: #28a745;
+}
+#form-mensagem .text-info {
+    color: #17a2b8;
+}
+
+/* * =========================================
+ * NOVOS ESTILOS PARA O MODAL DE SUCESSO
+ * (COM CORREÇÃO DE ALINHAMENTO)
+ * =========================================
+ */
+#sucessoModal .modal-content {
+    border-radius: 8px; /* Cantos arredondados */
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+#sucessoModal .modal-body {
+    padding-bottom: 0; /* Remove padding extra */
+    
+    /* ===== CORREÇÃO AQUI ===== */
+    /* Força o alinhamento central */
+    text-align: center !important; 
+}
+
+#sucessoModal .modal-footer {
+    border-top: none;
+    padding-top: 0;
+    padding-bottom: 20px;
+    
+    /* ===== CORREÇÃO AQUI ===== */
+    /* Força a centralização do botão */
+    justify-content: center !important; 
+    text-align: center !important; 
+}
+
+#sucessoModal .btn-success {
+    min-width: 100px; /* Largura mínima para o botão */
+    font-weight: 600;
+    
+    /* ===== CORREÇÃO AQUI ===== */
+    /* Garante que o botão não se estique */
+    display: inline-block;
+    width: auto;
+}
+
+#sucessoModal .fa-check-circle {
+    font-size: 3.5rem; /* 56px */
+    color: #28a745; /* Mesmo verde do botão */
+}
+
+#sucessoModal h4 {
+    font-weight: 600;
+    color: var(--text-dark, #333);
+    margin-top: 20px;
+    font-size: 1.25rem; /* 20px */
+}
+

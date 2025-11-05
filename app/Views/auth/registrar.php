@@ -1,5 +1,5 @@
 <?php
-// Inicia a sessão para que possamos ler as mensagens de erro/sucesso
+// Inicia a sessão para que o JS possa limpar a msg de erro antiga, se houver
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -27,6 +27,7 @@ if (session_status() == PHP_SESSION_NONE) {
             background-color: rgba(0, 0, 0, 0.2); /* Fundo escuro sutil */
             border-radius: 5px;
             transition: all 0.3s ease;
+            z-index: 10; /* Garante que fique acima de outros elementos */
         }
         .back-link:hover {
             background-color: rgba(0, 0, 0, 0.4); /* Escurece no hover */
@@ -34,6 +35,34 @@ if (session_status() == PHP_SESSION_NONE) {
         .back-link i {
             margin-right: 5px; /* Espaço entre o ícone e o texto */
         }
+        
+        /* =====================================
+         * CORREÇÃO PARA A PÁGINA ROLAR
+         * =====================================
+        */
+        body {
+            /* Remove o alinhamento vertical que impede a rolagem */
+            align-items: flex-start; 
+            
+            /* Garante que o body possa crescer */
+            height: auto;
+            min-height: 100vh;
+            
+             /* Permite rolagem vertical */
+            overflow-y: auto;
+            
+            /* Adiciona um 'respiro' no topo e embaixo para a rolagem */
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+        }
+        
+        .login-card {
+           /* Garante que o card não seja cortado 
+              e se centralize se houver espaço */
+           margin: auto; 
+        }
+        /* ===================================== */
+
     </style>
 </head>
 <body>
@@ -53,28 +82,46 @@ if (session_status() == PHP_SESSION_NONE) {
 
             <h2 style="text-align: center;">CRIAR CONTA</h2>
 
-            <?php if (isset($_SESSION['form_error'])): ?>
-                <div class="login-error" style="display: block;">
-                    <?php 
+            <!--
+              Div de Erro: Agora controlada pelo JavaScript.
+              O PHP só mostra o erro se o JS falhar totalmente.
+            -->
+            <div class="login-error" id="form-error-msg" style="<?php echo isset($_SESSION['form_error']) ? 'display: block;' : 'display: none;'; ?>">
+                <?php 
+                    if (isset($_SESSION['form_error'])) {
                         echo htmlspecialchars($_SESSION['form_error']);
-                        unset($_SESSION['form_error']);
-                    ?>
-                </div>
-            <?php endif; ?>
+                        unset($_SESSION['form_error']); // Limpa após exibir
+                    }
+                ?>
+            </div>
             
-            <form action="/registrar" method="POST">
+            <!-- 
+              Formulário agora chama o JS (via ID) e não tem mais 'action'
+            -->
+            <form id="form-registrar">
                 
                 <div class="input-group">
                     <i class="fas fa-building"></i>
                     <input type="text" name="cnpj" placeholder="CNPJ" required>
                 </div>
+                
+                <!-- =====================================
+                 * NOVO CAMPO ADICIONADO
+                 * =====================================
+                -->
+                <div class="input-group">
+                    <i class="fas fa-store"></i> <!-- Ícone de loja/restaurante -->
+                    <input type="text" name="nome_estabelecimento" placeholder="Nome do Estabelecimento" required>
+                </div>
+                <!-- ===================================== -->
+                
                 <div class="input-group">
                     <i class="fas fa-user"></i>
                     <input type="text" name="nome_proprietario" placeholder="Seu Nome Completo" required>
                 </div>
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" name="email" placeholder="E-mail" required>
+                    <input type="email" name="email" placeholder="E-mail (será seu login)" required>
                 </div>
                 <div class="input-group">
                     <i class="fas fa-phone"></i>
@@ -87,14 +134,18 @@ if (session_status() == PHP_SESSION_NONE) {
                 
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
-                    <input type="password" name="senha" placeholder="Senha" required>
+                    <input type="password" name="senha" placeholder="Senha (mín. 6 caracteres)" required>
                 </div>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" name="confirm_senha" placeholder="Confirme a Senha" required>
                 </div>
 
-                <button type="submit" class="btn-entrar">Registrar</button>
+                <!-- Botão de submit com 'spinner' de loading -->
+                <button type="submit" class="btn-entrar" id="btn-submit-registrar">
+                    <span class="btn-text">Registrar</span>
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                </button>
                 
                 <p style="text-align: center; margin-top: 15px;">
                     Já tem uma conta? 
@@ -103,5 +154,69 @@ if (session_status() == PHP_SESSION_NONE) {
             </form>
         </div>
     </div>
+
+    <!-- 
+      =====================================
+      == JAVASCRIPT PARA CHAMAR A API ==
+      =====================================
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('form-registrar');
+        const errorMsgDiv = document.getElementById('form-error-msg');
+        const submitBtn = document.getElementById('btn-submit-registrar');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnSpinner = submitBtn.querySelector('.fa-spinner');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // 1. Mostrar loading e limpar erros
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            errorMsgDiv.style.display = 'none';
+            errorMsgDiv.innerText = '';
+
+            // 2. Coletar dados do formulário
+            const formData = new FormData(form);
+            const dados = Object.fromEntries(formData.entries());
+
+            try {
+                // 3. Enviar para a API
+                const response = await fetch('/api/registrar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // 4. Sucesso! Redirecionar para o login
+                    // A API (que vamos ajustar) vai ter colocado a
+                    // mensagem de sucesso na sessão.
+                    window.location.href = '/login';
+                } else {
+                    // 5. Erro da API (ex: "Email já existe")
+                    throw new Error(result.message || 'Erro desconhecido. Tente novamente.');
+                }
+
+            } catch (error) {
+                // 6. Erro de rede ou o 'throw' acima
+                errorMsgDiv.innerText = error.message;
+                errorMsgDiv.style.display = 'block';
+                
+                // 7. Parar loading
+                btnText.style.display = 'inline';
+                btnSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    });
+    </script>
 </body>
 </html>
