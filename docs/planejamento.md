@@ -54,3 +54,19 @@ Transformar a arquitetura do projeto de uma aplicação monolítica renderizada 
 
 ---
 
+## Iteração 4: Plataforma SaaS, Operações Avançadas e Testes
+
+[➡️ Ver registro de implementação desta iteração](features.md)
+
+**Valor da Iteração:**
+Elevar o PedeAI à categoria de uma plataforma **SaaS (Software as a Service)**, introduzindo o cadastro de múltiplas empresas. Além disso, esta iteração adiciona funcionalidades operacionais críticas, como **edição de pedidos e divisão de contas**, e implementa as primeiras ferramentas de **Business Intelligence (Relatórios)**. A introdução obrigatória de **Testes Unitários** em todas as novas lógicas de back-end garante um salto na qualidade, confiabilidade e manutenibilidade do código.
+
+### Funcionalidades
+- **Cadastro de Empresas (Arquitetura Multi-Tenant):** Criar o fluxo público de cadastro para novos restaurantes. A implementação inclui o formulário de registro, a API para criar a empresa e o primeiro usuário Administrador, e a atualização da API de login para autenticação baseada no `id_empresa`.
+- **Edição e Cancelamento de Itens em Pedidos Abertos:** Implementar a funcionalidade que permite ao garçom modificar um pedido que já foi enviado. A tarefa inclui a interface (front-end) e os *endpoints* da API (back-end) para editar ou remover itens, com regras de negócio (ex: não permitir edição se o preparo já foi iniciado).
+- **Funcionalidade de Dividir a Conta e Impressão de Conta:** Refinar o fluxo de caixa, implementando a API e a interface no painel do Caixa para permitir a divisão do valor total de uma conta (por valor ou por número de pessoas) e gerar uma versão HTML formatada para impressão.
+- **Relatórios de Vendas e Performance (US10):** Desenvolver o painel de Business Intelligence para o Administrador. A tarefa inclui a criação dos *endpoints* da API para agregar dados de vendas e a interface (front-end) para exibir faturamento, filtros por período e os produtos mais vendidos.
+- **Implementação do Framework de Testes e Cobertura do Core:** Configurar o ambiente de testes unitários (ex: PHPUnit) no projeto. Criar os primeiros testes para as novas funcionalidades (Relatórios, Edição de Pedidos, etc.) e, adicionalmente, escrever testes de cobertura para as funcionalidades críticas existentes (ex: API de Login, API de Lançamento de Pedido).
+
+---
+
