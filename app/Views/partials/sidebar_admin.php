@@ -19,6 +19,11 @@ $activePage = $data['activePage'] ?? '';
             </a>
         </li>
         <li>
+            <a href="/estabelecimento" class="<?= ($activePage === 'estabelecimento') ? 'active' : '' ?>">
+                <i class="fa-solid fa-store"></i><span>Estabelecimento</span>
+            </a>
+        </li>
+        <li>
             <a href="/dashboard/admin/cardapio" class="<?= ($activePage === 'cardapio') ? 'active' : '' ?>">
                 <i class="fa-solid fa-book-open"></i><span>Gerenciamento de Cardápio</span>
             </a>
