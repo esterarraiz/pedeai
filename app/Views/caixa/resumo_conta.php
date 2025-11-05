@@ -4,124 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumo da Conta - Mesa <?= htmlspecialchars($data['mesa']['numero']) ?></title>
-    <link rel="stylesheet" href="/css/style.css">
+    
+    <link rel="stylesheet" href="/css/style.css"> 
     <link rel="stylesheet" href="/css/caixa.css"> 
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        /* Estilos adicionados para esta página */
-        .account-card { background: #fff; border-radius: 12px; padding: 30px; box-shadow: var(--shadow-sm); max-width: 800px; margin: 0 auto; }
-        .account-header { text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; }
-        .item-list { list-style: none; padding: 0; }
-        .item-list li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border-color); }
-        .item-list li span:first-child { font-weight: 500; }
-        .item-list .quantity { color: var(--text-light); }
-        .total-section { text-align: right; margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--text-dark); }
-        .total-section h3 { font-size: 1.8rem; margin: 0; }
-        .actions { text-align: right; margin-top: 30px; }
-
-        /* --- CORREÇÃO: Estilos para seleção de pagamento --- */
-        .payment-methods .btn {
-            background-color: #f0f2f5; /* Cor de fundo inativa (cinza claro) */
-            color: #333; /* Cor do texto inativo */
-            border: 1px solid #ddd;
-            font-weight: 600;
-        }
-        
-        .payment-methods .btn.active {
-            background-color: #28a745; /* CORRIGIDO: Cor verde (hardcoded) */
-            color: #ffffff;           /* CORRIGIDO: Cor do texto (hardcoded) */
-            border-color: #28a745;     /* CORRIGIDO: Cor da borda (hardcoded) */
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-        }
-        /* --- FIM DA CORREÇÃO --- */
-
-        /* --- MELHORIA: Botão Fechar Conta com mais destaque --- */
-        #btn-fechar-conta {
-            width: 100%; /* CORRIGIDO: Ocupa 100% da largura */
-            background-color: #28a745; /* CORRIGIDO: Cor verde (hardcoded) */
-            color: #ffffff;           /* CORRIGIDO: Cor do texto (hardcoded) */
-            border: none;              /* CORRIGIDO: Remove borda */
-
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            padding: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.2s ease-in-out;
-            margin-top: 10px; /* Adiciona um espaço */
-        }
-        #btn-fechar-conta:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-            background-color: #218838; /* Verde um pouco mais escuro no hover */
-        }
-        #btn-fechar-conta:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        /* --- FIM DA MELHORIA --- */
-
-        /* --- Estilos do Alert (Sem alteração) --- */
-        .custom-alert-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease;
-        }
-        .custom-alert-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .custom-alert-box {
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-lg);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.2s ease;
-        }
-        .custom-alert-overlay.show .custom-alert-box {
-            transform: scale(1);
-        }
-        .custom-alert-box h4 {
-            font-size: 1.5rem;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        .custom-alert-box p {
-            margin-bottom: 25px;
-            font-size: 1rem;
-            color: var(--text-light);
-        }
-        .custom-alert-box .btn {
-            width: 100%;
-            padding: 12px;
-        }
-        /* --- FIM --- */
-
-    </style>
-</head>
+    
+    </head>
 <body>
 
-<!-- HTML do Alert Personalizado (Sem alteração) -->
 <div id="custom-alert-overlay" class="custom-alert-overlay">
     <div class="custom-alert-box">
         <h4 id="custom-alert-title"></h4>
@@ -129,8 +20,6 @@
         <button id="custom-alert-ok" class="btn btn-primary">OK</button>
     </div>
 </div>
-<!-- FIM -->
-
 <div class="dashboard-container">
     <?php include_once __DIR__ . '/../partials/sidebar_caixa.php'; ?>
     <main class="main-content">
@@ -150,7 +39,6 @@
     </main>
 </div>
 
-<!-- Script do Alert Personalizado (Sem alteração) -->
 <script>
     const alertOverlay = document.getElementById('custom-alert-overlay');
     const alertTitle = document.getElementById('custom-alert-title');
@@ -180,13 +68,11 @@
         }
     });
 </script>
-<!-- FIM -->
-
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const mesaId = <?= $data['mesa']['id'] ?>;
     const resumoContent = document.getElementById('resumo-content');
+    let globalTotalValue = 0; 
 
     async function carregarDetalhesConta() {
         try {
@@ -219,9 +105,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
 
+            globalTotalValue = valorTotalMesa; 
             const totalFormatado = valorTotalMesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 
-            // --- ALTERAÇÃO NO INNERHTML ---
             resumoContent.innerHTML = `
                 <div class="resumo-mesa">
                     <ul class="item-list">${itensHtml}</ul>
@@ -230,10 +116,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 
+                <div class="split-section">
+                    <label for="split-count">Dividir por:</label>
+                    <input type="number" id="split-count" min="1" value="1">
+                    <h4 id="split-total"></h4>
+                </div>
+                
                 <form id="payment-form">
-                    <div class="payment-section" style="margin-top: 30px;">
+                    <div class="payment-section" style="margin-top: 20px;">
                         
-                        <!-- CORRIGIDO: Adicionado 'justify-content: center;' para centralizar os botões -->
                         <div class="payment-methods" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
                             <button type="button" class="btn payment-btn" data-method="Dinheiro">Dinheiro</button>
                             <button type="button" class="btn payment-btn" data-method="Cartão de Crédito">Crédito</button>
@@ -241,7 +132,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             <button type="button" class="btn payment-btn" data-method="Pix">Pix</button>
                         </div>
                         
-                        <!-- CORRIGIDO: Removida a classe 'btn-success' para evitar conflito. O ID já estiliza. -->
+                        <button type="button" class="btn btn-print" id="btn-imprimir">
+                            <i class="fas fa-print"></i>
+                            Imprimir Conta
+                        </button>
+                        
                         <button type="submit" class="btn" id="btn-fechar-conta">
                             <i class="fas fa-check-circle"></i>
                             Fechar Conta
@@ -249,9 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </form>
             `;
-            // --- FIM DA ALTERAÇÃO ---
-            
-            setupPaymentForm(valorTotalMesa);
+            setupPaymentForm(); 
 
         } catch (error) {
             showAlert(error.message, 'error');
@@ -259,10 +152,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function setupPaymentForm(totalValue) {
+    function setupPaymentForm() {
         const paymentForm = document.getElementById('payment-form');
         const paymentButtons = document.querySelectorAll('.payment-btn');
         const btnSubmit = document.getElementById('btn-fechar-conta'); 
+        
+        const btnImprimir = document.getElementById('btn-imprimir');
+        if (btnImprimir) {
+            btnImprimir.addEventListener('click', () => {
+                window.print();
+            });
+        }
+        
+        const splitInput = document.getElementById('split-count');
+        const splitTotalDisplay = document.getElementById('split-total');
+        if (splitInput && splitTotalDisplay) {
+            splitInput.addEventListener('input', () => {
+                const count = parseInt(splitInput.value, 10);
+                if (count > 1) {
+                    const individualTotal = globalTotalValue / count;
+            splitTotalDisplay.textContent = `Valor por pessoa: R$ ${individualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                } else {
+                    splitTotalDisplay.textContent = '';
+                }
+            });
+        }
+        
         let metodoPagamento = null; 
 
         if(paymentButtons.length > 0) {
@@ -291,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const payload = {
                 mesa_id: mesaId,
-                valor_pago: totalValue,
+                valor_pago: globalTotalValue,
                 metodo_pagamento: metodoPagamento
             };
 
@@ -325,4 +240,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
