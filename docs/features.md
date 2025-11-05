@@ -51,9 +51,26 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 | Feature | Responsável | Revisor (PR) | Status |
 | :--- | :--- | :--- | :--- |
 | Refatoração da Autenticação para API | Ester | Arthur | Concluída |
-| Migração do Painel de Administração para API | Jorge | Ester | A Fazer |
+| Migração do Painel de Administração para API | Jorge | Ester | Concluída |
 | Migração do Painel da Cozinha para API | Vitória | Matheus | Concluída |
 | Migração do Fluxo do Caixa para API | Matheus | Jorge | Concluída |
 | Migração do Fluxo do Garçom para API | Arthur | Ester | Concluída |
+
+---
+
+
+## Iteração 4: Plataforma SaaS, Operações Avançadas e Testes
+
+Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionalidades planejadas, consulte o [planejamento das iterações](planejamento.md).
+
+### Features Planejadas
+
+| Feature | User Story | Responsável | Revisor (PR) | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| Cadastro de Empresas (Multi-Tenant) | N/A | Arthur Vinicíus | Vitória Maria | Concluída |
+| Edição e Cancelamento de Itens em Pedidos | N/A | Vitória Maria | Matheus Henrique | A Fazer |
+| Funcionalidade de Dividir a Conta e Impressão | N/A | Jorge Antônio | Ester Arraiz | Concluída |
+| Relatórios de Vendas e Performance | US10 | Matheus Henrique | Jorge Antônio | Concluída |
+| Configuração de Testes Unitários e Cobertura do Core | N/A | Ester Arraiz | Arthur Vinicíus | Concluída |
 
 ---
