@@ -70,3 +70,19 @@ Elevar o PedeAI à categoria de uma plataforma **SaaS (Software as a Service)**,
 
 ---
 
+## Iteração 5: Lançamento (Features Finais, Correções e Qualidade Total)
+
+[➡️ Ver registro de implementação desta iteração](features.md)
+
+**Valor da Iteração:**
+Esta é a iteração final de entrega de features, focada em solidificar o PedeAI como uma plataforma robusta e completa. O objetivo é fechar gaps funcionais críticos (como a **visualização de status pelo garçom** e o **pagamento parcial**), corrigir a arquitetura multi-tenant (categorias), e entregar as últimas grandes funcionalidades de valor (como o **cardápio digital** e a **edição de pedidos**). A obrigatoriedade de **Testes Unitários** para todas as entregas garante a qualidade e confiabilidade do produto final.
+
+### Funcionalidades
+- **Edição e Cancelamento de Itens em Pedidos Abertos:** Implementar a funcionalidade (adiada da Iteração 4) que permite ao garçom modificar um pedido que já foi enviado, adicionando ou removendo itens antes que o preparo seja iniciado pela cozinha.
+- **Cardápio Digital Público (PDF e QR Code):** Criar uma página pública para cada restaurante que exibe seu cardápio. Implementar a geração de um PDF do cardápio e um QR Code que aponta para o link público, disponibilizando-os no painel do Administrador.
+- **Refatoração Multi-Tenant (Categorias) e Imagens de Produtos:** Corrigir a arquitetura para que cada empresa possa gerenciar suas próprias categorias de produtos (multi-tenant). Adicionalmente, implementar o upload e a exibição de imagens para os produtos no CRUD do cardápio.
+- **Implementação da Visualização de Status pelo Garçom (US03):** Desenvolver a funcionalidade que falta no fluxo de comunicação: a tela do garçom agora deve consumir a API para exibir o status de seus pedidos ("Em preparo", "Pronto") em tempo real.
+- **Refinamento do Caixa (Pagamento Parcial) e Painel de Suporte:** Implementar a funcionalidade de pagamento parcial por valor (US07). Adicionalmente, criar uma nova seção de "Suporte" no painel do Administrador com FAQ e um formulário de contato.
+
+---
+
