@@ -35,4 +35,11 @@ class EmpresaModel
             throw $e; 
         }
     }
+    public function buscarPorId(int $id)
+    {
+        $sql = "SELECT * FROM empresas WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

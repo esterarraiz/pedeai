@@ -25,6 +25,12 @@ class Router
         $this->add('POST', 'api/login', ['controller' => 'Api\AuthController', 'action' => 'login']);
         // $this->add('POST', 'api/register', ['controller' => 'Api\AuthController', 'action' => 'register']); // Exemplo
 
+        // === ROTAS PÚBLICAS DO CARDÁPIO ===
+        // A página pública que o cliente vê (ex: /cardapio/1)
+        $this->add('GET', 'cardapio/{id:\d+}', ['controller' => 'CardapioPublicoController', 'action' => 'index']);
+        // A rota que gera o PDF para download
+        $this->add('GET', 'cardapio/{id:\d+}/pdf', ['controller' => 'CardapioPublicoController', 'action' => 'gerarPDF']);
+
         // === ROTAS PROTEGIDAS POR SESSÃO ===
         // === ROTAS DE ADMINISTRADOR (VIEWS) ===
         $this->add('GET', 'dashboard/admin', ['controller' => 'AdminDashboardController', 'action' => 'index'], ['administrador']);
@@ -40,10 +46,14 @@ class Router
         $this->add('POST', 'api/funcionarios/atualizar', ['controller' => 'Api\FuncionarioController', 'action' => 'atualizar'], ['administrador']);
         $this->add('POST', 'api/funcionarios/status', ['controller' => 'Api\FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'api/funcionarios/redefinir-senha', ['controller' => 'Api\FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
-        // API de Cargos
+        // Esta é a linha CORRET
+        $this->add('GET', 'admin/cardapio-digital', 
+            ['controller' => 'AdminDashboardController', 'action' => 'showCardapioDigital'], 
+            ['administrador']
+        );
+        $this->add('POST', 'admin/cardapio/gerar-qrcode-pdf', ['controller' => 'AdminDashboardController', 'action' => 'gerarQrCodePdf']);
         $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);         
         // Admin: Gerenciamento de Cardápio (Views)
-        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)
         // (NOVO) Admin: Relatórios (View)
