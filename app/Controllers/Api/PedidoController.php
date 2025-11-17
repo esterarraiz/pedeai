@@ -4,30 +4,52 @@ namespace App\Controllers\Api;
 
 use App\Core\JsonController;
 use App\Models\PedidoModel;
-use App\Models\Mesa; // Necessário para atualizar o status da mesa
+use App\Models\Mesa; 
 use Config\Database;
-use Exception; // Usaremos Exception para lidar com erros
+use Exception;
+use PDO; // Adicionado o import
 
 class PedidoController extends JsonController
 {
-    private PedidoModel $pedidoModel;
-    private Mesa $mesaModel; // Adicionado para interagir com mesas
+    // private PedidoModel $pedidoModel; // <-- REMOVIDO
+    // private Mesa $mesaModel; // <-- REMOVIDO
     private ?int $empresa_id;
     private ?int $funcionario_id;
 
     public function __construct()
     {
-        $pdo = Database::getConnection();
-        $this->pedidoModel = new PedidoModel($pdo);
-        $this->mesaModel = new Mesa($pdo); // Instancia o Mesa Model
+        // $pdo = Database::getConnection(); // <-- REMOVIDO
+        // $this->pedidoModel = new PedidoModel($pdo); // <-- REMOVIDO
+        // $this->mesaModel = new Mesa($pdo); // <-- REMOVIDO
         $this->empresa_id = $_SESSION['empresa_id'] ?? null;
         $this->funcionario_id = $_SESSION['user_id'] ?? null;
     }
 
-    /**
-     * Endpoint: POST /api/pedidos
-     * Cria um novo pedido.
-     */
+    // --- MÉTODOS DE INJEÇÃO (para teste) ---
+
+    protected function getPdo(): PDO
+    {
+        // Retorna uma nova conexão ou reutiliza uma existente
+        // Para este controller, vamos garantir que a conexão seja criada
+        static $pdo = null;
+        if ($pdo === null) {
+            $pdo = Database::getConnection();
+        }
+        return $pdo;
+    }
+
+    protected function getPedidoModel(): PedidoModel
+    {
+        return new PedidoModel($this->getPdo());
+    }
+
+    protected function getMesaModel(): Mesa
+    {
+        return new Mesa($this->getPdo());
+    }
+
+    // --- MÉTODOS DA API ---
+
     public function criarPedido()
     {
         error_reporting(E_ALL);
@@ -44,19 +66,20 @@ class PedidoController extends JsonController
             return $this->jsonResponse(['message' => 'Sessão inválida ou expirada.'], 401);
         }
 
-        $pdo = Database::getConnection(); // Pega a conexão novamente para a transação
+        $pdo = $this->getPdo(); // <-- MUDANÇA: Usa o método mockável
         try {
             $pdo->beginTransaction();
 
-            $pedido_id = $this->pedidoModel->criarNovoPedido(
+            // MUDANÇA: Usa os getters
+            $pedido_id = $this->getPedidoModel()->criarNovoPedido(
                 $this->empresa_id, 
                 (int)$mesa_id, 
                 $this->funcionario_id, 
                 $itens_validos
             );
 
-            // Atualiza o status da mesa para 'ocupada'
-            $this->mesaModel->atualizarStatus($mesa_id, 'ocupada'); // Usando o método correto
+            // MUDANÇA: Usa os getters
+            $this->getMesaModel()->atualizarStatus($mesa_id, 'ocupada'); 
 
             $pdo->commit();
             $this->jsonResponse(['success' => true, 'message' => "Pedido #{$pedido_id} lançado com sucesso!"]);
@@ -68,23 +91,16 @@ class PedidoController extends JsonController
         }
     }
 
-    /**
-     * Endpoint: GET /api/pedidos/prontos
-     * Busca pedidos prontos para notificar o garçom.
-     */
     public function getPedidosProntos()
     {
         if (!$this->empresa_id) {
             return $this->jsonResponse(['message' => 'Empresa não identificada.'], 401);
         }
-        $pedidosProntos = $this->pedidoModel->buscarPedidosProntosPorEmpresa($this->empresa_id);
+        // MUDANÇA: Usa o getter
+        $pedidosProntos = $this->getPedidoModel()->buscarPedidosProntosPorEmpresa($this->empresa_id);
         $this->jsonResponse(['pedidos' => $pedidosProntos]);
     }
 
-    /**
-     * Endpoint: POST /api/pedidos/marcar-entregue
-     * Marca um pedido como entregue.
-     */
     public function marcarPedidoEntregue()
     {
         $data = $this->getJsonData();
@@ -94,7 +110,8 @@ class PedidoController extends JsonController
             return $this->jsonResponse(['message' => 'ID do pedido ou empresa inválido.'], 400);
         }
 
-        $success = $this->pedidoModel->marcarComoEntregue((int)$pedido_id, $this->empresa_id);
+        // MUDANÇA: Usa o getter
+        $success = $this->getPedidoModel()->marcarPedidosDaMesaComoEntregues((int)$pedido_id, $this->empresa_id);
         
         if ($success) {
             $this->jsonResponse(['message' => 'Pedido marcado como entregue.']);
@@ -102,37 +119,30 @@ class PedidoController extends JsonController
             $this->jsonResponse(['message' => 'Falha ao marcar pedido como entregue (verifique o status atual).'], 500);
         }
     }
+
     public function marcarPedidoPronto()
     {
         try {
-            // Pega o corpo da requisição POST (que o JavaScript envia como JSON)
             $data = $this->getJsonData();
-
-            // Valida os dados recebidos
             $pedido_id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
-            $empresa_id = $this->empresa_id; // Pego do construtor
+            $empresa_id = $this->empresa_id; 
 
             if (!$pedido_id || !$empresa_id) {
-                // Usa 'Exception' (baseado no 'use' do topo)
                 throw new Exception("ID do pedido ou ID da empresa inválido.");
             }
 
-            // Executa a lógica de negócio no Model
-            $sucesso = $this->pedidoModel->marcarComoPronto($pedido_id, $empresa_id);
+            // MUDANÇA: Usa o getter
+            $sucesso = $this->getPedidoModel()->marcarComoPronto($pedido_id, $empresa_id);
 
             if ($sucesso) {
-                // Se o model retornar true, a atualização foi bem-sucedida.
                 $this->jsonResponse(['success' => true, 'message' => "Pedido #{$pedido_id} marcado como pronto!"]);
             } else {
-                // Se o model retornar false, a atualização falhou (0 linhas afetadas).
-                // Usa 'Exception' (baseado no 'use' do topo)
                 throw new Exception("O Pedido #{$pedido_id} não pôde ser atualizado. Ele pode já ter sido marcado como 'pronto' ou o seu estado não é 'em preparo'.");
             }
 
-        } catch (Exception $e) { // CORRIGIDO: Padrão igual ao 'criarPedido'
-            // Em caso de qualquer erro, retorna uma resposta JSON com a mensagem de erro.
-            error_log("Erro ao marcar pedido como pronto: " . $e->getMessage()); // CORRIGIDO: Adiciona log
-            $this->jsonResponse(['success' => false, 'message' => $e->getMessage()], 500); // CORRIGIDO: Muda para 500
+        } catch (Exception $e) { 
+            error_log("Erro ao marcar pedido como pronto: " . $e->getMessage()); 
+            $this->jsonResponse(['success' => false, 'message' => $e->getMessage()], 500); 
         }
     }
 }

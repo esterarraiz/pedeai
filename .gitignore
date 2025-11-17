@@ -1,5 +1,5 @@
 .env
 /vendor/
-.phpunit.cache/
-coverage/
-sessions/
+/.phpunit.cache/
+/coverage/
+/sessions/
