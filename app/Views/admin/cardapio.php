@@ -48,6 +48,21 @@
             margin-left: 10px;
             padding: 5px 10px;
         }
+        
+        /* CORREÇÃO VISUAL DO MODAL DE CATEGORIAS */
+        #modalGerenciarCategorias .modal-content {
+            padding: 20px; 
+        }
+        #formAdicionarCategoria {
+            padding: 15px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px;
+            margin-bottom: 20px !important; 
+        }
+        #formAdicionarCategoria .form-group.d-flex input {
+            flex-grow: 1; 
+            margin-right: 10px; 
+        }
     </style>
 </head>
 <body>
@@ -173,8 +188,7 @@
                 
                 <form id="formAdicionarCategoria" class="mb-4">
                     <div class="form-group d-flex">
-                        <input type="text" name="nome" class="form-control" placeholder="Novo nome da categoria" required style="margin-right: 10px;">
-                        <button type="submit" class="btn btn-primary flex-shrink-0">Criar</button>
+                        <input type="text" name="nome" class="form-control" placeholder="Novo nome da categoria" required> <button type="submit" class="btn btn-primary flex-shrink-0">Criar</button>
                     </div>
                     <div id="feedback-categoria" class="mt-2"></div>
                 </form>
