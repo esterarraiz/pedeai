@@ -51,9 +51,44 @@ Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionali
 | Feature | Responsável | Revisor (PR) | Status |
 | :--- | :--- | :--- | :--- |
 | Refatoração da Autenticação para API | Ester | Arthur | Concluída |
-| Migração do Painel de Administração para API | Jorge | Ester | A Fazer |
+| Migração do Painel de Administração para API | Jorge | Ester | Concluída |
 | Migração do Painel da Cozinha para API | Vitória | Matheus | Concluída |
 | Migração do Fluxo do Caixa para API | Matheus | Jorge | Concluída |
 | Migração do Fluxo do Garçom para API | Arthur | Ester | Concluída |
+
+---
+
+
+## Iteração 4: Plataforma SaaS, Operações Avançadas e Testes
+
+Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionalidades planejadas, consulte o [planejamento das iterações](planejamento.md).
+
+### Features Planejadas
+
+| Feature | Responsável | Revisor (PR) | Status |
+| :--- | :--- | :--- | :--- |
+| Cadastro de Empresas (Multi-Tenant) | Arthur Vinicíus | Vitória Maria | Concluída |
+| Edição e Cancelamento de Itens em Pedidos | Vitória Maria | Matheus Henrique | Ficará para a feature 5 |
+| Funcionalidade de Dividir a Conta e Impressão | Jorge Antônio | Ester Arraiz | Concluída |
+| Relatórios de Vendas e Performance | Matheus Henrique | Jorge Antônio | Concluída |
+| Configuração de Testes Unitários e Cobertura do Core | Ester Arraiz | Arthur Vinicíus | Concluída |
+
+---
+
+
+## Iteração 5: Lançamento (Features Finais, Correções e Qualidade Total)
+
+Para mais detalhes sobre esta iteração, valor agregado ao cliente e funcionalidades planejadas, consulte o [planejamento das iterações](planejamento.md).
+
+### Features Planejadas
+
+| Feature | Responsável | Revisor (PR) | Status |
+| :--- | :--- | :--- | :--- |
+| Cardápio Digital Público (PDF e QR Code) | Responsável | Revisor | A Fazer |
+| Refatoração Multi-Tenant e Imagens de Produtos | Responsável | Revisor | A Fazer |
+| Implementação da Visualização de Status (US03) | Responsável | Revisor | A Fazer |
+| Edição e Cancelamento de Itens em Pedidos | Responsável | Revisor | A Fazer |
+| Refinamento do Caixa (Pagamento Parcial) e Suporte | Responsável | Revisor | A Fazer |
+| Testes Unitários das APIs | Todos | Todos | A Fazer |
 
 ---

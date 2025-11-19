@@ -52,7 +52,6 @@ body {
 .main-content {
     flex-grow: 1;
     padding: 32px;
-    /* CORREÇÃO APLICADA AQUI */
     display: flex;
     flex-direction: column;
 }
@@ -61,7 +60,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0; /* Impede que o header encolha */
+    flex-shrink: 0; 
 }
 
 .main-header h1 {
@@ -84,6 +83,19 @@ body {
     text-align: center;
     transition: all 0.3s ease;
 }
+
+
+.btn-secondary {
+    background-color: var(--text-light);
+    color: var(--bg-sidebar-cards);
+    border: 1px solid var(--text-light);
+}
+.btn-secondary:hover {
+    background-color: var(--text-dark);
+    border-color: var(--text-dark);
+}
+
+
 
 .btn-logout {
     background-color: var(--red-status-text);
@@ -182,7 +194,7 @@ body {
 }
 
 .sidebar-logo img {
-    height: 180px; /* Ajustado para um tamanho mais razoável */
+    height: 180px; 
 }
 
 .sidebar-nav {
@@ -192,7 +204,7 @@ body {
     gap: 8px;
     flex-grow: 1;
     overflow-y: auto;
-    padding-right: 5px; /* Espaço para a barra de rolagem */
+    padding-right: 5px; 
 }
 
 .sidebar-nav li a {

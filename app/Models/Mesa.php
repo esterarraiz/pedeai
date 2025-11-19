@@ -40,6 +40,46 @@ class Mesa {
     // FIM dos métodos sem alteração
 
 
+    public function criar(array $dados): bool
+    {
+        $sql = "INSERT INTO mesas (empresa_id, numero, status) 
+                VALUES (:empresa_id, :numero, :status)";
+        
+        $stmt = $this->pdo->prepare($sql);
+        
+        $stmt->bindValue(':empresa_id', $dados['empresa_id'], PDO::PARAM_INT);
+        $stmt->bindValue(':numero', $dados['numero'], PDO::PARAM_INT);
+        $stmt->bindValue(':status', $dados['status'], PDO::PARAM_STR);
+        
+        // Se isto falhar, o Controller vai pegar o erro real.
+        return $stmt->execute();
+    }
+
+    /**
+     * Busca o maior número de mesa de uma empresa.
+     */
+    public function buscarUltimoNumero(int $empresa_id): int
+    {
+        $sql = "SELECT MAX(numero) as max_num FROM mesas WHERE empresa_id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$empresa_id]);
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Se não houver mesas, retorna 0.
+        return (int) ($resultado['max_num'] ?? 0);
+    }
+    
+    /**
+     * (CORRIGIDO) Exclui uma mesa pelo ID.
+     * Também removemos o try-catch para deixar o Controller capturar o erro.
+     */
+    public function excluir(int $id): bool
+    {
+        $sql = "DELETE FROM mesas WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$id]);
+    }
+
     /**
      * Atualiza o status de uma mesa para 'disponivel' após o pagamento.
      * CORRIGIDO: Removida a verificação de status anterior (IN ('ocupada', ...)).

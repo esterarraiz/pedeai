@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'Gerenciar Cardápio') ?></title>
     
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/funcionarios.css">
-    <link rel="stylesheet" href="/css/form.css"> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <link rel="stylesheet" href="/css/admin_cardapio.css">
+    <link rel="stylesheet" href="/css/style.css">
     
     <style>
         .category-header {
@@ -34,10 +36,13 @@
             display: flex;
             align-items: center;
         }
-        /* NOVO CSS para a lista de categorias no modal */
+        /* CSS para a lista de categorias no modal */
         .list-group-item {
             padding: 10px 15px;
             border-bottom: 1px solid var(--border-color);
+            display: flex; /* Adicionado para o layout da lista */
+            justify-content: space-between;
+            align-items: center;
         }
         .btn-remover-categoria {
             margin-left: 10px;
@@ -56,9 +61,17 @@
                 <button class="btn btn-warning" style="margin-left: auto; margin-right: 10px;" data-bs-toggle="modal" data-bs-target="#modalGerenciarCategorias">
                     <i class="fas fa-layer-group"></i> Gerenciar Categorias
                 </button>
+                
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAdicionarItem">
                     <i class="fas fa-plus"></i> Adicionar Item
                 </button>
+                
+                <button class="btn btn-amber" style="margin-left: 15px;"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#cardapioOpcoesModal">
+                    <i class="fas fa-qrcode"></i> Cardápio Público
+                </button>
+
             </header>
 
             <div id="feedback-container"></div>
@@ -80,7 +93,8 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <h3>Adicionar Novo Item</h3>
-                <form id="formAdicionarItem" enctype="multipart/form-data"> <div class="form-group">
+                <form id="formAdicionarItem" enctype="multipart/form-data"> 
+                    <div class="form-group">
                         <label>Nome do Item</label>
                         <input type="text" name="nome" class="form-control" required>
                     </div>
@@ -116,8 +130,10 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <h3>Editar Item</h3>
-                <form id="formEditarItem" enctype="multipart/form-data"> <input type="hidden" name="id" id="edit-id">
-                    <input type="hidden" name="imagem_url_atual" id="edit-imagem_url_atual"> <div class="form-group">
+                <form id="formEditarItem" enctype="multipart/form-data"> 
+                    <input type="hidden" name="id" id="edit-id">
+                    <input type="hidden" name="imagem_url_atual" id="edit-imagem_url_atual"> 
+                    <div class="form-group">
                         <label>Nome do Item</label>
                         <input type="text" id="edit-nome" name="nome" class="form-control" required>
                     </div>
@@ -174,7 +190,56 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="cardapioOpcoesModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered mx-auto">
+            <div class="modal-content p-3">
+
+                <h3 class="text-center mb-3">Cardápio Digital Público</h3>
+
+                <div class="mb-4">
+                    <label class="form-label"><strong>Link Público do Cardápio:</strong></label>
+                    <div class="input-group">
+                        
+                        <input id="cardapio-public-url" type="text" class="form-control" readonly 
+                            value="<?= isset($empresa['link_publico']) ? htmlspecialchars($empresa['link_publico']) : ''; ?>">
+                        
+                        <button class="btn btn-outline-secondary" id="copyCardapioUrl">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+
+                    <a href="<?= isset($empresa['link_pdf']) ? htmlspecialchars($empresa['link_pdf']) : ''; ?>"
+                        class="btn btn-green"
+                        target="_blank">
+                            <i class="fas fa-file-pdf"></i> Baixar PDF do Cardápio
+                    </a>
+
+
+                    <button id="btnGerarQrCode" class="btn btn-dark">
+                        <i class="fas fa-qrcode"></i> Gerar QR Code
+                    </button>
+
+                    <button id="btnImprimirQr" class="btn btn-amber">
+                        <i class="fas fa-print"></i> Imprimir QR Code
+                    </button>
+
+                </div>
+
+                <div id="qrCodeArea" class="text-center mt-4" style="display:none;">
+                    <h5>QR Code do Cardápio</h5>
+                    <img id="qrCodeImage" src="" style="max-width:180px;">
+
+                </div>
+
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     
     <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -188,18 +253,18 @@
         // Objetos JS do Bootstrap para controlar os modais
         const modalAdicionar = new bootstrap.Modal(document.getElementById('modalAdicionarItem'));
         const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarItem'));
-        const modalGerenciar = new bootstrap.Modal(document.getElementById('modalGerenciarCategorias')); // NOVO
+        const modalGerenciar = new bootstrap.Modal(document.getElementById('modalGerenciarCategorias')); 
 
         // Elemento HTML do modal (para adicionar listeners)
         const modalEditarElement = document.getElementById('modalEditarItem'); 
-        const modalGerenciarElement = document.getElementById('modalGerenciarCategorias'); // NOVO
+        const modalGerenciarElement = document.getElementById('modalGerenciarCategorias'); 
 
         // Elementos dos formulários
         const formAdicionar = document.getElementById('formAdicionarItem');
         const formEditar = document.getElementById('formEditarItem');
-        const formAdicionarCategoria = document.getElementById('formAdicionarCategoria'); // NOVO
-        const listaCategorias = document.getElementById('lista-categorias'); // NOVO
-        const feedbackCategoria = document.getElementById('feedback-categoria'); // NOVO
+        const formAdicionarCategoria = document.getElementById('formAdicionarCategoria'); 
+        const listaCategorias = document.getElementById('lista-categorias'); 
+        const feedbackCategoria = document.getElementById('feedback-categoria'); 
 
         // Selects de categoria
         const selectAddCategoria = document.getElementById('add-categoria_id');
@@ -213,7 +278,7 @@
             setTimeout(() => { feedbackContainer.innerHTML = ''; }, 5000);
         }
 
-        function mostrarFeedbackCategoria(mensagem, tipo = 'success') { // NOVO
+        function mostrarFeedbackCategoria(mensagem, tipo = 'success') {
             const alertClass = (tipo === 'success') ? 'alert-success' : 'alert-danger';
             feedbackCategoria.innerHTML = `<div class="alert ${alertClass}">${mensagem}</div>`;
             setTimeout(() => { feedbackCategoria.innerHTML = ''; }, 5000);
@@ -230,27 +295,21 @@
         function renderizarCategorias(categorias) {
             const selects = [selectAddCategoria, selectEditCategoria];
             selects.forEach(select => {
-                const placeholder = select.options[0];
-                // Limpa e garante que o placeholder/default esteja lá
+                // Removendo a lógica de placeholder complexa, garantindo limpeza e adição
                 select.innerHTML = ''; 
-                if (placeholder) {
-                     select.appendChild(placeholder.cloneNode(true));
-                } else {
-                     const defaultOption = document.createElement('option');
-                     defaultOption.value = "";
-                     defaultOption.textContent = 'Selecione uma categoria...';
-                     defaultOption.disabled = true;
-                     defaultOption.selected = true;
-                     select.appendChild(defaultOption);
-                }
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = categorias && categorias.length > 0 ? 'Selecione uma categoria...' : 'Nenhuma categoria encontrada';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                select.appendChild(defaultOption);
                 
                 if (categorias && categorias.length > 0) {
                     categorias.forEach(cat => {
                         const option = new Option(cat.nome, cat.id);
                         select.add(option);
                     });
-                } else {
-                    select.options[0].textContent = 'Nenhuma categoria encontrada';
                 }
             });
         }
@@ -258,7 +317,7 @@
         /**
          * Constrói a lista de categorias no modal de gerenciamento.
          */
-        function renderizarListaCategorias(categorias) { // NOVO
+        function renderizarListaCategorias(categorias) {
             listaCategorias.innerHTML = '';
             if (categorias.length === 0) {
                 listaCategorias.innerHTML = '<li class="list-group-item">Nenhuma categoria cadastrada.</li>';
@@ -278,7 +337,6 @@
                 listaCategorias.appendChild(li);
             });
         }
-
 
         function renderizarCardapio(cardapioAgrupado) {
             cardapioContainer.innerHTML = ''; 
@@ -547,6 +605,98 @@
                 } catch (error) {
                     mostrarFeedbackCategoria('Erro de comunicação ao remover.', 'danger');
                 }
+            }
+        });
+
+
+        // 4. Lógica do QR Code (Ajuste para funcionar dentro do DOMContentLoaded)
+
+        // Event listener para o botão Gerar QR Code
+        document.getElementById('btnGerarQrCode').addEventListener('click', function () {
+            const url = document.getElementById('cardapio-public-url').value;
+            const qrArea = document.getElementById('qrCodeArea');
+            const imgElement = document.getElementById('qrCodeImage');
+
+            if (!url || url.trim() === "") {
+                alert("Nenhum link disponível para gerar o QR Code!");
+                return;
+            }
+
+            // Limpa o container temporário antes de gerar
+            qrArea.innerHTML = '<h5>QR Code do Cardápio</h5><img id="qrCodeImage" src="" style="max-width:180px;">';
+            const tempContainer = document.createElement("div");
+
+            const qr = new QRCode(tempContainer, {
+                text: url,
+                width: 180,
+                height: 180
+            });
+
+            // QRCode.js gera a imagem em um canvas ou img dentro do tempContainer
+            // Usamos setTimeout para garantir que a geração assíncrona termine
+            setTimeout(() => {
+                const img = tempContainer.querySelector("img") || tempContainer.querySelector("canvas");
+                
+                if (img) {
+                    // Se for canvas, converte para base64; se for img, usa o src
+                    const src = img.tagName === 'CANVAS' ? img.toDataURL() : img.src;
+                    
+                    imgElement.src = src; 
+                    qrArea.style.display = "block"; 
+                } else {
+                    alert("Erro ao gerar o QR Code!");
+                }
+            }, 50); // Reduzido o tempo de espera
+
+        });
+
+        // Event listener para o botão Copiar URL
+        document.getElementById("copyCardapioUrl").addEventListener("click", function () {
+            const input = document.getElementById("cardapio-public-url");
+            if (!input.value) {
+                alert("Nenhum link disponível para copiar.");
+                return;
+            }
+
+            // Usa a API Clipboard moderna
+            navigator.clipboard.writeText(input.value)
+                .then(() => alert("Link copiado!"))
+                .catch(() => alert("Não foi possível copiar. Verifique se o navegador suporta a API Clipboard."));
+        });
+
+        // Event listener para o botão Imprimir QR (Mantido como estava na última versão)
+        document.getElementById('btnImprimirQr').addEventListener('click', async function () {
+            const qrBase64 = document.getElementById('qrCodeImage').src;
+            const companyName = "<?= addslashes($empresa['nome_empresa'] ?? ''); ?>"; 
+            const titulo = "Escaneie o QR code e confira nosso cardápio";
+
+            if (!qrBase64 || !qrBase64.startsWith('data:image')) {
+                alert('Gere o QR Code primeiro.');
+                return;
+            }
+
+            try {
+                // Requisição POST para o Controller (que deve gerar o PDF)
+                const res = await fetch('/admin/cardapio/gerar-qrcode-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qr: qrBase64, titulo, companyName })
+                });
+
+                if (!res.ok) throw new Error('Erro ao gerar PDF');
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${(companyName || 'qrcode_cardapio').replace(/\s+/g,'_')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error(err);
+                alert('Falha ao gerar o PDF.');
             }
         });
 

@@ -1,0 +1,105 @@
+/* Remove a dependência do style.css principal, que tem o layout do dashboard */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F9FAFB;
+    color: #1F2937;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.menu-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    overflow: hidden;
+}
+
+.menu-header {
+    padding: 30px;
+    text-align: center;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.menu-header img {
+    height: 60px;
+    margin-bottom: 15px;
+}
+
+.menu-header h1 {
+    font-size: 2.5rem;
+    color: #1F2937;
+    margin: 0;
+}
+
+.menu-content {
+    padding: 10px 0;
+}
+
+.category-group {
+    padding: 20px 30px;
+}
+
+.category-group h2 {
+    font-size: 1.8rem;
+    color: #059669; /* Verde Escuro */
+    border-bottom: 2px solid #E0F2F1; /* Verde Claro */
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.menu-item-details {
+    flex-grow: 1;
+    padding-right: 15px;
+}
+
+.menu-item-details h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    color: #1F2937;
+}
+
+.menu-item-details p {
+    margin: 0;
+    color: #6B7280;
+    font-size: 0.9rem;
+}
+
+.menu-item-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.menu-footer {
+    text-align: center;
+    padding: 25px;
+    background-color: #F9FAFB;
+    border-top: 1px solid #E5E7EB;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary {
+    background-color: #f3f4f6;
+    color: #1F2937;
+    border: 1px solid #E5E7EB;
+}
+.btn-secondary:hover {
+    background-color: #e5e7eb;
+}

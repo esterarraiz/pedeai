@@ -6,30 +6,40 @@ use App\Core\JsonController; // Herda do Controller Base de API
 use App\Models\Funcionario;
 use Config\Database;
 use Exception;
+use PDO; // Importar o PDO
 
 class FuncionarioController extends JsonController
 {
-    private Funcionario $funcionarioModel;
+    // private Funcionario $funcionarioModel; // <-- 1. REMOVIDO
     private ?int $empresa_id;
-    private $pdo; // Adicionado para ser consistente com o seu Model
+    private $pdo; 
 
     public function __construct()
     {
         $this->pdo = Database::getConnection();
-        $this->funcionarioModel = new Funcionario($this->pdo);
+        // $this->funcionarioModel = new Funcionario($this->pdo); // <-- 2. REMOVIDO
         $this->empresa_id = $_SESSION['empresa_id'] ?? null;
     }
 
     /**
+     * 3. ADICIONADO: Factory method para o Model.
+     * Isso permite que o teste injete um mock.
+     */
+    protected function getFuncionarioModel(): Funcionario
+    {
+        return new Funcionario($this->pdo);
+    }
+
+    /**
      * Endpoint: GET /api/funcionarios
-     * Lista todos os funcionários.
      */
     public function listar()
     {
         try {
             if (!$this->empresa_id) { throw new Exception("Empresa não identificada."); }
-            $funcionarios = $this->funcionarioModel->buscarTodosPorEmpresa($this->empresa_id);
-            $this->jsonResponse($funcionarios); // Envia os dados como JSON
+            // 4. MUDANÇA: usa o factory method
+            $funcionarios = $this->getFuncionarioModel()->buscarTodosPorEmpresa($this->empresa_id);
+            $this->jsonResponse($funcionarios); 
         } catch (Exception $e) {
             $this->jsonResponse(['message' => $e->getMessage()], 500);
         }
@@ -37,7 +47,6 @@ class FuncionarioController extends JsonController
 
     /**
      * Endpoint: GET /api/funcionarios/{id}
-     * Busca um funcionário específico.
      */
     public function getFuncionario($params)
     {
@@ -45,7 +54,8 @@ class FuncionarioController extends JsonController
             $id = $params['id'] ?? null;
             if (!$id) { return $this->jsonResponse(['message' => 'ID não fornecido.'], 400); }
             
-            $funcionario = $this->funcionarioModel->buscarPorId((int)$id);
+            // 4. MUDANÇA: usa o factory method
+            $funcionario = $this->getFuncionarioModel()->buscarPorId((int)$id);
             $this->jsonResponse($funcionario);
         } catch (Exception $e) {
             $this->jsonResponse(['message' => $e->getMessage()], 500);
@@ -54,7 +64,6 @@ class FuncionarioController extends JsonController
 
     /**
      * Endpoint: POST /api/funcionarios
-     * Cria um novo funcionário.
      */
     public function criar()
     {
@@ -70,7 +79,8 @@ class FuncionarioController extends JsonController
         }
 
         try {
-            $sucesso = $this->funcionarioModel->criar($this->empresa_id, (int)$cargo_id, $nome, $email, $senha);
+            // 4. MUDANÇA: usa o factory method
+            $sucesso = $this->getFuncionarioModel()->criar($this->empresa_id, (int)$cargo_id, $nome, $email, $senha);
             $this->jsonResponse(['success' => true, 'message' => 'Funcionário criado com sucesso!']);
         } catch (Exception $e) {
             $this->jsonResponse(['message' => $e->getMessage()], 500);
@@ -79,7 +89,6 @@ class FuncionarioController extends JsonController
 
     /**
      * Endpoint: POST /api/funcionarios/atualizar
-     * Atualiza um funcionário.
      */
     public function atualizar()
     {
@@ -96,7 +105,8 @@ class FuncionarioController extends JsonController
         }
 
         try {
-            $sucesso = $this->funcionarioModel->atualizar((int)$id, (int)$cargo_id, $nome, $email, $senha);
+            // 4. MUDANÇA: usa o factory method
+            $sucesso = $this->getFuncionarioModel()->atualizar((int)$id, (int)$cargo_id, $nome, $email, $senha);
             $this->jsonResponse(['success' => true, 'message' => 'Funcionário atualizado com sucesso!']);
         } catch (Exception $e) {
             $this->jsonResponse(['message' => $e->getMessage()], 500);
@@ -117,7 +127,8 @@ class FuncionarioController extends JsonController
         }
 
         try {
-            $sucesso = $this->funcionarioModel->atualizarStatus((int)$id, (bool)$status);
+            // 4. MUDANÇA: usa o factory method
+            $sucesso = $this->getFuncionarioModel()->atualizarStatus((int)$id, (bool)$status);
             $this->jsonResponse(['success' => $sucesso, 'message' => 'Status atualizado.']);
         } catch (Exception $e) {
             $this->jsonResponse(['message' => $e->getMessage()], 500);
@@ -138,11 +149,11 @@ class FuncionarioController extends JsonController
         }
 
         try {
-            $sucesso = $this->funcionarioModel->redefinirSenha((int)$id, $senha);
+            // 4. MUDANÇA: usa o factory method
+            $sucesso = $this->getFuncionarioModel()->redefinirSenha((int)$id, $senha);
             $this->jsonResponse(['success' => $sucesso, 'message' => 'Senha redefinida com sucesso!']);
         } catch (Exception $e) {
             $this->jsonResponse(['message' => $e->getMessage()], 500);
         }
     }
 }
-

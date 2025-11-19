@@ -19,12 +19,17 @@ class Router
 
         // --- ADIÇÃO PARA O REGISTRO DE EMPRESAS ---
         $this->add('GET', 'registrar', ['controller' => 'NovaEmpresaController', 'action' => 'showRegistrationForm']);
-        $this->add('POST', 'registrar', ['controller' => 'NovaEmpresaController', 'action' => 'processRegistration']);
-        // --- FIM DA ADIÇÃO ---
+        $this->add('POST', 'api/registrar', ['controller' => 'Api\NovaEmpresaController', 'action' => 'processRegistration']);        // --- FIM DA ADIÇÃO ---
 
         // === ROTAS DA API DE AUTENTICAÇÃO (PÚBLICAS) ===
         $this->add('POST', 'api/login', ['controller' => 'Api\AuthController', 'action' => 'login']);
         // $this->add('POST', 'api/register', ['controller' => 'Api\AuthController', 'action' => 'register']); // Exemplo
+
+        // === ROTAS PÚBLICAS DO CARDÁPIO ===
+        // A página pública que o cliente vê (ex: /cardapio/1)
+        $this->add('GET', 'cardapio/{id:\d+}', ['controller' => 'CardapioPublicoController', 'action' => 'index']);
+        // A rota que gera o PDF para download
+        $this->add('GET', 'cardapio/{id:\d+}/pdf', ['controller' => 'CardapioPublicoController', 'action' => 'gerarPDF']);
 
         // === ROTAS PROTEGIDAS POR SESSÃO ===
         // === ROTAS DE ADMINISTRADOR (VIEWS) ===
@@ -41,10 +46,14 @@ class Router
         $this->add('POST', 'api/funcionarios/atualizar', ['controller' => 'Api\FuncionarioController', 'action' => 'atualizar'], ['administrador']);
         $this->add('POST', 'api/funcionarios/status', ['controller' => 'Api\FuncionarioController', 'action' => 'toggleStatus'], ['administrador']);
         $this->add('POST', 'api/funcionarios/redefinir-senha', ['controller' => 'Api\FuncionarioController', 'action' => 'redefinirSenha'], ['administrador']);
-        // API de Cargos
+        // Esta é a linha CORRET
+        $this->add('GET', 'admin/cardapio-digital', 
+            ['controller' => 'AdminDashboardController', 'action' => 'showCardapioDigital'], 
+            ['administrador']
+        );
+        $this->add('POST', 'admin/cardapio/gerar-qrcode-pdf', ['controller' => 'AdminDashboardController', 'action' => 'gerarQrCodePdf']);
         $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);         
         // Admin: Gerenciamento de Cardápio (Views)
-        $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)
         // (NOVO) Admin: Relatórios (View)
@@ -113,13 +122,27 @@ class Router
         $this->add('DELETE', 'api/admin/cardapio/{id:\d+}', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'remover'], ['administrador']);
 
-        // === NOVAS ROTAS DE CATEGORIA (CORREÇÃO) ===
+
+        // Mesas Admin
+        $this->add('GET', 'estabelecimento', 
+            ['controller' => 'EstabelecimentoController', 'action' => 'index'], ['administrador']);
+            
+        // Rotas da API (para o JavaScript buscar e enviar dados)
+        $this->add('GET', 'api/estabelecimento/mesas', 
+            ['controller' => 'Api\EstabelecimentoController', 'action' => 'listarMesas'], ['administrador']);
+            
+        $this->add('POST', 'api/estabelecimento/mesas', 
+            ['controller' => 'Api\EstabelecimentoController', 'action' => 'criarMesas'], ['administrador']);
+
+        $this->add('POST', 'api/estabelecimento/mesas/excluir', 
+            ['controller' => 'Api\EstabelecimentoController', 'action' => 'excluirMesa'], ['administrador']);
+
         $this->add('POST', 'api/admin/cardapio/categorias', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'criarCategoria'], ['administrador']);
 
         $this->add('DELETE', 'api/admin/cardapio/categorias/{id:\d+}', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'removerCategoria'], ['administrador']);
-        // === FIM NOVAS ROTAS DE CATEGORIA ===
+
     }
 
     public function add($method, $route, $params = [], $roles = [])
