@@ -116,11 +116,12 @@ class Router
         $this->add('POST', 'api/admin/cardapio', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'criar'], ['administrador']);
 
-        $this->add('PUT', 'api/admin/cardapio/{id:\d+}', 
-            ['controller' => 'Api\\AdminCardapioController', 'action' => 'atualizar'], ['administrador']);
+        $this->add('POST', 'api/admin/cardapio/{id:\d+}', 
+            ['controller' => 'Api\\AdminCardapioController', 'action' => 'atualizar'], ['administrador']); // PUT simulado com POST
 
         $this->add('DELETE', 'api/admin/cardapio/{id:\d+}', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'remover'], ['administrador']);
+
 
         // Mesas Admin
         $this->add('GET', 'estabelecimento', 
@@ -135,6 +136,13 @@ class Router
 
         $this->add('POST', 'api/estabelecimento/mesas/excluir', 
             ['controller' => 'Api\EstabelecimentoController', 'action' => 'excluirMesa'], ['administrador']);
+
+        $this->add('POST', 'api/admin/cardapio/categorias', 
+            ['controller' => 'Api\\AdminCardapioController', 'action' => 'criarCategoria'], ['administrador']);
+
+        $this->add('DELETE', 'api/admin/cardapio/categorias/{id:\d+}', 
+            ['controller' => 'Api\\AdminCardapioController', 'action' => 'removerCategoria'], ['administrador']);
+
     }
 
     public function add($method, $route, $params = [], $roles = [])
