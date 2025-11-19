@@ -57,6 +57,8 @@ class Router
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)
         // (NOVO) Admin: Relatórios (View)
+        $this->add('GET', 'api/admin/pedidos/{id:\d+}', ['controller' => 'Api\PedidoController', 'action' => 'getDetalhesPedidoAdmin'], ['administrador']);
+        $this->add('GET', 'api/admin/dashboard', ['controller' => 'Api\AdminDashboardController', 'action' => 'getDadosDashboard'], ['administrador']);
         $this->add('GET', 'relatorios/vendas', ['controller' => 'RelatorioController', 'action' => 'index'], ['administrador']);
         $this->add('POST', 'api/cardapio/adicionar', ['controller' => 'Api\CardapioController', 'action' => 'adicionarItem'], ['administrador']);
         $this->add('POST', 'api/cardapio/editar', ['controller' => 'Api\CardapioController', 'action' => 'editarItem'], ['administrador']);

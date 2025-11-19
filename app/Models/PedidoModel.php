@@ -113,9 +113,44 @@ class PedidoModel
         }
     }
 
-    /**
-     * Cria um novo pedido, inserindo na tabela 'pedidos' e 'pedido_itens'.
-     */
+    public function buscarDetalhesPorPedidoId(int $pedido_id, int $empresa_id): ?array
+    {
+        $sql = "
+            SELECT p.id AS pedido_id, p.status, p.data_abertura, pi.quantidade, pi.preco_unitario_momento, ci.nome AS item_nome, m.numero as mesa_numero
+            FROM pedidos p
+            JOIN pedido_itens pi ON p.id = pi.pedido_id
+            JOIN cardapio_itens ci ON pi.item_id = ci.id
+            JOIN mesas m ON p.mesa_id = m.id
+            WHERE p.id = :pedido_id AND p.empresa_id = :empresa_id
+            ORDER BY ci.nome ASC;
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':pedido_id' => $pedido_id, ':empresa_id' => $empresa_id]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($results)) { return null; }
+        
+        $pedido_detalhes = [ 
+            'id' => $results[0]['pedido_id'], 
+            'mesa_numero' => $results[0]['mesa_numero'],
+            'hora' => date('H:i', strtotime($results[0]['data_abertura'])), 
+            'status' => $results[0]['status'], 
+            'itens' => [], 
+            'total' => 0 
+        ];
+        
+        foreach ($results as $row) {
+            $subtotal = $row['quantidade'] * $row['preco_unitario_momento'];
+            $pedido_detalhes['itens'][] = [ 
+                'nome' => $row['item_nome'], 
+                'quantidade' => $row['quantidade'], 
+                'preco_unitario' => $row['preco_unitario_momento'] 
+            ];
+            $pedido_detalhes['total'] += $subtotal;
+        }
+        return $pedido_detalhes;
+    }
+
+
     public function criarNovoPedido(int $empresa_id, int $mesa_id, int $funcionario_id, array $itens): int
     {
         try {
