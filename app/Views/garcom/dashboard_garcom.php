@@ -77,7 +77,6 @@
         </main>
     </div>
 
-    <!-- Modal para Detalhes e Novo Pedido -->
     <div id="modal-mesa" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -89,15 +88,18 @@
                 <ul id="detalhes-pedido-itens"></ul>
                 <p id="pedido-total"></p>
                 <div class="modal-footer">
-                    <button id="btn-adicionar-itens" class="btn btn-primary">Adicionar Itens</button>
+                    <button id="btn-editar-pedido" class="btn btn-primary">Editar Pedido</button>
                 </div>
             </div>
             <div id="conteudo-novo-pedido" style="display: none;">
                 <form id="form-novo-pedido">
+                    <input type="hidden" id="form-modo" value="novo"> 
                     <input type="hidden" id="form-mesa-id" name="mesa_id">
+                    <input type="hidden" id="form-pedido-id" name="pedido_id">
+                    
                     <div id="cardapio-categorias"></div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Lançar Pedido</button>
+                        <button type="submit" id="btn-submit-pedido" class="btn btn-success">Lançar Pedido</button>
                     </div>
                 </form>
             </div>
@@ -114,7 +116,10 @@
             const conteudoNovoPedido = document.getElementById('conteudo-novo-pedido');
             const formNovoPedido = document.getElementById('form-novo-pedido');
             const formMesaIdInput = document.getElementById('form-mesa-id');
-            const btnAdicionarItens = document.getElementById('btn-adicionar-itens');
+            const formModoInput = document.getElementById('form-modo');
+            const formPedidoIdInput = document.getElementById('form-pedido-id');
+            const btnEditarPedido = document.getElementById('btn-editar-pedido'); 
+            const btnSubmitPedido = document.getElementById('btn-submit-pedido');
             const pedidosProntosContainer = document.getElementById('lista-pedidos-prontos');
             let cardapioCache = null;
 
@@ -129,14 +134,12 @@
                     return responseData; 
                 } catch (error) {
                     console.error("Erro na API:", url, error);
-                    // Retorna um objeto indicando falha e a mensagem para tratamento
                     return { success: false, message: error.message }; 
                 }
             };
 
             const carregarMesas = async () => {
                 const response = await apiFetch('/api/garcom/mesas');
-                // CORREÇÃO: A sua API /api/garcom/mesas retorna {success: true, data: [...] }
                 const mesas = response?.data ?? []; 
 
                 if (response?.success === false || !Array.isArray(mesas)) {
@@ -152,7 +155,6 @@
                 }
 
                 mesas.forEach(mesa => {
-                    // CORREÇÃO: O status 'disponivel' deve ser usado, não 'livre'.
                     let statusClass = 'status-livre'; let statusText = 'Livre';
                     let linkHref = `/pedidos/novo/${mesa.id}`; 
                     if (mesa.status === 'ocupada') { statusClass = 'status-ocupada'; statusText = 'Ocupada'; linkHref = `/mesas/detalhes/${mesa.id}`; } 
@@ -165,24 +167,19 @@
                     linkMesa.dataset.status = mesa.status;
                     linkMesa.href = linkHref; 
 
-                    // --- LÓGICA DO LISTENER DE CLIQUE ---
                     linkMesa.addEventListener('click', (e) => {
-                        e.preventDefault(); // sempre previne o comportamento padrão
+                        e.preventDefault(); 
 
                         const mesaId = linkMesa.dataset.id;
                         const mesaNumero = linkMesa.querySelector('.table-number').textContent.trim();
                         const mesaStatus = linkMesa.dataset.status;
 
                         if (mesaStatus === 'disponivel') {
-                            // Redireciona para novo pedido
-                            // ESTA É A OUTRA PÁGINA, SE O BUG ESTIVER LÁ, PRECISAMOS VER ESSE ARQUIVO
-                            window.location.href = `/pedidos/novo/${mesaId}`;
+                            abrirModalMesa(mesaId, mesaNumero, mesaStatus, null);
                         } else {
-                            // Abre modal com detalhes do pedido atual
                             abrirModalMesa(mesaId, mesaNumero, mesaStatus);
                         }
                     });
-
 
                     linkMesa.innerHTML = `<div class="table-card ${statusClass}"><div><div class="table-number">${String(mesa.numero).padStart(2, '0')}</div><div class="table-label">Mesa</div></div><span class="status">${statusText}</span></div>`;
                     mesasGrid.appendChild(linkMesa);
@@ -192,11 +189,7 @@
             const carregarPedidosProntos = async () => {
                 const response = await apiFetch('/api/garcom/pedidos/prontos');
                 const pedidos = response?.data ?? [];
-
-                // ----> ADICIONE ESTA LINHA <----
-                console.log('API /api/garcom/pedidos/prontos retornou:', JSON.stringify(pedidos));
-                // ----> FIM DA LINHA ADICIONADA <----
-
+                
                 if (response?.success === false || !Array.isArray(pedidos)) {
                     pedidosProntosContainer.innerHTML = `<p>Erro ao carregar pedidos prontos: ${response?.message || 'Falha na comunicação'}</p>`;
                     return;
@@ -219,7 +212,7 @@
                 });
             };
 
-            // Event listener para marcar como entregue (já estava correto)
+            // Event listener para marcar como entregue
             pedidosProntosContainer.addEventListener('click', async (event) => {
                 if (event.target.classList.contains('btn-entregar')) {
                     const mesaId = event.target.dataset.mesaId; 
@@ -246,24 +239,86 @@
             const abrirModalMesa = async (mesaId, mesaNumero, mesaStatus) => {
                 modalTitulo.textContent = `Mesa ${mesaNumero}`;
                 formMesaIdInput.value = mesaId; 
+                
                 conteudoDetalhes.style.display = 'block';
                 conteudoNovoPedido.style.display = 'none';
                 conteudoDetalhes.querySelector('ul').innerHTML = '<li>Carregando detalhes...</li>';
                 conteudoDetalhes.querySelector('p').textContent = '';
-
-                // A API /api/garcom/mesas/{id} retorna { success: true, data: { mesa: ..., pedido: ... } }
-                const response = await apiFetch(`/api/garcom/mesas/${mesaId}`); 
-                if (response?.success && response.data?.pedido) { 
-                    renderizarDetalhesPedido(response.data.pedido);
-                } else {
-                    // Se não há pedido, oferece para criar um novo
-                    conteudoDetalhes.querySelector('ul').innerHTML = '<li>Nenhum pedido ativo.</li>';
+                
+                // MODO CRIAÇÃO (Mesa Livre)
+                if (mesaStatus === 'disponivel') {
+                    // Prepara para criar um novo pedido
+                    formModoInput.value = 'novo';
+                    formPedidoIdInput.value = '';
+                    btnEditarPedido.textContent = 'Lançar Novo Pedido';
+                    btnEditarPedido.onclick = async () => {
+                        const cardapio = await carregarCardapio();
+                        if (cardapio) {
+                             renderizarCardapio(cardapio, {}); // Passa objeto vazio para não pré-preencher
+                            conteudoDetalhes.style.display = 'none';
+                            conteudoNovoPedido.style.display = 'block';
+                            btnSubmitPedido.textContent = 'Lançar Pedido';
+                        }
+                    };
+                    
+                    conteudoDetalhes.querySelector('ul').innerHTML = '<li>Mesa Livre. Clique abaixo para lançar um novo pedido.</li>';
                     conteudoDetalhes.querySelector('p').textContent = '';
+
+                } 
+                // MODO DETALHES/EDIÇÃO (Mesa Ocupada)
+                else {
+                    btnEditarPedido.textContent = 'Editar Pedido';
+                    
+                    const response = await apiFetch(`/api/garcom/mesas/${mesaId}`); 
+                    
+                    if (response?.success && response.data?.pedido) { 
+                        const pedido = response.data.pedido;
+                        renderizarDetalhesPedido(pedido);
+                        
+                        // O pedido mais recente (ativo) da mesa está aqui, salvamos o ID para a edição
+                        const pedidoId = pedido.id; 
+                        formPedidoIdInput.value = pedidoId;
+                        
+                        // Prepara o botão para MODO EDIÇÃO
+                        btnEditarPedido.onclick = async () => {
+                            const cardapio = await carregarCardapio();
+                            if (cardapio) {
+                                formModoInput.value = 'editar';
+                                
+                                // Mapeia os itens do pedido atual para um objeto ID:Quantidade
+                                const itensAtuais = {};
+                                pedido.itens.forEach(item => {
+                                    // *** CORREÇÃO APLICADA AQUI ***
+                                    // Usa o novo campo 'item_id' (que é o ID do cardápio) para mapeamento.
+                                    const idKey = item.item_id || null; 
+                                    if(idKey) {
+                                        itensAtuais[idKey] = item.quantidade;
+                                    } else {
+                                        console.warn("Item ID do Cardápio não encontrado para pré-preenchimento.");
+                                    }
+                                });
+
+                                // Renderiza o cardápio e pré-preenche as quantidades
+                                renderizarCardapio(cardapio, itensAtuais); 
+                                
+                                conteudoDetalhes.style.display = 'none';
+                                conteudoNovoPedido.style.display = 'block';
+                                btnSubmitPedido.textContent = 'Salvar Edição';
+                            }
+                        };
+
+                    } else {
+                        conteudoDetalhes.querySelector('ul').innerHTML = '<li>Nenhum pedido ativo ou erro ao carregar.</li>';
+                        conteudoDetalhes.querySelector('p').textContent = '';
+                        btnEditarPedido.textContent = 'Lançar Novo Pedido'; // Volta para modo criação
+                        formModoInput.value = 'novo';
+                    }
                 }
                 modal.style.display = 'flex'; 
             };
 
             const renderizarDetalhesPedido = (pedido) => {
+                // Lógica de renderização de detalhes (mantida)
                 const itensList = document.getElementById('detalhes-pedido-itens');
                 const totalP = document.getElementById('pedido-total');
                 itensList.innerHTML = '';
@@ -271,7 +326,6 @@
                     let total = 0;
                     pedido.itens.forEach(item => {
                         const quantidade = parseFloat(item.quantidade) || 0;
-                        // CORREÇÃO: O seu JSON usa 'preco_unitario_momento' ou 'preco_unitario'
                         const preco = parseFloat(item.preco_unitario_momento || item.preco_unitario) || 0; 
                         const itemTotal = quantidade * preco;
                         total += itemTotal;
@@ -284,11 +338,8 @@
                 }
             };
 
-            // --- CÓDIGO CORRIGIDO/ADICIONADO ---
             const carregarCardapio = async () => {
-                if (cardapioCache) return cardapioCache; // Usa cache
-                
-                // API /api/garcom/cardapio retorna { success: true, data: [...] }
+                if (cardapioCache) return cardapioCache; 
                 const response = await apiFetch('/api/garcom/cardapio');
                 if (response?.success && response.data) {
                     cardapioCache = response.data;
@@ -299,8 +350,8 @@
                 }
             };
             
-            // --- CÓDIGO CORRIGIDO/ADICIONADO ---
-            const renderizarCardapio = (categorias) => {
+            // Alterado para aceitar 'itensAtuais' para pré-preenchimento
+            const renderizarCardapio = (categorias, itensAtuais = {}) => {
                 const container = document.getElementById('cardapio-categorias');
                 container.innerHTML = '';
                 if (!categorias) {
@@ -312,10 +363,14 @@
                     bloco.className = 'categoria-bloco';
                     let itensHtml = '';
                     itens.forEach(item => {
+                        // Verifica se o item existe no pedido atual e usa a quantidade
+                        // Usa item.id, que deve corresponder ao item_id_cardapio_fk do backend
+                        const quantidadeAtual = itensAtuais[item.id] || 0; 
+
                         itensHtml += `
                             <div class="item-cardapio">
                                 <label for="item-${item.id}">${item.nome} (R$ ${parseFloat(item.preco).toFixed(2)})</label>
-                                <input type="number" id="item-${item.id}" name="itens[${item.id}]" min="0" value="0" data-id="${item.id}">
+                                <input type="number" id="item-${item.id}" name="itens[${item.id}]" min="0" value="${quantidadeAtual}" data-id="${item.id}">
                             </div>
                         `;
                     });
@@ -324,83 +379,87 @@
                 }
             };
             
-            // --- CÓDIGO CORRIGIDO/ADICIONADO (ESTE É O BUG) ---
+            // --- Lógica de Submissão Unificada (Criação e Edição) ---
             formNovoPedido.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btnSubmit = e.target.querySelector('button[type="submit"]');
                 btnSubmit.disabled = true;
-                btnSubmit.textContent = 'Enviando...';
+                btnSubmit.textContent = 'Processando...';
 
+                const modo = formModoInput.value;
+                const pedidoId = formPedidoIdInput.value;
+                const mesaId = formMesaIdInput.value;
+                
                 const formData = new FormData(formNovoPedido);
-                const mesaId = formData.get('mesa_id');
                 const itens = {};
                 
-                // Coleta apenas itens com quantidade > 0
+                // Coleta apenas itens com quantidade > 0 (A quantidade zero é a exclusão implícita)
                 formData.forEach((value, key) => {
                     if (key.startsWith('itens[') && value > 0) {
-                        // Extrai o ID do item
                         const id = key.match(/\[(\d+)\]/)[1];
                         itens[id] = parseInt(value, 10);
                     }
                 });
 
                 if (Object.keys(itens).length === 0) {
-                    alert('Nenhum item selecionado.');
-                    btnSubmit.disabled = false;
-                    btnSubmit.textContent = 'Lançar Pedido';
-                    return;
+                    alert('Nenhum item selecionado para lançamento ou edição. O pedido será esvaziado.');
+                    // Permite que o PUT/POST seja enviado, mas o total será zero.
+                    // Se estiver em modo 'novo' e for vazio, retornamos (não faz sentido criar pedido vazio)
+                    if (modo === 'novo') {
+                        btnSubmit.disabled = false;
+                        btnSubmit.textContent = 'Lançar Pedido';
+                        return;
+                    }
                 }
 
-                // A ROTA CORRETA é /api/pedidos (do PedidoController)
-                const response = await apiFetch('/api/pedidos', {
-                    method: 'POST',
+                let url = '';
+                let method = '';
+                let payload = {};
+
+                if (modo === 'novo') {
+                    url = '/api/pedidos';
+                    method = 'POST';
+                    payload = { mesa_id: mesaId, itens: itens };
+                } else if (modo === 'editar') {
+                    url = `/api/pedidos/${pedidoId}`;
+                    method = 'PUT'; 
+                    payload = { itens: itens };
+                } else {
+                    alert('Modo de operação inválido.');
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = 'Erro';
+                    return;
+                }
+                
+                const response = await apiFetch(url, {
+                    method: method,
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        mesa_id: mesaId,
-                        itens: itens
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 if (response && response.success) {
-                    // *** A CORREÇÃO ESTÁ AQUI ***
-                    // NÃO mexemos na lista de "Pedidos Prontos" manualmente.
-                    // Apenas fechamos o modal e chamamos a função que 
-                    // recarrega TUDO do servidor.
+                    alert(`Pedido ${modo === 'editar' ? 'editado' : 'lançado'} com sucesso!`);
                     fecharModal();
-                    atualizarDashboard(); // <-- ISTO É O CORRETO A FAZER
+                    atualizarDashboard(); 
                     
                 } else {
-                    alert(response?.message || 'Erro ao lançar pedido.');
+                    alert(response?.message || `Erro ao ${modo === 'editar' ? 'editar' : 'lançar'} pedido.`);
                 }
                 
                 btnSubmit.disabled = false;
-                btnSubmit.textContent = 'Lançar Pedido';
+                btnSubmit.textContent = modo === 'editar' ? 'Salvar Edição' : 'Lançar Pedido';
             });
             
-            // --- FIM DA CORREÇÃO ---
-
-
             const fecharModal = () => {
                 modal.style.display = 'none';
                 conteudoDetalhes.style.display = 'none';
                 conteudoNovoPedido.style.display = 'none';
+                formModoInput.value = 'novo'; // Reseta o modo
+                formNovoPedido.reset(); // Limpa o formulário
             };
 
             closeModalBtn.addEventListener('click', fecharModal);
             window.addEventListener('click', (event) => { if (event.target == modal) fecharModal(); });
-            
-            // --- CÓDIGO CORRIGIDO/ADICIONADO ---
-            btnAdicionarItens.addEventListener('click', async () => {
-                // Carrega o cardápio (do cache ou da API)
-                const cardapio = await carregarCardapio();
-                if (cardapio) {
-                    // Renderiza o cardápio no formulário
-                    renderizarCardapio(cardapio);
-                    // Alterna a visão do modal
-                    conteudoDetalhes.style.display = 'none';
-                    conteudoNovoPedido.style.display = 'block';
-                }
-            });
             
             // Função central para atualizar tudo
             const atualizarDashboard = () => { 
@@ -411,7 +470,7 @@
             // Carga inicial
             atualizarDashboard();
             
-            // Polling (busca atualizações) a cada 15 segundos
+            // Polling (busca atualizações) a cada 5 segundos
             setInterval(atualizarDashboard, 5000); 
         });
     </script>
