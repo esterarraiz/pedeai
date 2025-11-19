@@ -80,7 +80,7 @@ class Router
         $this->add('POST', 'api/pedidos', ['controller' => 'Api\PedidoController','action' => 'criarPedido'], ['garçom']); // Endpoint CORRETO para criar pedido
         $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
         $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
-
+        $this->add('PUT', 'api/pedidos/{id:\d+}', ['controller' => 'Api\PedidoController', 'action' => 'updatePedido'], ['garçom']);
         // --- CAIXA (VIEWS) ---
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
         $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'CaixaController', 'action' => 'verConta'], ['caixa']); // View
