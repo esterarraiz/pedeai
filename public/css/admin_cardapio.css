@@ -1,0 +1,287 @@
+
+
+/* --- FIM DOS ESTILOS DA SIDEBAR --- */
+
+/* --- Layout Principal do Dashboard --- */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 2.5rem;
+    background-color: #f4f7f6; /* Fundo cinza claro da página */
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.main-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2a2a2a;
+}
+
+/* --- Títulos das Categorias (Bebidas, Pizzas...) --- */
+.category-header {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+.category-header:first-of-type {
+    margin-top: 10px;
+}
+
+/* --- Container da Tabela --- */
+.table-container {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Para o border-radius funcionar na tabela */
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse; /* Remove espaços entre células */
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0; /* Linha sutil entre as fileiras */
+}
+
+/* Cabeçalho da Tabela (NOME, DESCRIÇÃO...) */
+.data-table th {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: #fafafa;
+}
+
+/* Remove a borda da última fileira */
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Célula de Ações (ícones) */
+.actions-cell {
+    text-align: right;
+    width: 120px; /* Largura fixa para os ícones */
+}
+
+.action-icon {
+    color: #555;
+    margin: 0 8px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.action-icon:hover {
+    color: #0d6efd; /* Azul do Bootstrap */
+}
+
+.btn-remover:hover {
+    color: #dc3545; /* Vermelho do Bootstrap */
+}
+
+/* --- Estilos para os Modais (Adicionar/Editar) --- */
+
+/* Título (Adicionar Novo Item / Editar Item) */
+.modal-content h3 {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 25px;
+}
+
+/* (Substituindo o form.css) */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px; /* Espaço entre botões */
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Garante que os inputs/selects do modal peguem o estilo do Bootstrap */
+.modal-content .form-control,
+.modal-content .form-select {
+    width: 100%;
+}
+
+/* --- Ajustes Finais para o Modal "Opções do Cardápio" --- */
+
+/* 1. Força o 'input-group' a exibir o botão ao lado do campo */
+#cardapioOpcoesModal .input-group {
+    display: flex;
+    flex-wrap: nowrap; /* Impede que o botão quebre para a linha de baixo */
+}
+
+#cardapioOpcoesModal .input-group .form-control {
+    width: auto; /* Garante que o input não tente ocupar 100% */
+}
+
+/* 2. Centraliza o texto dos botões de PDF/QR Code (Correção Definitiva) */
+
+/* FORÇA o botão a NÃO ser flex e obedecer o text-align */
+#cardapioOpcoesModal .d-grid .btn {
+    display: block !important;       /* ANULA o 'inline-flex' do style.css */
+    position: relative !important;   /* Cria o contexto para o ícone */
+    text-align: center !important; /* AGORA VAI CENTRALIZAR */
+    gap: 0 !important;             /* Remove o 'gap' do style.css */
+    
+    /* Padding para o texto não ficar colado nas bordas */
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+}
+
+/* FORÇA o ícone a flutuar na esquerda */
+#cardapioOpcoesModal .d-grid .btn i {
+    position: absolute !important; 
+    left: 1.25rem !important;      
+    top: 50% !important;           
+    transform: translateY(-50%) !important;
+}
+
+/* 1. A "casca" do modal (caixa branca) */
+#modalAdicionarItem .modal-content,
+#modalEditarItem .modal-content {
+    /* Usando as variáveis do seu style.css */
+    padding: 1.75rem; /* Mais "respiro" interno */
+    border-radius: 12px; /* Bordas arredondadas */
+    border: none;
+    box-shadow: var(--shadow-md); /* Sombra do seu style.css */
+    background-color: var(--bg-sidebar-cards);
+}
+
+/* 2. O Título ("Adicionar Novo Item") */
+#modalAdicionarItem h3,
+#modalEditarItem h3 {
+    color: var(--text-dark); /* Cor do seu style.css */
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* 3. As "etiquetas" (Nome do Item, Preço...) */
+#modalAdicionarItem .form-group label,
+#modalEditarItem .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600; /* Mais forte */
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+/* 4. Os campos de texto e seleção (o mais importante!) */
+#modalAdicionarItem .form-control,
+#modalAdicionarItem .form-select,
+#modalEditarItem .form-control,
+#modalEditarItem .form-select {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-dark);
+    background-color: var(--bg-main); /* Fundo cinza claro */
+    border: 1px solid var(--border-color); /* Borda sutil */
+    border-radius: 8px; /* Bordas arredondadas */
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#modalAdicionarItem .form-control:focus,
+#modalAdicionarItem .form-select:focus,
+#modalEditarItem .form-control:focus,
+#modalEditarItem .form-select:focus {
+    border-color: var(--green-dark); /* Borda verde ao focar */
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(5, 150, 105, 0.25);
+}
+
+/* 5. A área dos botões (Cancelar / Salvar) */
+#modalAdicionarItem .form-actions,
+#modalEditarItem .form-actions {
+    display: flex;
+    justify-content: flex-end; /* Botões para a direita */
+    gap: 12px; /* Espaço entre os botões */
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color); /* Linha divisória */
+}
+
+/* 6. Estilizando os botões para combinar com seu site */
+#modalAdicionarItem .form-actions .btn-secondary,
+#modalEditarItem .form-actions .btn-secondary {
+    background-color: var(--text-light);
+    color: white;
+}
+
+#modalAdicionarItem .form-actions .btn-success,
+#modalEditarItem .form-actions .btn-success {
+    background-color: var(--green-dark); /* Cor verde principal */
+    color: white;
+}
+
+.btn-amber {
+    background-color: #F59E0B !important;
+    border-color: #F59E0B !important;
+    color: #fff !important;
+}
+
+.btn-amber:hover {
+    background-color: #d48807 !important;
+    border-color: #d48807 !important;
+}
+
+.btn-amber {
+    background-color: #F59E0B !important;
+    border-color: #F59E0B !important;
+    color: #fff !important;
+}
+
+.btn-amber:hover {
+    background-color: #d48807 !important;
+    border-color: #d48807 !important;
+}
+.btn-green {
+    background-color: #27AE60 !important;
+    border-color: #27AE60 !important;
+    color: #fff !important;
+}
+
+.btn-green:hover {
+    background-color: #1e8d4d !important;
+    border-color: #1e8d4d !important;
+}

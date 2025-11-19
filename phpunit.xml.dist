@@ -9,6 +9,9 @@
         <testsuite name="Unit">
             <directory>./tests/Unit</directory>
         </testsuite>
+        <testsuite name="Api">
+            <directory>./tests/Api</directory>
+        </testsuite>
     </testsuites>
 
 
@@ -20,12 +23,10 @@
 
     <source>
         <include>
-            <directory>./app</directory>
+            <directory>./app/Controllers/Api</directory>
+            
+            <directory>./app/Models</directory>
+            
         </include>
-        <exclude>
-            <directory>./app/Views</directory>
-            <directory>./app/Core</directory>
-            <directory>./app/Controllers</directory>
-        </exclude>
     </source>
 </phpunit>
