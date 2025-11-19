@@ -1,5 +1,5 @@
 <?php
-// Ficheiro: app/Models/AdminDashboardModel.php (NOVO)
+// Ficheiro: app/Models/AdminDashboardModel.php (MODIFICADO)
 
 namespace App\Models;
 
@@ -19,6 +19,8 @@ class AdminDashboardModel
      */
     public function getMetricas(int $empresa_id): array
     {
+        // ... (função getMetricas sem alterações) ...
+        
         // Faturamento do dia
         $sql_faturamento = "
             SELECT SUM(valor) AS faturamento_dia
@@ -63,8 +65,10 @@ class AdminDashboardModel
      */
     public function getPedidosRecentes(int $empresa_id): array
     {
+        // **** ALTERAÇÃO AQUI: Adicionado "p.id AS pedido_id" ****
         $sql = "
             SELECT
+                p.id AS pedido_id, 
                 m.numero AS mesa_numero,
                 f.nome AS garcom_nome,
                 p.valor_total,

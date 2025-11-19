@@ -24,6 +24,28 @@ class PedidoController extends JsonController
         $this->empresa_id = $_SESSION['empresa_id'] ?? null;
         $this->funcionario_id = $_SESSION['user_id'] ?? null;
     }
+    public function getDetalhesPedidoAdmin($params)
+    {
+        $pedido_id = $params['id'] ?? null;
+
+        if (!$pedido_id || !$this->empresa_id) {
+            return $this->jsonResponse(['message' => 'ID do pedido ou empresa inválido.'], 400);
+        }
+
+        try {
+            // Usa o novo método do Model
+            $detalhes = $this->pedidoModel->buscarDetalhesPorPedidoId((int)$pedido_id, $this->empresa_id);
+            
+            if ($detalhes) {
+                $this->jsonResponse(['success' => true, 'data' => $detalhes]);
+            } else {
+                $this->jsonResponse(['message' => 'Pedido não encontrado.'], 404);
+            }
+        } catch (Exception $e) {
+            error_log("Erro ao buscar detalhes do pedido (Admin): " . $e->getMessage());
+            $this->jsonResponse(['message' => 'Erro interno ao buscar detalhes.'], 500);
+        }
+    }
 
     // --- MÉTODOS DE INJEÇÃO (para teste) ---
 
