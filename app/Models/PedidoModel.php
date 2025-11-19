@@ -103,6 +103,10 @@ class PedidoModel
             return [];
         }
     }
+    /**
+     * Cria um novo pedido e seus itens.
+     * Corrigido para compatibilidade com MySQL.
+     */
     public function criarNovoPedido(int $empresa_id, int $mesa_id, int $funcionario_id, array $itens): int
     {
         try {
@@ -110,6 +114,8 @@ class PedidoModel
             $itensParaInserir = [];
             $sql_preco = "SELECT preco, nome FROM cardapio_itens WHERE id = :item_id AND empresa_id = :empresa_id";
             $stmt_preco = $this->pdo->prepare($sql_preco);
+            
+            // 1. Cálculo do valor total e validação dos itens
             foreach ($itens as $item_id => $quantidade) {
                 if ($quantidade <= 0) continue;
                 $stmt_preco->execute([':item_id' => $item_id, ':empresa_id' => $empresa_id]);
@@ -120,19 +126,33 @@ class PedidoModel
                 $valorTotal += $preco_unitario * $quantidade;
                 $itensParaInserir[] = ['item_id' => $item_id, 'quantidade' => $quantidade, 'preco' => $preco_unitario ];
             }
-            $sql_pedido = "INSERT INTO pedidos (empresa_id, mesa_id, funcionario_id, status, data_abertura, valor_total) VALUES (?, ?, ?, 'em_preparo', NOW(), ?) RETURNING id;";
+            
+            // 2. Inserção do Pedido (MySQL compatível)
+            // REMOVIDO: RETURNING id;
+            $sql_pedido = "INSERT INTO pedidos (empresa_id, mesa_id, funcionario_id, status, data_abertura, valor_total) VALUES (?, ?, ?, 'em_preparo', NOW(), ?)";
             $stmt_pedido = $this->pdo->prepare($sql_pedido);
             $stmt_pedido->execute([$empresa_id, $mesa_id, $funcionario_id, $valorTotal]);
-            $pedido_id = $stmt_pedido->fetchColumn();
+            
+            // CORREÇÃO: Usa lastInsertId() do PDO (correto para MySQL)
+            $pedido_id = $this->pdo->lastInsertId();
+            
             if (!$pedido_id) { throw new Exception("Falha ao obter o ID do novo pedido."); }
+
+            // 3. Inserção dos Itens do Pedido
             $sql_itens = "INSERT INTO pedido_itens (pedido_id, item_id, quantidade, preco_unitario_momento) VALUES (:pedido_id, :item_id, :quantidade, :preco);";
             $stmt_itens = $this->pdo->prepare($sql_itens);
             foreach ($itensParaInserir as $item) {
                 $stmt_itens->execute([':pedido_id' => $pedido_id, ':item_id' => $item['item_id'], ':quantidade'=> $item['quantidade'], ':preco' => $item['preco']]);
             }
+            
             return (int)$pedido_id;
-        } catch (PDOException $e) { error_log("Erro PDO ao criar pedido: " . $e->getMessage()); throw $e;
-        } catch (Exception $e) { error_log("Erro Geral ao criar pedido: " . $e->getMessage()); throw $e; }
+        } catch (PDOException $e) { 
+            error_log("Erro PDO ao criar pedido: " . $e->getMessage()); 
+            throw $e;
+        } catch (Exception $e) { 
+            error_log("Erro Geral ao criar pedido: " . $e->getMessage()); 
+            throw $e; 
+        }
     }
     public function buscarItensDoUltimoPedidoDaMesa(int $mesa_id, int $empresa_id): ?array
     {
@@ -229,7 +249,6 @@ class PedidoModel
      */
     public function marcarPedidosDaMesaComoPagos(int $mesa_id, int $empresa_id): bool
     {
-        // --- CORREÇÃO DO BUG AQUI ---
         // O status de um pedido deve ser 'pago', não 'disponível'.
         $sql = "UPDATE pedidos
                 SET status = 'pago' 

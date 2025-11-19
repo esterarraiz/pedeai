@@ -122,6 +122,10 @@ class Router
         $this->add('DELETE', 'api/admin/cardapio/{id:\d+}', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'remover'], ['administrador']);
 
+        // Adicione esta rota na seção de rotas públicas
+        $this->add('GET', 'suporte', ['controller' => 'SuporteController', 'action' => 'index']);
+        $this->add('GET', 'suporte/faq', ['controller' => 'SuporteController', 'action' => 'showFaq']);
+
 
         // Mesas Admin
         $this->add('GET', 'estabelecimento', 
