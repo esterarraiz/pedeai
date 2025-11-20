@@ -1,5 +1,5 @@
 <?php
-// Ficheiro: app/Models/AdminDashboardModel.php (NOVO)
+// Ficheiro: app/Models/AdminDashboardModel.php
 
 namespace App\Models;
 
@@ -63,8 +63,10 @@ class AdminDashboardModel
      */
     public function getPedidosRecentes(int $empresa_id): array
     {
+        // Mantida a alteração: adicionando o ID do pedido
         $sql = "
             SELECT
+                p.id AS pedido_id,
                 m.numero AS mesa_numero,
                 f.nome AS garcom_nome,
                 p.valor_total,
@@ -76,6 +78,7 @@ class AdminDashboardModel
             ORDER BY p.data_abertura DESC
             LIMIT 5;
         ";
+        
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':empresa_id' => $empresa_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

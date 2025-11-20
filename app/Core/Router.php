@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Core;
 
 class Router
@@ -52,11 +51,16 @@ class Router
             ['administrador']
         );
         $this->add('POST', 'admin/cardapio/gerar-qrcode-pdf', ['controller' => 'AdminDashboardController', 'action' => 'gerarQrCodePdf']);
-        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);         
+        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);   
+        // Adicione esta rota na seção de rotas públicas
+        $this->add('GET', 'suporte', ['controller' => 'SuporteController', 'action' => 'index']);
+        $this->add('GET', 'suporte/faq', ['controller' => 'SuporteController', 'action' => 'showFaq']);      
         // Admin: Gerenciamento de Cardápio (Views)
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)
         // (NOVO) Admin: Relatórios (View)
+        $this->add('GET', 'api/admin/pedidos/{id:\d+}', ['controller' => 'Api\PedidoController', 'action' => 'getDetalhesPedidoAdmin'], ['administrador']);
+        $this->add('GET', 'api/admin/dashboard', ['controller' => 'Api\AdminDashboardController', 'action' => 'getDadosDashboard'], ['administrador']);
         $this->add('GET', 'relatorios/vendas', ['controller' => 'RelatorioController', 'action' => 'index'], ['administrador']);
         $this->add('POST', 'api/cardapio/adicionar', ['controller' => 'Api\CardapioController', 'action' => 'adicionarItem'], ['administrador']);
         $this->add('POST', 'api/cardapio/editar', ['controller' => 'Api\CardapioController', 'action' => 'editarItem'], ['administrador']);
@@ -78,7 +82,7 @@ class Router
         $this->add('POST', 'api/pedidos', ['controller' => 'Api\PedidoController','action' => 'criarPedido'], ['garçom']); // Endpoint CORRETO para criar pedido
         $this->add('GET', 'api/garcom/pedidos/prontos', ['controller' => 'Api\GarcomApiController', 'action' => 'buscarPedidosProntos'], ['garçom']);
         $this->add('POST', 'api/garcom/pedidos/marcar-entregue', ['controller' => 'Api\GarcomApiController', 'action' => 'marcarComoEntregue'], ['garçom']);
-
+        $this->add('PUT', 'api/pedidos/{id:\d+}', ['controller' => 'Api\PedidoController', 'action' => 'updatePedido'], ['garçom']);
         // --- CAIXA (VIEWS) ---
         $this->add('GET', 'dashboard/caixa', ['controller' => 'CaixaDashboardController', 'action' => 'index'], ['caixa']);
         $this->add('GET', 'caixa/conta/{id:\d+}', ['controller' => 'CaixaController', 'action' => 'verConta'], ['caixa']); // View
@@ -121,10 +125,6 @@ class Router
 
         $this->add('DELETE', 'api/admin/cardapio/{id:\d+}', 
             ['controller' => 'Api\\AdminCardapioController', 'action' => 'remover'], ['administrador']);
-
-        // Adicione esta rota na seção de rotas públicas
-        $this->add('GET', 'suporte', ['controller' => 'SuporteController', 'action' => 'index']);
-        $this->add('GET', 'suporte/faq', ['controller' => 'SuporteController', 'action' => 'showFaq']);
 
 
         // Mesas Admin

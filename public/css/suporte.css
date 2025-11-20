@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ===== ESCOPO PARA NÃO SER SOBRESCRITO PELO style.css ===== */
+.page-suporte *,
+.page-suporte *::before,
+.page-suporte *::after {
+    box-sizing: border-box;
+}
+
+.page-suporte {
+    background: var(--bg-main);
+}
+
+/* ===== HEADER ===== */
+.page-suporte .suporte-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-suporte .suporte-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.page-suporte .suporte-header .lead {
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+/* ===== WRAPPER (LARGURA TOTAL DOS CARDS) ===== */
+.page-suporte .suporte-wrapper {
+    max-width: 1050px;   /* Cards mais largos */
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ===== CARD ===== */
+.page-suporte .suporte-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    padding: 35px 50px;         /* Mais espaço interno */
+    margin-bottom: 35px;
+
+    /* CENTRALIZA TUDO */
+    text-align: center;
+}
+
+/* Título dentro do card */
+.page-suporte .suporte-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-dark);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-suporte .suporte-card-title i {
+    color: var(--green-dark);
+}
+
+.page-suporte .suporte-card p {
+    text-align: center;
+}
+
+/* ===== BOTÕES ===== */
+.page-suporte .btn-support {
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: inline-flex;
+    font-weight: 600;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.page-suporte .btn-support-primary {
+    background: var(--green-dark);
+    color: white !important;
+}
+
+.page-suporte .btn-support-primary:hover {
+    background: #047857;
+}
+
+.page-suporte .btn-support-outline {
+    background: transparent;
+    border: 2px solid var(--green-dark);
+    color: var(--green-dark);
+}
+
+.page-suporte .btn-support-outline:hover {
+    background: var(--green-light);
+}
+
+/* Centraliza o botão de envio */
+.page-suporte .support-form button {
+    display: block;
+    margin: 20px auto 0;
+}
+
+/* ===== FORMULÁRIO ===== */
+.page-suporte .support-form .form-label {
+    font-weight: 600;
+    text-align: left;
+    display: block;
+    margin-left: 3%;
+}
+
+/* Inputs maiores */
+.page-suporte .support-form input,
+.page-suporte .support-form textarea {
+    width: 90%;                      /* Mais largo */
+    margin: 0 auto 15px auto;        /* Centraliza */
+    display: block;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+/* Input focus */
+.page-suporte .support-form input:focus,
+.page-suporte .support-form textarea:focus {
+    border-color: var(--green-dark);
+    box-shadow: 0 0 0 2px rgba(16,185,129,0.25);
+}
+
+/* ===== MENSAGEM DE FEEDBACK ===== */
+.page-suporte .feedback-box {
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-suporte .feedback-success {
+    background: var(--green-light);
+    color: var(--green-dark);
+    border: 1px solid var(--green-dark);
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+    .page-suporte .main-content {
+        padding: 20px;
+    }
+
+    .page-suporte .support-form input,
+    .page-suporte .support-form textarea {
+        width: 100%;
+    }
+
+    .page-suporte .suporte-card {
+        padding: 25px;
+    }
+}
