@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Core;
 
 class Router
@@ -52,7 +51,10 @@ class Router
             ['administrador']
         );
         $this->add('POST', 'admin/cardapio/gerar-qrcode-pdf', ['controller' => 'AdminDashboardController', 'action' => 'gerarQrCodePdf']);
-        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);         
+        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);   
+        // Adicione esta rota na seção de rotas públicas
+        $this->add('GET', 'suporte', ['controller' => 'SuporteController', 'action' => 'index']);
+        $this->add('GET', 'suporte/faq', ['controller' => 'SuporteController', 'action' => 'showFaq']);      
         // Admin: Gerenciamento de Cardápio (Views)
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)

@@ -1,5 +1,5 @@
 <?php
-// Ficheiro: app/Models/AdminDashboardModel.php (MODIFICADO)
+// Ficheiro: app/Models/AdminDashboardModel.php
 
 namespace App\Models;
 
@@ -19,8 +19,6 @@ class AdminDashboardModel
      */
     public function getMetricas(int $empresa_id): array
     {
-        // ... (função getMetricas sem alterações) ...
-        
         // Faturamento do dia
         $sql_faturamento = "
             SELECT SUM(valor) AS faturamento_dia
@@ -65,10 +63,10 @@ class AdminDashboardModel
      */
     public function getPedidosRecentes(int $empresa_id): array
     {
-        // **** ALTERAÇÃO AQUI: Adicionado "p.id AS pedido_id" ****
+        // Mantida a alteração: adicionando o ID do pedido
         $sql = "
             SELECT
-                p.id AS pedido_id, 
+                p.id AS pedido_id,
                 m.numero AS mesa_numero,
                 f.nome AS garcom_nome,
                 p.valor_total,
@@ -80,6 +78,7 @@ class AdminDashboardModel
             ORDER BY p.data_abertura DESC
             LIMIT 5;
         ";
+        
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':empresa_id' => $empresa_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

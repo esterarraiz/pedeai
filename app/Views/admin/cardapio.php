@@ -48,21 +48,6 @@
             margin-left: 10px;
             padding: 5px 10px;
         }
-        
-        /* CORREÇÃO VISUAL DO MODAL DE CATEGORIAS */
-        #modalGerenciarCategorias .modal-content {
-            padding: 20px; 
-        }
-        #formAdicionarCategoria {
-            padding: 15px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px;
-            margin-bottom: 20px !important; 
-        }
-        #formAdicionarCategoria .form-group.d-flex input {
-            flex-grow: 1; 
-            margin-right: 10px; 
-        }
     </style>
 </head>
 <body>
@@ -70,24 +55,28 @@
         <?php include_once __DIR__ . '/../partials/sidebar_admin.php'; ?>
 
         <main class="main-content">
-            <header class="main-header">
-                <h1>Editar Cardápio</h1>
-                
-                <button class="btn btn-warning" style="margin-left: auto; margin-right: 10px;" data-bs-toggle="modal" data-bs-target="#modalGerenciarCategorias">
-                    <i class="fas fa-layer-group"></i> Gerenciar Categorias
-                </button>
-                
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAdicionarItem">
-                    <i class="fas fa-plus"></i> Adicionar Item
-                </button>
-                
-                <button class="btn btn-amber" style="margin-left: 15px;"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#cardapioOpcoesModal">
-                    <i class="fas fa-qrcode"></i> Cardápio Público
-                </button>
+            <header class="main-header cardapio-header">
+                <div class="header-left">
+                    <h1>Editar Cardápio</h1>
+                </div>
 
+                <div class="header-actions">
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalGerenciarCategorias">
+                        <i class="fas fa-layer-group"></i> Gerenciar Categorias
+                    </button>
+
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAdicionarItem">
+                        <i class="fas fa-plus"></i> Adicionar Item
+                    </button>
+
+                    <button class="btn btn-amber" data-bs-toggle="modal" data-bs-target="#cardapioOpcoesModal">
+                        <i class="fas fa-qrcode"></i> Cardápio Público
+                    </button>
+                </div>
             </header>
+
+
+
 
             <div id="feedback-container"></div>
             
@@ -188,7 +177,8 @@
                 
                 <form id="formAdicionarCategoria" class="mb-4">
                     <div class="form-group d-flex">
-                        <input type="text" name="nome" class="form-control" placeholder="Novo nome da categoria" required> <button type="submit" class="btn btn-primary flex-shrink-0">Criar</button>
+                        <input type="text" name="nome" class="form-control" placeholder="Novo nome da categoria" required style="margin-right: 10px;">
+                        <button type="submit" class="btn btn-primary flex-shrink-0">Criar</button>
                     </div>
                     <div id="feedback-categoria" class="mt-2"></div>
                 </form>
@@ -720,4 +710,5 @@
     });
     </script>
 </body>
+
 </html>

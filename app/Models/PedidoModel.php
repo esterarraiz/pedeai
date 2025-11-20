@@ -20,7 +20,6 @@ class PedidoModel
      */
     public function buscarPedidosParaCozinha(int $empresa_id): array
     {
-        // ... (código inalterado) ...
         $sql = "
             SELECT
                 p.id AS pedido_id, p.data_abertura, m.numero AS mesa_numero,
@@ -30,7 +29,6 @@ class PedidoModel
             JOIN pedido_itens pi ON p.id = pi.pedido_id
             JOIN cardapio_itens ci ON pi.item_id = ci.id
             WHERE p.id IN (
-                -- Subconsulta para encontrar o ID do último pedido 'em_preparo' de CADA mesa
                 SELECT MAX(p_sub.id)
                 FROM pedidos p_sub
                 WHERE p_sub.empresa_id = :empresa_id
@@ -64,11 +62,10 @@ class PedidoModel
     }
 
     /**
-     * Marca um pedido específico como 'pronto'.
+     * Marca um pedido como pronto.
      */
     public function marcarComoPronto(int $pedido_id, int $empresa_id): bool
     {
-        // ... (código inalterado) ...
         $sql = "
             UPDATE pedidos
             SET status = 'pronto', data_pronto = NOW()
@@ -85,11 +82,10 @@ class PedidoModel
     }
 
     /**
-     * Busca mesas que têm pedidos prontos para entrega.
+     * Busca mesas com pedidos prontos para entrega.
      */
     public function buscarPedidosProntosPorEmpresa(int $empresa_id): array
     {
-        // ... (código inalterado) ...
         $sql = "
             SELECT
                 m.id AS mesa_id,
@@ -113,10 +109,15 @@ class PedidoModel
         }
     }
 
+    /**
+     * Busca os dados completos de um pedido por ID.
+     * (NOVO)
+     */
     public function buscarDetalhesPorPedidoId(int $pedido_id, int $empresa_id): ?array
     {
         $sql = "
-            SELECT p.id AS pedido_id, p.status, p.data_abertura, pi.quantidade, pi.preco_unitario_momento, ci.nome AS item_nome, m.numero as mesa_numero
+            SELECT p.id AS pedido_id, p.status, p.data_abertura, pi.quantidade,
+                   pi.preco_unitario_momento, ci.nome AS item_nome, m.numero as mesa_numero
             FROM pedidos p
             JOIN pedido_itens pi ON p.id = pi.pedido_id
             JOIN cardapio_itens ci ON pi.item_id = ci.id
@@ -124,33 +125,37 @@ class PedidoModel
             WHERE p.id = :pedido_id AND p.empresa_id = :empresa_id
             ORDER BY ci.nome ASC;
         ";
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':pedido_id' => $pedido_id, ':empresa_id' => $empresa_id]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (empty($results)) { return null; }
-        
-        $pedido_detalhes = [ 
-            'id' => $results[0]['pedido_id'], 
+        if (empty($results)) return null;
+
+        $pedido = [
+            'id' => $results[0]['pedido_id'],
             'mesa_numero' => $results[0]['mesa_numero'],
-            'hora' => date('H:i', strtotime($results[0]['data_abertura'])), 
-            'status' => $results[0]['status'], 
-            'itens' => [], 
-            'total' => 0 
+            'hora' => date('H:i', strtotime($results[0]['data_abertura'])),
+            'status' => $results[0]['status'],
+            'itens' => [],
+            'total' => 0
         ];
-        
+
         foreach ($results as $row) {
             $subtotal = $row['quantidade'] * $row['preco_unitario_momento'];
-            $pedido_detalhes['itens'][] = [ 
-                'nome' => $row['item_nome'], 
-                'quantidade' => $row['quantidade'], 
-                'preco_unitario' => $row['preco_unitario_momento'] 
+            $pedido['itens'][] = [
+                'nome' => $row['item_nome'],
+                'quantidade' => $row['quantidade'],
+                'preco_unitario' => $row['preco_unitario_momento']
             ];
-            $pedido_detalhes['total'] += $subtotal;
+            $pedido['total'] += $subtotal;
         }
-        return $pedido_detalhes;
+
+        return $pedido;
     }
 
-
+    /**
+     * Cria um novo pedido.
+     */
     public function criarNovoPedido(int $empresa_id, int $mesa_id, int $funcionario_id, array $itens): int
     {
         try {
@@ -160,171 +165,193 @@ class PedidoModel
             $stmt_preco = $this->pdo->prepare($sql_preco);
             
             foreach ($itens as $item_id => $quantidade) {
-                if ($quantidade <= 0) continue; // Ignora itens com quantidade zero ou negativa
-                $stmt_preco->execute([':item_id' => $item_id, ':empresa_id' => $empresa_id]);
-                $item_info = $stmt_preco->fetch(PDO::FETCH_ASSOC);
-                
-                if (!$item_info) { throw new Exception("O item com ID {$item_id} não foi encontrado."); }
-                if (!isset($item_info['preco']) || !is_numeric($item_info['preco'])) { throw new Exception("O item '{$item_info['nome']}' está com um preço inválido.");}
-                
-                $preco_unitario = (float) $item_info['preco'];
-                $valorTotal += $preco_unitario * $quantidade;
-                $itensParaInserir[] = ['item_id' => $item_id, 'quantidade' => $quantidade, 'preco' => $preco_unitario ];
-            }
-            
-            // CORREÇÃO: Removido 'RETURNING id' para compatibilidade com MySQL.
-            $sql_pedido = "INSERT INTO pedidos (empresa_id, mesa_id, funcionario_id, status, data_abertura, valor_total) VALUES (?, ?, ?, 'em_preparo', NOW(), ?);";
-            $stmt_pedido = $this->pdo->prepare($sql_pedido);
-            $stmt_pedido->execute([$empresa_id, $mesa_id, $funcionario_id, $valorTotal]);
-            
-            // Uso de lastInsertId() para obter o ID da inserção no MySQL.
-            $pedido_id = $this->pdo->lastInsertId();
-            
-            if (!$pedido_id) { throw new Exception("Falha ao obter o ID do novo pedido."); }
-            
-            $sql_itens = "INSERT INTO pedido_itens (pedido_id, item_id, quantidade, preco_unitario_momento) VALUES (:pedido_id, :item_id, :quantidade, :preco);";
-            $stmt_itens = $this->pdo->prepare($sql_itens);
-            
-            foreach ($itensParaInserir as $item) {
-                $stmt_itens->execute([':pedido_id' => $pedido_id, ':item_id' => $item['item_id'], ':quantidade'=> $item['quantidade'], ':preco' => $item['preco']]);
-            }
-            
-            return (int)$pedido_id;
-        } catch (PDOException $e) { error_log("Erro PDO ao criar pedido: " . $e->getMessage()); throw $e;
-        } catch (Exception $e) { error_log("Erro Geral ao criar pedido: " . $e->getMessage()); throw $e; }
-    }
-
-    /**
-     * Atualiza um pedido existente (itens, valor, e marca como 'em_preparo').
-     */
-    public function atualizarPedido(int $pedido_id, int $empresa_id, array $novos_itens): bool
-    {
-        try {
-            // Garante que todas as operações SQL sejam revertidas se uma falhar.
-            $this->pdo->beginTransaction(); 
-
-            $valorTotal = 0.0;
-            $itensParaInserir = [];
-            $sql_preco = "SELECT preco, nome FROM cardapio_itens WHERE id = :item_id AND empresa_id = :empresa_id";
-            $stmt_preco = $this->pdo->prepare($sql_preco);
-            
-            // 1. Validação dos Itens e Cálculo do Novo Total
-            foreach ($novos_itens as $item_id => $quantidade) {
-                // ATENÇÃO: Se a quantidade for 0, o item é IGNORADO (efetivamente excluído)
-                if ($quantidade <= 0) continue; 
+                if ($quantidade <= 0) continue;
                 
                 $stmt_preco->execute([':item_id' => $item_id, ':empresa_id' => $empresa_id]);
                 $item_info = $stmt_preco->fetch(PDO::FETCH_ASSOC);
                 
-                if (!$item_info) { 
-                    throw new Exception("O item com ID {$item_id} não foi encontrado no cardápio."); 
-                }
-                if (!isset($item_info['preco']) || !is_numeric($item_info['preco'])) { 
+                if (!$item_info) throw new Exception("O item com ID {$item_id} não foi encontrado.");
+
+                if (!is_numeric($item_info['preco'])) {
                     throw new Exception("O item '{$item_info['nome']}' está com um preço inválido.");
                 }
                 
                 $preco_unitario = (float) $item_info['preco'];
                 $valorTotal += $preco_unitario * $quantidade;
-                $itensParaInserir[] = ['item_id' => $item_id, 'quantidade' => $quantidade, 'preco' => $preco_unitario ];
+
+                $itensParaInserir[] = [
+                    'item_id' => $item_id,
+                    'quantidade' => $quantidade,
+                    'preco' => $preco_unitario
+                ];
             }
             
-            // Se após a filtragem não houver itens, o valor total será 0, o que é válido.
-            if (empty($itensParaInserir) && $valorTotal > 0) {
-                 $valorTotal = 0.0;
-            }
+            $sql_pedido = "
+                INSERT INTO pedidos (empresa_id, mesa_id, funcionario_id, status, data_abertura, valor_total)
+                VALUES (?, ?, ?, 'em_preparo', NOW(), ?)
+            ";
+            $stmt_pedido = $this->pdo->prepare($sql_pedido);
+            $stmt_pedido->execute([$empresa_id, $mesa_id, $funcionario_id, $valorTotal]);
 
-            // 2. Apagar TODOS os Itens Antigos do Pedido
-            $sql_delete_itens = "DELETE FROM pedido_itens WHERE pedido_id = :pedido_id;";
-            $stmt_delete = $this->pdo->prepare($sql_delete_itens);
-            $stmt_delete->execute([':pedido_id' => $pedido_id]);
+            $pedido_id = $this->pdo->lastInsertId();
+            if (!$pedido_id) throw new Exception("Falha ao obter o ID do novo pedido.");
 
-            // 3. Inserir SOMENTE os Novos Itens (com quantidade > 0)
-            $sql_itens = "INSERT INTO pedido_itens (pedido_id, item_id, quantidade, preco_unitario_momento) VALUES (:pedido_id, :item_id, :quantidade, :preco);";
+            $sql_itens = "
+                INSERT INTO pedido_itens (pedido_id, item_id, quantidade, preco_unitario_momento)
+                VALUES (:pedido_id, :item_id, :quantidade, :preco)
+            ";
             $stmt_itens = $this->pdo->prepare($sql_itens);
+
             foreach ($itensParaInserir as $item) {
                 $stmt_itens->execute([
-                    ':pedido_id' => $pedido_id, 
-                    ':item_id' => $item['item_id'], 
-                    ':quantidade'=> $item['quantidade'], 
+                    ':pedido_id' => $pedido_id,
+                    ':item_id' => $item['item_id'],
+                    ':quantidade' => $item['quantidade'],
                     ':preco' => $item['preco']
                 ]);
             }
+            
+            return (int)$pedido_id;
 
-            // 4. Atualizar o Pedido Principal (UPDATE)
-            // CORREÇÃO: Removida a coluna 'data_atualizacao' que causava o erro.
-            $sql_pedido = "UPDATE pedidos SET valor_total = ?, status = 'em_preparo' WHERE id = ? AND empresa_id = ? AND status IN ('em_preparo', 'pronto', 'entregue');";
-            $stmt_pedido = $this->pdo->prepare($sql_pedido);
-            $stmt_pedido->execute([$valorTotal, $pedido_id, $empresa_id]);
-
-            if ($stmt_pedido->rowCount() === 0) {
-                throw new Exception("Pedido não encontrado ou status inválido para edição.");
-            }
-
-            // 5. Finalizar a Transação
-            $this->pdo->commit();
-            return true;
-
-        } catch (PDOException $e) { 
-            if ($this->pdo->inTransaction()) { $this->pdo->rollBack(); }
-            error_log("Erro PDO ao atualizar pedido: " . $e->getMessage()); 
+        } catch (Exception $e) {
+            error_log("Erro ao criar pedido: " . $e->getMessage());
             throw $e;
-        } catch (Exception $e) { 
-            if ($this->pdo->inTransaction()) { $this->pdo->rollBack(); }
-            error_log("Erro Geral ao atualizar pedido: " . $e->getMessage()); 
-            throw $e; 
         }
     }
 
     /**
-     * Busca os itens do pedido mais recente (ativo) de uma mesa específica.
+     * Atualiza um pedido existente.
+     * (NOVO & COMPLEXO)
+     */
+    public function atualizarPedido(int $pedido_id, int $empresa_id, array $novos_itens): bool
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            $valorTotal = 0.0;
+            $itensParaInserir = [];
+
+            $sql_preco = "
+                SELECT preco, nome FROM cardapio_itens
+                WHERE id = :item_id AND empresa_id = :empresa_id
+            ";
+            $stmt_preco = $this->pdo->prepare($sql_preco);
+
+            foreach ($novos_itens as $item_id => $quantidade) {
+                if ($quantidade <= 0) continue;
+
+                $stmt_preco->execute([':item_id' => $item_id, ':empresa_id' => $empresa_id]);
+                $item = $stmt_preco->fetch(PDO::FETCH_ASSOC);
+
+                if (!$item) throw new Exception("Item ID {$item_id} inválido.");
+
+                $preco_unit = (float)$item['preco'];
+                $valorTotal += $preco_unit * $quantidade;
+
+                $itensParaInserir[] = [
+                    'item_id' => $item_id,
+                    'quantidade' => $quantidade,
+                    'preco' => $preco_unit
+                ];
+            }
+
+            $this->pdo->prepare("DELETE FROM pedido_itens WHERE pedido_id = :pedido_id")
+                      ->execute([':pedido_id' => $pedido_id]);
+
+            if (!empty($itensParaInserir)) {
+                $stmt_itens = $this->pdo->prepare("
+                    INSERT INTO pedido_itens (pedido_id, item_id, quantidade, preco_unitario_momento)
+                    VALUES (:pedido_id, :item_id, :quantidade, :preco)
+                ");
+
+                foreach ($itensParaInserir as $item) {
+                    $stmt_itens->execute([
+                        ':pedido_id' => $pedido_id,
+                        ':item_id' => $item['item_id'],
+                        ':quantidade' => $item['quantidade'],
+                        ':preco' => $item['preco']
+                    ]);
+                }
+            }
+
+            $stmt_update = $this->pdo->prepare("
+                UPDATE pedidos
+                SET valor_total = ?, status = 'em_preparo'
+                WHERE id = ? AND empresa_id = ?
+            ");
+            $stmt_update->execute([$valorTotal, $pedido_id, $empresa_id]);
+
+            if ($stmt_update->rowCount() === 0) {
+                throw new Exception("Pedido não encontrado ou não pode ser atualizado.");
+            }
+
+            $this->pdo->commit();
+            return true;
+
+        } catch (Exception $e) {
+            if ($this->pdo->inTransaction()) $this->pdo->rollBack();
+            error_log("Erro ao atualizar pedido: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Busca itens do último pedido ativo da mesa (com item_id para edição).
      */
     public function buscarItensDoUltimoPedidoDaMesa(int $mesa_id, int $empresa_id): ?array
     {
         $sql = "
             SELECT 
-                p.id AS pedido_id, p.status, p.data_abertura, pi.quantidade, pi.preco_unitario_momento, 
-                ci.nome AS item_nome, 
-                ci.id AS item_id_cardapio_fk 
+                p.id AS pedido_id, p.status, p.data_abertura, pi.quantidade,
+                pi.preco_unitario_momento,
+                ci.nome AS item_nome,
+                ci.id AS item_id_cardapio_fk
             FROM pedidos p
             JOIN pedido_itens pi ON p.id = pi.pedido_id
             JOIN cardapio_itens ci ON pi.item_id = ci.id
-            WHERE p.id = ( SELECT MAX(p_sub.id) FROM pedidos p_sub WHERE p_sub.mesa_id = :mesa_id AND p_sub.empresa_id = :empresa_id AND p_sub.status IN ('em_preparo', 'entregue', 'pronto') )
+            WHERE p.id = (
+                SELECT MAX(p_sub.id)
+                FROM pedidos p_sub
+                WHERE p_sub.mesa_id = :mesa_id
+                  AND p_sub.empresa_id = :empresa_id
+                  AND p_sub.status IN ('em_preparo', 'entregue', 'pronto')
+            )
             ORDER BY ci.nome ASC;
         ";
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        if (empty($results)) { return null; }
-        
-        $ultimo_pedido = [ 
-            'id' => $results[0]['pedido_id'], 
-            'hora' => date('H:i', strtotime($results[0]['data_abertura'])), 
-            'status' => $results[0]['status'], 
-            'itens' => [], 
-            'total' => 0 
+
+        if (empty($results)) return null;
+
+        $pedido = [
+            'id' => $results[0]['pedido_id'],
+            'hora' => date('H:i', strtotime($results[0]['data_abertura'])),
+            'status' => $results[0]['status'],
+            'itens' => [],
+            'total' => 0
         ];
-        
+
         foreach ($results as $row) {
             $subtotal = $row['quantidade'] * $row['preco_unitario_momento'];
-            $ultimo_pedido['itens'][] = [ 
-                'nome' => $row['item_nome'], 
-                'quantidade' => $row['quantidade'], 
+            $pedido['itens'][] = [
+                'nome' => $row['item_nome'],
+                'quantidade' => $row['quantidade'],
                 'preco_unitario' => $row['preco_unitario_momento'],
-                // Adicionado este campo CRUCIAL para o frontend
-                'item_id' => $row['item_id_cardapio_fk'] 
+                'item_id' => $row['item_id_cardapio_fk']
             ];
-            $ultimo_pedido['total'] += $subtotal;
+            $pedido['total'] += $subtotal;
         }
-        return $ultimo_pedido;
+
+        return $pedido;
     }
 
     /**
-     * Busca todos os pedidos ativos de uma mesa, agrupados.
+     * Busca todos os pedidos ativos de uma mesa.
      */
     public function buscarPedidosPorMesa(int $mesa_id, int $empresa_id): array
     {
-        // ... (código inalterado) ...
         $sql = "
             SELECT
                 p.id AS pedido_id,
@@ -346,12 +373,12 @@ class PedidoModel
         $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Agrupa os itens por pedido
-        $pedidos_agrupados = [];
+        $pedidos = [];
         foreach ($results as $row) {
             $pedido_id = $row['pedido_id'];
-            if (!isset($pedidos_agrupados[$pedido_id])) {
-                $pedidos_agrupados[$pedido_id] = [
+
+            if (!isset($pedidos[$pedido_id])) {
+                $pedidos[$pedido_id] = [
                     'id' => $pedido_id,
                     'hora' => date('H:i', strtotime($row['data_abertura'])),
                     'status' => $row['status'],
@@ -359,63 +386,67 @@ class PedidoModel
                     'subtotal' => 0
                 ];
             }
-            
-            $subtotal_item = $row['quantidade'] * $row['preco_unitario_momento'];
-            
-            $pedidos_agrupados[$pedido_id]['itens'][] = [
+
+            $subtotal = $row['quantidade'] * $row['preco_unitario_momento'];
+
+            $pedidos[$pedido_id]['itens'][] = [
                 'nome' => $row['item_nome'],
                 'quantidade' => $row['quantidade'],
                 'preco_unitario' => $row['preco_unitario_momento'],
-                'subtotal' => $subtotal_item
+                'subtotal' => $subtotal
             ];
-            
-            $pedidos_agrupados[$pedido_id]['subtotal'] += $subtotal_item;
+
+            $pedidos[$pedido_id]['subtotal'] += $subtotal;
         }
 
-        return array_values($pedidos_agrupados);
+        return array_values($pedidos);
     }
 
     /**
-     * Marca todos os pedidos 'pronto' de uma mesa como 'entregue'.
+     * Marca pedidos prontos como entregues.
      */
     public function marcarPedidosDaMesaComoEntregues(int $mesa_id, int $empresa_id): bool
     {
-        // ... (código inalterado) ...
-        $sql = "UPDATE pedidos
-                SET status = 'entregue'
-                WHERE mesa_id = :mesa_id
-                  AND empresa_id = :empresa_id
-                  AND status = 'pronto'";
+        $sql = "
+            UPDATE pedidos
+            SET status = 'entregue'
+            WHERE mesa_id = :mesa_id
+              AND empresa_id = :empresa_id
+              AND status = 'pronto'
+        ";
+
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
             return $stmt->rowCount() > 0;
+
         } catch (PDOException $e) {
-            error_log("Erro ao marcar pedidos da mesa como entregues: " . $e->getMessage());
+            error_log("Erro ao marcar como entregue: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Marca todos os pedidos ativos de uma mesa como 'pago'.
+     * Marca pedidos ativos como pagos.
      */
     public function marcarPedidosDaMesaComoPagos(int $mesa_id, int $empresa_id): bool
     {
-        // ... (código inalterado) ...
-        $sql = "UPDATE pedidos
-                SET status = 'pago' 
-                WHERE mesa_id = :mesa_id
-                  AND empresa_id = :empresa_id
-                  AND status IN ('em_preparo', 'pronto', 'entregue')"; 
-        
+        $sql = "
+            UPDATE pedidos
+            SET status = 'pago'
+            WHERE mesa_id = :mesa_id
+              AND empresa_id = :empresa_id
+              AND status IN ('em_preparo', 'pronto', 'entregue')
+        ";
+
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':mesa_id' => $mesa_id, ':empresa_id' => $empresa_id]);
-            return true; 
+            return true;
+
         } catch (PDOException $e) {
-            error_log("Erro no Model (PDO) ao marcar pedidos da mesa como pagos: " . $e->getMessage());
+            error_log("Erro ao marcar como pago: " . $e->getMessage());
             return false;
         }
     }
-
 }
