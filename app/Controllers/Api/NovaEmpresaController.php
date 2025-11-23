@@ -162,7 +162,11 @@ class NovaEmpresaController extends Controller
             // MUDANÇA: Usa o método mockável de sessão
             $this->setSuccessSession('Conta criada com sucesso! Faça o login.');
             
-            $this->jsonResponse(['success' => true, 'message' => 'Conta criada com sucesso!']);
+            $this->jsonResponse([
+                'success' => true,
+                'message' => 'Conta criada com sucesso!',
+                'empresa_id' => $novo_id_empresa
+            ]);
 
         } catch (PDOException $e) { 
             if ($db->inTransaction()) { $db->rollBack(); }
