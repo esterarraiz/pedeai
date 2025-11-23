@@ -13,9 +13,16 @@ if (session_status() == PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
+// Carregar .env APENAS em ambiente local (quando o arquivo existe)
+$envPath = __DIR__ . '/../.env';
+
+if (file_exists($envPath)) {
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+    $dotenv->load();
+}
+// Em produção (Render), as variáveis vêm do painel "Environment"
 
 use App\Core\Router;
+
 $router = new Router();
 $router->dispatch();
