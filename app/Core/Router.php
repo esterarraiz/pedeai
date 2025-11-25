@@ -219,8 +219,9 @@ class Router
         } else {
             // Nenhuma rota foi encontrada.
             if (str_starts_with($url, 'api/')) {
-                $this->showErrorPage(null, 404, 'Endpoint não encontrado.'); // 404 Not Found
+                $this->showErrorPage(null, 404, 'Endpoint não encontrado.'); // 404 Not Found (API)
             } else {
+                // AQUI: Alterar para 'error/404'
                 $this->showErrorPage('error/404', 404);
             }
         }
