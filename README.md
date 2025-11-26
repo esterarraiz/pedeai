@@ -113,7 +113,7 @@ Este arquivo detalha todas as iterações planejadas do projeto, descrevendo o v
 ## 📄 Apresentação Final
 Acesse aqui a apresentação oficial entregue ao professor:
 
-👉 [PedeAI — Apresentação Final](docs/PedeAI-Apresentacao-Final.pdf)
+[PedeAI — Apresentação Final](docs/PedeAI-Apresentacao-Final.pdf)
 
 ---
 
