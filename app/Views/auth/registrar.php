@@ -65,6 +65,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
     </style>
 </head>
+
 <body>
 
     <a href="/" class="back-link">
@@ -196,10 +197,19 @@ if (session_status() == PHP_SESSION_NONE) {
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    // 4. Sucesso! Redirecionar para o login
-                    // A API (que vamos ajustar) vai ter colocado a
-                    // mensagem de sucesso na sessão.
-                    window.location.href = '/login';
+                    // Insere o ID no modal
+                    document.getElementById("empresa-id-box").innerText = "ID: " + result.empresa_id;
+
+                    // Mostra o modal
+                    document.getElementById("success-modal").style.display = "flex";
+
+                    // Botão "OK"
+                    document.getElementById("modal-ok-btn").onclick = () => {
+                        window.location.href = "/login";
+                    };
+
+                    return; // Não deixa o código continuarr a janela
+
                 } else {
                     // 5. Erro da API (ex: "Email já existe")
                     throw new Error(result.message || 'Erro desconhecido. Tente novamente.');
@@ -218,5 +228,22 @@ if (session_status() == PHP_SESSION_NONE) {
         });
     });
     </script>
+    <div id="success-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2 class="modal-title">🎉 Cadastro realizado com sucesso!</h2>
+
+            <p class="modal-text">
+                Sua conta foi criada com sucesso!<br><br>
+                <strong style="color:#ff4757;">Atenção:</strong> anote o ID da sua empresa — ele será necessário para fazer login.
+            </p>
+
+            <div class="empresa-id-box" id="empresa-id-box">
+                <!-- O ID será inserido aqui -->
+            </div>
+
+            <button class="modal-button" id="modal-ok-btn">Entendi</button>
+        </div>
+    </div>
+
 </body>
 </html>

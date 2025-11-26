@@ -55,24 +55,28 @@
         <?php include_once __DIR__ . '/../partials/sidebar_admin.php'; ?>
 
         <main class="main-content">
-            <header class="main-header">
-                <h1>Editar Cardápio</h1>
-                
-                <button class="btn btn-warning" style="margin-left: auto; margin-right: 10px;" data-bs-toggle="modal" data-bs-target="#modalGerenciarCategorias">
-                    <i class="fas fa-layer-group"></i> Gerenciar Categorias
-                </button>
-                
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAdicionarItem">
-                    <i class="fas fa-plus"></i> Adicionar Item
-                </button>
-                
-                <button class="btn btn-amber" style="margin-left: 15px;"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#cardapioOpcoesModal">
-                    <i class="fas fa-qrcode"></i> Cardápio Público
-                </button>
+            <header class="main-header cardapio-header">
+                <div class="header-left">
+                    <h1>Editar Cardápio</h1>
+                </div>
 
+                <div class="header-actions">
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalGerenciarCategorias">
+                        <i class="fas fa-layer-group"></i> Gerenciar Categorias
+                    </button>
+
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAdicionarItem">
+                        <i class="fas fa-plus"></i> Adicionar Item
+                    </button>
+
+                    <button class="btn btn-amber" data-bs-toggle="modal" data-bs-target="#cardapioOpcoesModal">
+                        <i class="fas fa-qrcode"></i> Cardápio Público
+                    </button>
+                </div>
             </header>
+
+
+
 
             <div id="feedback-container"></div>
             
@@ -612,93 +616,127 @@
         // 4. Lógica do QR Code (Ajuste para funcionar dentro do DOMContentLoaded)
 
         // Event listener para o botão Gerar QR Code
+        // Event listener para o botão Gerar QR Code (versão substituta, mais robusta)
         document.getElementById('btnGerarQrCode').addEventListener('click', function () {
             const url = document.getElementById('cardapio-public-url').value;
             const qrArea = document.getElementById('qrCodeArea');
-            const imgElement = document.getElementById('qrCodeImage');
 
             if (!url || url.trim() === "") {
                 alert("Nenhum link disponível para gerar o QR Code!");
                 return;
             }
 
-            // Limpa o container temporário antes de gerar
-            qrArea.innerHTML = '<h5>QR Code do Cardápio</h5><img id="qrCodeImage" src="" style="max-width:180px;">';
-            const tempContainer = document.createElement("div");
+            // Limpa a área e cria um container direto visível para o QR
+            qrArea.innerHTML = '<h5>QR Code do Cardápio</h5><div id="qrContainer" style="display:inline-block;margin-top:10px;"></div>';
+            const qrContainer = document.getElementById('qrContainer');
 
-            const qr = new QRCode(tempContainer, {
-                text: url,
-                width: 180,
-                height: 180
-            });
+            // Remove QR anterior (se existir)
+            qrContainer.innerHTML = '';
 
-            // QRCode.js gera a imagem em um canvas ou img dentro do tempContainer
-            // Usamos setTimeout para garantir que a geração assíncrona termine
+            // Cria novo QR (QRCode.js)
+            try {
+                new QRCode(qrContainer, {
+                    text: url,
+                    width: 180,
+                    height: 180
+                });
+            } catch (err) {
+                console.error('Erro ao instanciar QRCode:', err);
+                alert('Erro ao gerar o QR Code. Veja o Console (F12).');
+                return;
+            }
+
+            // Se quisermos sempre ter um <img id="qrCodeImage"> com base64 (para enviar ao servidor),
+            // aguardamos brevemente e então transformamos canvas em dataURL quando necessário.
             setTimeout(() => {
-                const img = tempContainer.querySelector("img") || tempContainer.querySelector("canvas");
-                
-                if (img) {
-                    // Se for canvas, converte para base64; se for img, usa o src
-                    const src = img.tagName === 'CANVAS' ? img.toDataURL() : img.src;
-                    
-                    imgElement.src = src; 
-                    qrArea.style.display = "block"; 
-                } else {
-                    alert("Erro ao gerar o QR Code!");
-                }
-            }, 50); // Reduzido o tempo de espera
+                // Busca img ou canvas dentro do qrContainer
+                const img = qrContainer.querySelector('img');
+                const canvas = qrContainer.querySelector('canvas');
+                let dataUrl = '';
 
+                if (img && img.src) {
+                    dataUrl = img.src;
+                } else if (canvas) {
+                    try {
+                        dataUrl = canvas.toDataURL('image/png');
+                    } catch (e) {
+                        console.error('Erro ao converter canvas para dataURL:', e);
+                    }
+                }
+
+                // Coloca a imagem final no elemento visível #qrCodeImage (se existir)
+                const qrImgEl = document.getElementById('qrCodeImage');
+                if (qrImgEl) {
+                    if (dataUrl) {
+                        qrImgEl.src = dataUrl;
+                    } else {
+                        // Caso não consiga dataURL, tentamos usar a imagem criada diretamente (caso exista)
+                        if (img && img.src) qrImgEl.src = img.src;
+                    }
+                }
+
+                // Mostra a área do QR
+                qrArea.style.display = 'block';
+            }, 150); // 150ms deve ser suficiente; é pequeno, mas mais seguro que 50ms
         });
+
 
         // Event listener para o botão Copiar URL
-        document.getElementById("copyCardapioUrl").addEventListener("click", function () {
-            const input = document.getElementById("cardapio-public-url");
-            if (!input.value) {
-                alert("Nenhum link disponível para copiar.");
+           document.addEventListener("click", async function (e) {
+            const btn = e.target.closest("#btnImprimirQr");
+            if (!btn) return;
+
+            console.log("Botão imprimir foi clicado!");
+
+            // Captura o QR onde ele realmente está
+            const qrContainer = document.querySelector("#qrContainer img, #qrContainer canvas");
+
+            if (!qrContainer) {
+                alert("Gere o QR Code primeiro.");
                 return;
             }
 
-            // Usa a API Clipboard moderna
-            navigator.clipboard.writeText(input.value)
-                .then(() => alert("Link copiado!"))
-                .catch(() => alert("Não foi possível copiar. Verifique se o navegador suporta a API Clipboard."));
-        });
+            let qrBase64 = "";
 
-        // Event listener para o botão Imprimir QR (Mantido como estava na última versão)
-        document.getElementById('btnImprimirQr').addEventListener('click', async function () {
-            const qrBase64 = document.getElementById('qrCodeImage').src;
-            const companyName = "<?= addslashes($empresa['nome_empresa'] ?? ''); ?>"; 
+            if (qrContainer.tagName === "IMG") {
+                qrBase64 = qrContainer.src;
+            } else {
+                qrBase64 = qrContainer.toDataURL("image/png");
+            }
+
+            if (!qrBase64.startsWith("data:image")) {
+                alert("QR inválido. Gere novamente.");
+                return;
+            }
+
+            const companyName = "<?= addslashes($empresa['nome_empresa'] ?? ''); ?>";
             const titulo = "Escaneie o QR code e confira nosso cardápio";
 
-            if (!qrBase64 || !qrBase64.startsWith('data:image')) {
-                alert('Gere o QR Code primeiro.');
-                return;
-            }
-
             try {
-                // Requisição POST para o Controller (que deve gerar o PDF)
-                const res = await fetch('/admin/cardapio/gerar-qrcode-pdf', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const res = await fetch("/admin/cardapio/gerar-qrcode-pdf", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ qr: qrBase64, titulo, companyName })
                 });
 
-                if (!res.ok) throw new Error('Erro ao gerar PDF');
-
                 const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
                 a.href = url;
-                a.download = `${(companyName || 'qrcode_cardapio').replace(/\s+/g,'_')}.pdf`;
-                document.body.appendChild(a);
+                a.download = "qrcode_cardapio.pdf";
                 a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
+
+                URL.revokeObjectURL(url);
+
             } catch (err) {
-                console.error(err);
-                alert('Falha ao gerar o PDF.');
+                console.error("Erro ao gerar PDF:", err);
+                alert("Falha ao gerar PDF.");
             }
         });
+
+
+
 
 
         // --- INICIALIZAÇÃO ---
@@ -706,4 +744,5 @@
     });
     </script>
 </body>
+
 </html>

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Core;
 
 class Router
@@ -52,11 +51,16 @@ class Router
             ['administrador']
         );
         $this->add('POST', 'admin/cardapio/gerar-qrcode-pdf', ['controller' => 'AdminDashboardController', 'action' => 'gerarQrCodePdf']);
-        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);         
+        $this->add('GET', 'api/cargos', ['controller' => 'Api\CargoController', 'action' => 'listar'], ['administrador']);   
+        // Adicione esta rota na seção de rotas públicas
+        $this->add('GET', 'suporte', ['controller' => 'SuporteController', 'action' => 'index']);
+        $this->add('GET', 'suporte/faq', ['controller' => 'SuporteController', 'action' => 'showFaq']);      
         // Admin: Gerenciamento de Cardápio (Views)
         $this->add('GET', 'dashboard/admin/cardapio', ['controller' => 'AdminDashboardController', 'action' => 'gerenciarCardapio'], ['administrador']);
         // Admin: Gerenciamento de Cardápio (API Endpoints - refatorado de POST para API)
         // (NOVO) Admin: Relatórios (View)
+        $this->add('GET', 'api/admin/pedidos/{id:\d+}', ['controller' => 'Api\PedidoController', 'action' => 'getDetalhesPedidoAdmin'], ['administrador']);
+        $this->add('GET', 'api/admin/dashboard', ['controller' => 'Api\AdminDashboardController', 'action' => 'getDadosDashboard'], ['administrador']);
         $this->add('GET', 'relatorios/vendas', ['controller' => 'RelatorioController', 'action' => 'index'], ['administrador']);
         $this->add('POST', 'api/cardapio/adicionar', ['controller' => 'Api\CardapioController', 'action' => 'adicionarItem'], ['administrador']);
         $this->add('POST', 'api/cardapio/editar', ['controller' => 'Api\CardapioController', 'action' => 'editarItem'], ['administrador']);
@@ -215,8 +219,9 @@ class Router
         } else {
             // Nenhuma rota foi encontrada.
             if (str_starts_with($url, 'api/')) {
-                $this->showErrorPage(null, 404, 'Endpoint não encontrado.'); // 404 Not Found
+                $this->showErrorPage(null, 404, 'Endpoint não encontrado.'); // 404 Not Found (API)
             } else {
+                // AQUI: Alterar para 'error/404'
                 $this->showErrorPage('error/404', 404);
             }
         }

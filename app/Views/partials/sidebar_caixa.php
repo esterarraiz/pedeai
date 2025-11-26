@@ -12,11 +12,6 @@ $activePage = $data['activePage'] ?? '';
             </a>
         </li>
         <li>
-            <a href="/relatorios/caixa" class="<?= ($activePage === 'relatorios') ? 'active' : '' ?>">
-                <i class="fa-solid fa-chart-pie"></i><span>Relatório do Dia</span>
-            </a>
-        </li>
-        <li>
             <a href="/logout">
                 <i class="fa-solid fa-sign-out-alt"></i><span>Sair</span>
             </a>

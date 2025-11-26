@@ -31,7 +31,6 @@
                     <i class="fas fa-lock"></i>
                     <input type="password" name="senha" placeholder="Senha" required>
                 </div>
-                <a href="/esqueci-senha" class="forgot-password">Esqueci minha senha?</a>
                 <button type="submit" id="login-button" class="btn-entrar">Entrar</button>
             </form>
 
