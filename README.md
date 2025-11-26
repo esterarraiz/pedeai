@@ -8,6 +8,7 @@ O **PedeAI** é um sistema de gerenciamento de pedidos em restaurantes, desenvol
 
 ---
 
+
 ## Universidade  
 Universidade Federal do Tocantins  
 
@@ -29,6 +30,22 @@ Edeílson Milhomem
 - Jorge Antônio Motta Braga  
 - Matheus Henrique de Freitas
 - Vitória Maria Reis Fontana
+
+---
+## 🌐 Acesso ao Sistema e Demonstração
+
+🔗 **Acessar versão pública do sistema:**  
+https://pedeai-r6z7.onrender.com/
+
+🎥 **Vídeo demonstrativo (YouTube):**  
+https://www.youtube.com/watch?v=lmjdiEXJb3M
+
+---
+
+## 🔧 Guia de Instalação e Configuração
+Para clonar, configurar e executar o PedeAI em ambiente local, consulte o guia completo:
+
+[Acessar documentação de setup](docs/setup.md)
 
 ---
 
