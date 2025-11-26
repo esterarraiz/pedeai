@@ -110,6 +110,13 @@ Este arquivo detalha todas as iterações planejadas do projeto, descrevendo o v
 
 ---
 
+## 📄 Apresentação Final
+Acesse aqui a apresentação oficial entregue ao professor:
+
+👉 [PedeAI — Apresentação Final](docs/PedeAI-Apresentacao-Final.pdf)
+
+---
+
 ## 💻 Histórico de Implementações
 Este arquivo contém todas as features implementadas em cada iteração, junto com os responsáveis e revisores (PR).  
 [Abrir registro de features](docs/features.md)
@@ -164,6 +171,7 @@ Este arquivo contém todas as features implementadas em cada iteração, junto c
 <div style="display: flex; gap: 10px;">
   <img src="prototipo/tela_de_LOGIN_FUNCIONARIO.png" alt="Home" width="300px">
 </div>
+
 
 
 
